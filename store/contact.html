@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Contact Us - AquariumGalleryTripura</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+  <!-- Header -->
+  <header class="store-header">
+    <div class="store-header-inner">
+      <a href="index.html" class="store-logo">
+        <div class="store-logo-icon">🐠</div>
+        <span class="store-logo-text">AquariumGalleryTripura</span>
+      </a>
+      <button class="store-nav-toggle" onclick="document.querySelector('.store-nav').classList.toggle('open')">
+        <i class="fa-solid fa-bars"></i>
+      </button>
+      <nav class="store-nav">
+        <a href="index.html">Home</a>
+        <a href="products.html">Products</a>
+        <a href="contact.html" class="active">Contact Us</a>
+      </nav>
+    </div>
+  </header>
+
+  <!-- Page Title -->
+  <div style="background:linear-gradient(135deg,#164e63,#0891b2);padding:2rem 0;">
+    <div style="max-width:1200px;margin:0 auto;padding:0 1.5rem;">
+      <h1 style="font-family:'Poppins',sans-serif;font-size:2rem;font-weight:800;color:white;">Contact Us</h1>
+      <p style="color:rgba(255,255,255,0.7);margin-top:4px;">We'd love to hear from you!</p>
+    </div>
+  </div>
+
+  <section class="section">
+    <div style="max-width:800px;margin:0 auto;">
+
+      <!-- Contact Card -->
+      <div class="contact-card">
+        <div style="text-align:center;margin-bottom:2rem;">
+          <div style="width:80px;height:80px;border-radius:20px;background:linear-gradient(135deg,#0891b2,#0e7490);display:inline-flex;align-items:center;justify-content:center;font-size:2rem;margin-bottom:1rem;">
+            🐠
+          </div>
+          <h2 style="font-family:'Poppins',sans-serif;font-weight:800;font-size:1.5rem;color:#155e75;">AquariumGalleryTripura</h2>
+          <p style="color:#64748b;margin-top:4px;">Your one-stop destination for all aquarium needs</p>
+        </div>
+
+        <div id="contact-details">
+          <div class="contact-item">
+            <div class="contact-icon" style="background:#ecfdf5;color:#059669;">
+              <i class="fa-solid fa-location-dot"></i>
+            </div>
+            <div>
+              <h4>Visit Our Shop</h4>
+              <p id="shop-address">Tripura, India</p>
+            </div>
+          </div>
+
+          <div class="contact-item">
+            <div class="contact-icon" style="background:#eff6ff;color:#2563eb;">
+              <i class="fa-solid fa-phone"></i>
+            </div>
+            <div>
+              <h4>Call Us</h4>
+              <p id="shop-phone">Contact us for details</p>
+            </div>
+          </div>
+
+          <div class="contact-item">
+            <div class="contact-icon" style="background:#f0fdf4;color:#16a34a;">
+              <i class="fa-brands fa-whatsapp"></i>
+            </div>
+            <div>
+              <h4>WhatsApp</h4>
+              <p id="shop-whatsapp">Message us on WhatsApp</p>
+            </div>
+          </div>
+
+          <div class="contact-item">
+            <div class="contact-icon" style="background:#fef3c7;color:#d97706;">
+              <i class="fa-solid fa-clock"></i>
+            </div>
+            <div>
+              <h4>Business Hours</h4>
+              <p>Monday - Saturday: 9:00 AM - 8:00 PM<br>Sunday: 10:00 AM - 6:00 PM</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Social Links -->
+        <div style="margin-top:2rem;padding-top:2rem;border-top:2px solid #f1f5f9;text-align:center;">
+          <h3 style="font-family:'Poppins',sans-serif;font-weight:600;font-size:1rem;color:#155e75;margin-bottom:1rem;">Follow Us On Social Media</h3>
+          <div id="social-links" style="display:flex;justify-content:center;gap:12px;flex-wrap:wrap;">
+            <!-- Loaded dynamically -->
+          </div>
+        </div>
+      </div>
+
+      <!-- CTA -->
+      <div style="text-align:center;margin-top:2rem;padding:2rem;background:linear-gradient(135deg,#fffbeb,#ecfeff);border-radius:16px;border:1px solid rgba(0,0,0,0.04);">
+        <h3 style="font-family:'Poppins',sans-serif;font-weight:700;color:#155e75;margin-bottom:0.5rem;">Ready to explore?</h3>
+        <p style="color:#64748b;margin-bottom:1rem;font-size:0.9rem;">Check out our latest collection of aquarium products</p>
+        <a href="products.html" style="display:inline-flex;align-items:center;gap:8px;padding:12px 28px;background:linear-gradient(135deg,#fbbf24,#f59e0b);color:#78350f;font-weight:700;border-radius:12px;text-decoration:none;font-family:'Poppins',sans-serif;box-shadow:0 4px 16px rgba(245,158,11,0.3);transition:all 0.3s;">
+          <i class="fa-solid fa-fish"></i> View Products
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="store-footer">
+    <p>&copy; 2026 <a href="index.html">AquariumGalleryTripura</a>. All rights reserved.</p>
+  </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="js/supabase-config.js"></script>
+  <script>
+    const socialIcons = {
+      'Facebook': { icon: 'fa-facebook-f', bg: '#1877F2' },
+      'Instagram': { icon: 'fa-instagram', bg: '#E4405F' },
+      'WhatsApp': { icon: 'fa-whatsapp', bg: '#25D366' },
+      'YouTube': { icon: 'fa-youtube', bg: '#FF0000' },
+      'Twitter': { icon: 'fa-x-twitter', bg: '#000' },
+      'Telegram': { icon: 'fa-telegram', bg: '#0088cc' },
+    };
+
+    (async () => {
+      const { data } = await db.from('homepage_content').select('*').eq('type', 'social_link').order('sort_order');
+      if (!data) return;
+
+      const container = document.getElementById('social-links');
+      container.innerHTML = data.filter(s => s.link).map(s => {
+        const info = socialIcons[s.title] || { icon: 'fa-link', bg: '#0891b2' };
+
+        // Auto-fill WhatsApp link
+        if (s.title === 'WhatsApp' && s.link) {
+          const num = s.link.replace(/\D/g, '');
+          if (num) {
+            document.getElementById('shop-whatsapp').innerHTML = `<a href="https://wa.me/${num}" target="_blank" style="color:#16a34a;text-decoration:none;font-weight:600;">Chat on WhatsApp</a>`;
+          }
+        }
+
+        return `
+          <a href="${s.link}" target="_blank" rel="noopener noreferrer"
+            style="width:48px;height:48px;border-radius:14px;display:inline-flex;align-items:center;justify-content:center;color:white;font-size:1.1rem;text-decoration:none;background:${info.bg};transition:all 0.3s;box-shadow:0 2px 8px rgba(0,0,0,0.15);"
+            title="${s.title}">
+            <i class="fa-brands ${info.icon}"></i>
+          </a>
+        `;
+      }).join('');
+    })();
+  </script>
+</body>
+</html>

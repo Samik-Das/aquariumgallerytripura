@@ -1,0 +1,4 @@
+const SUPABASE_URL = 'https://pkutovmcaumbbskoutsy.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBrdXRvdm1jYXVtYmJza291dHN5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU5NTkzODgsImV4cCI6MjA5MTUzNTM4OH0.fSZMRDw0qzTdnH6njKapIsgtnqg48zGvn5R5eKcTrTs';
+
+const db = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);

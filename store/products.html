@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Products - AquariumGalleryTripura</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <link rel="stylesheet" href="css/style.css">
+  <meta name="description" content="Browse our wide collection of aquarium fish, accessories, and supplies.">
+</head>
+<body>
+
+  <!-- Header -->
+  <header class="store-header">
+    <div class="store-header-inner">
+      <a href="index.html" class="store-logo">
+        <div class="store-logo-icon">🐠</div>
+        <span class="store-logo-text">AquariumGalleryTripura</span>
+      </a>
+      <button class="store-nav-toggle" onclick="document.querySelector('.store-nav').classList.toggle('open')">
+        <i class="fa-solid fa-bars"></i>
+      </button>
+      <nav class="store-nav">
+        <a href="index.html">Home</a>
+        <a href="products.html" class="active">Products</a>
+        <a href="contact.html">Contact Us</a>
+      </nav>
+    </div>
+  </header>
+
+  <!-- Page Title -->
+  <div style="background:linear-gradient(135deg,#164e63,#0891b2);padding:2rem 0;">
+    <div style="max-width:1200px;margin:0 auto;padding:0 1.5rem;">
+      <h1 style="font-family:'Poppins',sans-serif;font-size:2rem;font-weight:800;color:white;">Our Products</h1>
+      <p style="color:rgba(255,255,255,0.7);margin-top:4px;">Explore our collection of premium aquarium items</p>
+    </div>
+  </div>
+
+  <section class="section">
+    <!-- Filters -->
+    <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:2rem;">
+      <div style="position:relative;flex:1;min-width:250px;">
+        <i class="fa-solid fa-magnifying-glass" style="position:absolute;left:14px;top:50%;transform:translateY(-50%);color:#94a3b8;"></i>
+        <input type="text" id="search-input" placeholder="Search products..." oninput="filterProducts()"
+          style="width:100%;padding:12px 14px 12px 42px;border:2px solid #e2e8f0;border-radius:12px;font-size:0.95rem;font-family:'Inter',sans-serif;outline:none;transition:all 0.3s;"
+          onfocus="this.style.borderColor='#06b6d4';this.style.boxShadow='0 0 0 3px rgba(6,182,212,0.15)'"
+          onblur="this.style.borderColor='#e2e8f0';this.style.boxShadow='none'">
+      </div>
+      <select id="category-filter" onchange="filterProducts()"
+        style="padding:12px 36px 12px 14px;border:2px solid #e2e8f0;border-radius:12px;font-size:0.95rem;font-family:'Inter',sans-serif;background:white;appearance:none;background-image:url('data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 width=%2720%27 height=%2720%27 viewBox=%270 0 24 24%27 fill=%27none%27 stroke=%27%230891b2%27 stroke-width=%272%27%3E%3Cpath d=%27M6 9l6 6 6-6%27/%3E%3C/svg%3E');background-repeat:no-repeat;background-position:right 12px center;min-width:180px;">
+        <option value="">All Categories</option>
+      </select>
+    </div>
+
+    <!-- Product Count -->
+    <div style="margin-bottom:1rem;color:#64748b;font-size:0.9rem;">
+      Showing <strong id="product-count" style="color:#0891b2;">0</strong> products
+    </div>
+
+    <!-- Product Grid -->
+    <div class="product-grid-store" id="product-grid"></div>
+
+    <!-- Empty State -->
+    <div id="empty-state" style="display:none;text-align:center;padding:4rem 2rem;">
+      <i class="fa-solid fa-fish" style="font-size:4rem;color:#a5f3fc;margin-bottom:1rem;display:block;"></i>
+      <h3 style="font-family:'Poppins',sans-serif;font-size:1.2rem;color:#64748b;margin-bottom:0.5rem;">No products found</h3>
+      <p style="color:#94a3b8;">Try a different search or category</p>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="store-footer">
+    <p>&copy; 2026 <a href="index.html">AquariumGalleryTripura</a>. All rights reserved.</p>
+  </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="js/supabase-config.js"></script>
+  <script>
+    let allProducts = [];
+
+    (async () => {
+      await loadCategories();
+      await loadProducts();
+      applyUrlFilter();
+    })();
+
+    async function loadCategories() {
+      const { data } = await db.from('categories').select('name').order('name');
+      const select = document.getElementById('category-filter');
+      (data || []).forEach(c => {
+        select.innerHTML += `<option value="${c.name}">${c.name}</option>`;
+      });
+    }
+
+    async function loadProducts() {
+      const { data } = await db.from('products').select('*').order('name');
+      allProducts = (data || []).filter(p => p.quantity > 0 || p.image_url);
+      filterProducts();
+    }
+
+    function applyUrlFilter() {
+      const params = new URLSearchParams(window.location.search);
+      const cat = params.get('category');
+      if (cat) {
+        document.getElementById('category-filter').value = cat;
+        filterProducts();
+      }
+    }
+
+    function filterProducts() {
+      const search = document.getElementById('search-input').value.toLowerCase().trim();
+      const category = document.getElementById('category-filter').value;
+
+      const filtered = allProducts.filter(p => {
+        const matchSearch = !search || p.name.toLowerCase().includes(search) || p.category.toLowerCase().includes(search);
+        const matchCat = !category || p.category === category;
+        return matchSearch && matchCat;
+      });
+
+      renderProducts(filtered);
+    }
+
+    function renderProducts(products) {
+      const grid = document.getElementById('product-grid');
+      const empty = document.getElementById('empty-state');
+      const count = document.getElementById('product-count');
+
+      count.textContent = products.length;
+
+      if (products.length === 0) {
+        grid.innerHTML = '';
+        empty.style.display = 'block';
+        return;
+      }
+
+      empty.style.display = 'none';
+      grid.innerHTML = products.map(p => {
+        const isLow = p.quantity > 0 && p.quantity < 5;
+        const isOut = p.quantity <= 0;
+        return `
+          <div class="store-product-card">
+            <div class="prod-img">
+              ${p.image_url
+                ? `<img src="${p.image_url}" alt="${p.name}">`
+                : `<i class="fa-solid fa-fish" style="font-size:3rem;color:#a5f3fc;"></i>`
+              }
+              ${isLow ? `<div class="prod-badge" style="background:#fef2f2;color:#dc2626;">Only ${p.quantity} left!</div>` : ''}
+              ${isOut ? `<div class="prod-badge" style="background:#fef2f2;color:#dc2626;">Out of Stock</div>` : ''}
+              ${!isLow && !isOut ? `<div class="prod-badge" style="background:#ecfdf5;color:#059669;">${p.quantity} available</div>` : ''}
+            </div>
+            <div class="prod-body">
+              <div class="prod-category">${p.category}</div>
+              <div class="prod-name">${p.name}</div>
+              <div class="prod-price">₹${Number(p.selling_price).toLocaleString('en-IN')}</div>
+              <div class="prod-stock">
+                ${isOut
+                  ? `<span style="color:#dc2626;font-weight:600;"><i class="fa-solid fa-xmark"></i> Currently unavailable</span>`
+                  : `<span style="color:#059669;"><i class="fa-solid fa-check"></i> In Stock (${p.quantity})</span>`
+                }
+              </div>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+  </script>
+</body>
+</html>

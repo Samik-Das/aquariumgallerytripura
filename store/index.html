@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AquariumGalleryTripura - Premium Aquarium Shop</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <link rel="stylesheet" href="css/style.css">
+  <meta name="description" content="AquariumGalleryTripura - Your one-stop destination for all aquarium needs. Premium fish, aquariums, accessories and more.">
+</head>
+<body>
+
+  <!-- Header -->
+  <header class="store-header">
+    <div class="store-header-inner">
+      <a href="index.html" class="store-logo">
+        <div class="store-logo-icon">🐠</div>
+        <span class="store-logo-text">AquariumGalleryTripura</span>
+      </a>
+      <button class="store-nav-toggle" onclick="document.querySelector('.store-nav').classList.toggle('open')">
+        <i class="fa-solid fa-bars"></i>
+      </button>
+      <nav class="store-nav">
+        <a href="index.html" class="active">Home</a>
+        <a href="products.html">Products</a>
+        <a href="contact.html">Contact Us</a>
+      </nav>
+    </div>
+  </header>
+
+  <!-- Hero Banner -->
+  <section class="hero" id="hero-section">
+    <div class="hero-bg" id="hero-bg"></div>
+    <div class="hero-overlay"></div>
+    <div class="bubble-bg">
+      <div class="b" style="width:100px;height:100px;top:20%;left:10%;animation-delay:0s;"></div>
+      <div class="b" style="width:60px;height:60px;top:60%;left:25%;animation-delay:2s;"></div>
+      <div class="b" style="width:80px;height:80px;top:30%;right:15%;animation-delay:1s;"></div>
+      <div class="b" style="width:40px;height:40px;bottom:20%;right:30%;animation-delay:3s;"></div>
+      <div class="b" style="width:70px;height:70px;top:50%;left:50%;animation-delay:1.5s;"></div>
+    </div>
+    <div class="hero-content">
+      <h1 id="hero-title">
+        Welcome to
+        <span id="hero-shop-name">AquariumGalleryTripura</span>
+      </h1>
+      <p id="hero-slogan">Your one-stop destination for all aquarium needs</p>
+      <div style="margin-top:1.5rem;display:flex;gap:12px;flex-wrap:wrap;">
+        <a href="products.html" style="display:inline-flex;align-items:center;gap:8px;padding:12px 28px;background:linear-gradient(135deg,#fbbf24,#f59e0b);color:#78350f;font-weight:700;border-radius:12px;text-decoration:none;font-family:'Poppins',sans-serif;box-shadow:0 4px 16px rgba(245,158,11,0.3);transition:all 0.3s;">
+          <i class="fa-solid fa-fish"></i> Browse Products
+        </a>
+        <a href="contact.html" style="display:inline-flex;align-items:center;gap:8px;padding:12px 28px;border:2px solid rgba(255,255,255,0.5);color:white;font-weight:600;border-radius:12px;text-decoration:none;font-family:'Poppins',sans-serif;transition:all 0.3s;">
+          <i class="fa-solid fa-phone"></i> Contact Us
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- Category Cards -->
+  <section class="section" id="categories-section">
+    <div class="section-title">
+      <h2>Our Categories</h2>
+      <div class="title-accent"></div>
+    </div>
+    <div class="category-grid" id="category-grid">
+      <!-- Loaded dynamically -->
+    </div>
+  </section>
+
+  <!-- Product Carousel -->
+  <section class="carousel-section" id="carousel-section">
+    <div class="carousel-wrapper">
+      <div class="section-title">
+        <h2>Featured Products</h2>
+        <div class="title-accent"></div>
+      </div>
+      <div class="carousel-track" id="carousel-track">
+        <!-- Loaded dynamically -->
+      </div>
+    </div>
+  </section>
+
+  <!-- Social Links -->
+  <section class="social-section" id="social-section">
+    <div style="text-align:center;margin-bottom:1.5rem;">
+      <h2 style="font-family:'Poppins',sans-serif;font-weight:800;font-size:1.5rem;color:white;margin-bottom:4px;">Follow Us</h2>
+      <p style="color:rgba(255,255,255,0.6);font-size:0.9rem;">Stay connected for latest arrivals and offers</p>
+    </div>
+    <div class="social-grid" id="social-grid">
+      <!-- Loaded dynamically -->
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="store-footer">
+    <p>&copy; 2026 <a href="index.html">AquariumGalleryTripura</a>. All rights reserved.</p>
+    <p style="margin-top:4px;font-size:0.75rem;">Bringing aquatic beauty to your home 🐠</p>
+  </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="js/supabase-config.js"></script>
+  <script>
+    const socialIcons = {
+      'Facebook': { icon: 'fa-facebook-f', bg: '#1877F2' },
+      'Instagram': { icon: 'fa-instagram', bg: 'linear-gradient(135deg,#f09433,#e6683c,#dc2743,#cc2366,#bc1888)' },
+      'WhatsApp': { icon: 'fa-whatsapp', bg: '#25D366' },
+      'YouTube': { icon: 'fa-youtube', bg: '#FF0000' },
+      'Twitter': { icon: 'fa-x-twitter', bg: '#000' },
+      'Telegram': { icon: 'fa-telegram', bg: '#0088cc' },
+    };
+
+    // Load everything
+    (async () => {
+      await loadBanner();
+      await loadCategories();
+      await loadCarousel();
+      await loadSocials();
+    })();
+
+    async function loadBanner() {
+      const { data } = await db.from('homepage_content').select('*').eq('type', 'banner').single();
+      if (data) {
+        document.getElementById('hero-shop-name').textContent = data.title || 'AquariumGalleryTripura';
+        document.getElementById('hero-slogan').textContent = data.description || '';
+        if (data.image_url) {
+          document.getElementById('hero-bg').style.backgroundImage = `url(${data.image_url})`;
+          document.getElementById('hero-bg').style.opacity = '0.4';
+        }
+      }
+    }
+
+    async function loadCategories() {
+      const { data } = await db.from('homepage_content').select('*').eq('type', 'category_card').order('sort_order');
+      const grid = document.getElementById('category-grid');
+      if (!data || data.length === 0) {
+        document.getElementById('categories-section').style.display = 'none';
+        return;
+      }
+      grid.innerHTML = data.map(c => `
+        <a href="products.html${c.title ? '?category=' + encodeURIComponent(c.title) : ''}" class="category-card">
+          <div class="card-img">
+            ${c.image_url ? `<img src="${c.image_url}" alt="${c.title}">` : '<i class="fa-solid fa-fish" style="font-size:3rem;color:#a5f3fc;"></i>'}
+          </div>
+          <div class="card-body">
+            <h3>${c.title || ''}</h3>
+            <p>${c.description || ''}</p>
+          </div>
+        </a>
+      `).join('');
+    }
+
+    async function loadCarousel() {
+      const { data } = await db.from('products').select('*').gt('quantity', 0).order('created_at', { ascending: false }).limit(20);
+      const track = document.getElementById('carousel-track');
+      if (!data || data.length === 0) {
+        document.getElementById('carousel-section').style.display = 'none';
+        return;
+      }
+
+      const items = [...data, ...data]; // Duplicate for seamless scroll
+      track.innerHTML = items.map(p => {
+        const isLow = p.quantity > 0 && p.quantity < 5;
+        return `
+          <div class="carousel-card">
+            <div class="img-wrap">
+              ${p.image_url ? `<img src="${p.image_url}" alt="${p.name}">` : '<i class="fa-solid fa-fish" style="font-size:2.5rem;color:#a5f3fc;"></i>'}
+            </div>
+            <div class="info">
+              <h4>${p.name}</h4>
+              <div class="price">₹${Number(p.selling_price).toLocaleString('en-IN')}</div>
+              <div class="stock ${isLow ? 'stock-low' : 'stock-available'}">
+                ${isLow ? `Only ${p.quantity} left!` : `${p.quantity} available`}
+              </div>
+            </div>
+          </div>
+        `;
+      }).join('');
+
+      // Auto-scroll
+      let pos = 0;
+      const cardW = 252;
+      setInterval(() => {
+        pos++;
+        if (pos >= data.length) pos = 0;
+        track.style.transform = `translateX(-${pos * cardW}px)`;
+      }, 5000);
+    }
+
+    async function loadSocials() {
+      const { data } = await db.from('homepage_content').select('*').eq('type', 'social_link').order('sort_order');
+      const grid = document.getElementById('social-grid');
+      if (!data || data.length === 0) {
+        document.getElementById('social-section').style.display = 'none';
+        return;
+      }
+      grid.innerHTML = data.filter(s => s.link).map(s => {
+        const info = socialIcons[s.title] || { icon: 'fa-link', bg: '#0891b2' };
+        const bgStyle = info.bg.includes('gradient') ? `background:${info.bg}` : `background:${info.bg}`;
+        return `
+          <a href="${s.link}" target="_blank" rel="noopener noreferrer" class="social-btn" style="${bgStyle};" title="${s.title}">
+            <i class="fa-brands ${info.icon}"></i>
+          </a>
+        `;
+      }).join('');
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Homepage - AquariumGalleryTripura Admin</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <link rel="stylesheet" href="css/style.css">
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            aqua: { 50:'#ecfeff',100:'#cffafe',200:'#a5f3fc',300:'#67e8f9',400:'#22d3ee',500:'#06b6d4',600:'#0891b2',700:'#0e7490',800:'#155e75',900:'#164e63' },
+            golden: { 50:'#fffbeb',100:'#fef3c7',200:'#fde68a',300:'#fcd34d',400:'#fbbf24',500:'#f59e0b',600:'#d97706',700:'#b45309' }
+          },
+          fontFamily: { heading: ['Poppins','sans-serif'], body: ['Inter','sans-serif'] }
+        }
+      }
+    }
+  </script>
+</head>
+<body>
+  <div class="page-container" id="main-content">
+    <!-- Banner Section -->
+    <section id="banner-section" class="mb-8">
+      <div class="relative rounded-2xl overflow-hidden shadow-lg" style="min-height:300px; background: linear-gradient(135deg, #164e63, #0891b2, #f59e0b);">
+        <img id="banner-image" src="" alt="Banner" class="w-full h-72 object-cover" style="display:none;">
+        <div class="absolute inset-0 bg-gradient-to-r from-aqua-900/70 via-aqua-800/50 to-transparent flex items-center">
+          <div class="p-8 md:p-12 max-w-2xl">
+            <h1 id="banner-title" class="font-heading text-3xl md:text-4xl font-extrabold text-white mb-3"></h1>
+            <p id="banner-slogan" class="text-aqua-100 text-lg md:text-xl font-light"></p>
+            <div class="mt-4 flex gap-3">
+              <button onclick="editBanner()" class="btn btn-gold btn-sm"><i class="fa-solid fa-pen"></i> Edit Banner</button>
+              <label class="btn btn-outline btn-sm" style="border-color:rgba(255,255,255,0.4);color:white;cursor:pointer;">
+                <i class="fa-solid fa-image"></i> Change Image
+                <input type="file" accept="image/*" onchange="uploadBannerImage(event)" style="display:none;">
+              </label>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Category Cards Section -->
+    <section class="mb-8">
+      <div class="card">
+        <div class="card-header">
+          <h2><i class="fa-solid fa-layer-group"></i> Category Cards</h2>
+          <button onclick="addCategoryCard()" class="btn btn-primary btn-sm"><i class="fa-solid fa-plus"></i> Add Card</button>
+        </div>
+        <div id="category-cards" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+          <!-- Cards loaded dynamically -->
+        </div>
+        <div id="category-empty" class="empty-state" style="display:none;">
+          <i class="fa-solid fa-layer-group"></i>
+          <h3>No category cards yet</h3>
+          <p>Add your first category card to showcase on the homepage</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Product Carousel Section -->
+    <section class="mb-8">
+      <div class="card">
+        <div class="card-header">
+          <h2><i class="fa-solid fa-fish"></i> Featured Products</h2>
+          <span class="badge badge-aqua">Auto-scrolling • From Products</span>
+        </div>
+        <div class="carousel-container">
+          <div class="carousel-track" id="product-carousel">
+            <!-- Products loaded dynamically -->
+          </div>
+        </div>
+        <div id="carousel-empty" class="empty-state" style="display:none;">
+          <i class="fa-solid fa-fish"></i>
+          <h3>No products yet</h3>
+          <p>Add products in the Products page to see them here</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Social Links Section -->
+    <section class="mb-8">
+      <div class="card">
+        <div class="card-header">
+          <h2><i class="fa-solid fa-share-nodes"></i> Social Media Links</h2>
+          <button onclick="addSocialLink()" class="btn btn-primary btn-sm"><i class="fa-solid fa-plus"></i> Add Link</button>
+        </div>
+        <div id="social-links" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          <!-- Social links loaded dynamically -->
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <!-- Edit Banner Modal Template -->
+  <div id="banner-modal" class="modal-overlay" style="display:none;">
+    <div class="modal">
+      <h3><i class="fa-solid fa-pen" style="color:var(--gold-500);"></i> Edit Banner</h3>
+      <div class="form-group">
+        <label class="form-label">Title</label>
+        <input type="text" id="banner-title-input" class="form-input" placeholder="Shop title">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Slogan / Description</label>
+        <textarea id="banner-slogan-input" class="form-input form-textarea" placeholder="Your slogan"></textarea>
+      </div>
+      <div class="modal-actions">
+        <button class="btn btn-outline" onclick="closeBannerModal()">Cancel</button>
+        <button class="btn btn-primary" onclick="saveBanner()">Save</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Edit Category Card Modal -->
+  <div id="card-modal" class="modal-overlay" style="display:none;">
+    <div class="modal">
+      <h3><i class="fa-solid fa-pen" style="color:var(--gold-500);"></i> <span id="card-modal-title">Add Card</span></h3>
+      <div class="form-group">
+        <label class="form-label">Category Title</label>
+        <input type="text" id="card-title-input" class="form-input" placeholder="e.g. Freshwater Fish">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Description</label>
+        <textarea id="card-desc-input" class="form-input form-textarea" placeholder="Short description"></textarea>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Image</label>
+        <label class="btn btn-outline btn-sm" style="cursor:pointer;">
+          <i class="fa-solid fa-upload"></i> Upload Image
+          <input type="file" accept="image/*" id="card-image-input" style="display:none;">
+        </label>
+        <img id="card-image-preview" src="" alt="" style="display:none;max-height:120px;margin-top:8px;border-radius:8px;">
+      </div>
+      <input type="hidden" id="card-edit-id">
+      <div class="modal-actions">
+        <button class="btn btn-outline" onclick="closeCardModal()">Cancel</button>
+        <button class="btn btn-primary" onclick="saveCard()"><i class="fa-solid fa-check"></i> Save</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Social Link Modal -->
+  <div id="social-modal" class="modal-overlay" style="display:none;">
+    <div class="modal">
+      <h3><i class="fa-solid fa-link" style="color:var(--gold-500);"></i> <span id="social-modal-title">Add Social Link</span></h3>
+      <div class="form-group">
+        <label class="form-label">Platform</label>
+        <select id="social-platform-input" class="form-select">
+          <option value="Facebook">Facebook</option>
+          <option value="Instagram">Instagram</option>
+          <option value="WhatsApp">WhatsApp</option>
+          <option value="YouTube">YouTube</option>
+          <option value="Twitter">Twitter</option>
+          <option value="Telegram">Telegram</option>
+          <option value="Other">Other</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">URL / Link</label>
+        <input type="url" id="social-url-input" class="form-input" placeholder="https://...">
+      </div>
+      <input type="hidden" id="social-edit-id">
+      <div class="modal-actions">
+        <button class="btn btn-outline" onclick="closeSocialModal()">Cancel</button>
+        <button class="btn btn-primary" onclick="saveSocialLink()"><i class="fa-solid fa-check"></i> Save</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="js/supabase-config.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/components.js"></script>
+  <script src="js/homepage.js"></script>
+</body>
+</html>
