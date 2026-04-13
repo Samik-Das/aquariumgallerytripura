@@ -115,7 +115,7 @@ function formatDateTime(dateStr) {
 }
 
 // Upload image to Supabase Storage
-async function uploadImage(file, bucket = 'product-images') {
+async function uploadImage(file, bucket = 'product_image') {
   const fileExt = file.name.split('.').pop();
   const fileName = `${Date.now()}-${Math.random().toString(36).substring(2)}.${fileExt}`;
   const filePath = `${fileName}`;

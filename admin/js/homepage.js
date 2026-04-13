@@ -81,9 +81,9 @@ async function uploadBannerImage(event) {
   }
 }
 
-// ===== Category Cards =====
+// ===== Category Cards (from categories table) =====
 async function loadCategoryCards() {
-  const { data } = await db.from('homepage_content').select('*').eq('type', 'category_card').order('sort_order');
+  const { data } = await db.from('categories').select('*').order('name');
   categoryCards = data || [];
   renderCategoryCards();
 }
@@ -100,18 +100,18 @@ function renderCategoryCards() {
 
   empty.style.display = 'none';
   container.innerHTML = categoryCards.map(card => `
-    <div class="relative group rounded-xl overflow-hidden shadow-md border border-gray-100 transition-all hover:shadow-xl hover:-translate-y-1" style="min-height:240px;">
+    <div class="relative group rounded-xl overflow-hidden shadow-md border border-gray-100 transition-all hover:shadow-xl hover:-translate-y-1 cursor-pointer" style="min-height:240px;" onclick="window.location.href='catalogue.html?category=${encodeURIComponent(card.name)}'">
       <div class="h-40 bg-gradient-to-br from-cyan-50 to-amber-50 flex items-center justify-center overflow-hidden">
         ${card.image_url
-          ? `<img src="${card.image_url}" alt="${card.title}" class="w-full h-full object-cover">`
+          ? `<img src="${card.image_url}" alt="${card.name}" class="w-full h-full object-cover">`
           : `<i class="fa-solid fa-image text-4xl text-cyan-200"></i>`
         }
       </div>
       <div class="p-4">
-        <h3 class="font-heading font-bold text-aqua-800 text-lg">${card.title || 'Untitled'}</h3>
+        <h3 class="font-heading font-bold text-aqua-800 text-lg">${card.name || 'Untitled'}</h3>
         <p class="text-sm text-gray-500 mt-1 line-clamp-2">${card.description || ''}</p>
       </div>
-      <div class="absolute top-2 right-2 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+      <div class="absolute top-2 right-2 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity" onclick="event.stopPropagation()">
         <button onclick="editCard('${card.id}')" class="w-8 h-8 rounded-lg bg-white/90 shadow flex items-center justify-center text-aqua-600 hover:bg-aqua-50">
           <i class="fa-solid fa-pen text-xs"></i>
         </button>
@@ -137,7 +137,7 @@ function editCard(id) {
   const card = categoryCards.find(c => c.id === id);
   if (!card) return;
   document.getElementById('card-modal-title').textContent = 'Edit Card';
-  document.getElementById('card-title-input').value = card.title || '';
+  document.getElementById('card-title-input').value = card.name || '';
   document.getElementById('card-desc-input').value = card.description || '';
   document.getElementById('card-edit-id').value = id;
   if (card.image_url) {
@@ -179,13 +179,13 @@ async function saveCard() {
     }
 
     if (editId) {
-      const updates = { title, description, updated_at: new Date().toISOString() };
+      const updates = { name: title, description };
       if (image_url) updates.image_url = image_url;
-      await db.from('homepage_content').update(updates).eq('id', editId);
+      await db.from('categories').update(updates).eq('id', editId);
     } else {
-      const newCard = { type: 'category_card', title, description, sort_order: categoryCards.length + 1 };
+      const newCard = { name: title, description };
       if (image_url) newCard.image_url = image_url;
-      await db.from('homepage_content').insert(newCard);
+      await db.from('categories').insert(newCard);
     }
 
     closeCardModal();
@@ -201,8 +201,8 @@ async function deleteCard(id) {
   if (!yes) return;
 
   try {
-    await db.from('homepage_content').delete().eq('id', id);
-    showToast('Card deleted');
+    await db.from('categories').delete().eq('id', id);
+    showToast('Category deleted');
     await loadCategoryCards();
   } catch (err) {
     showToast(err.message, 'error');
@@ -223,8 +223,8 @@ async function loadProductCarousel() {
 
   empty.style.display = 'none';
 
-  // Duplicate items for infinite scroll effect
-  const items = [...data, ...data];
+  // Duplicate items for infinite scroll effect (only if more than 3 products)
+  const items = data.length > 3 ? [...data, ...data] : data;
   container.innerHTML = items.map(p => `
     <div class="flex-shrink-0 w-64 bg-white rounded-xl overflow-hidden shadow-md border border-gray-100">
       <div class="h-36 bg-gradient-to-br from-cyan-50 to-amber-50 flex items-center justify-center overflow-hidden">

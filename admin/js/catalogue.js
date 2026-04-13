@@ -10,7 +10,17 @@ let editImageFile = null;
   buildNavbar('Catalogue');
   await loadProducts();
   await loadCategoryFilter();
+  applyUrlFilter();
 })();
+
+function applyUrlFilter() {
+  const params = new URLSearchParams(window.location.search);
+  const cat = params.get('category');
+  if (cat) {
+    document.getElementById('filter-category').value = cat;
+    filterProducts();
+  }
+}
 
 async function loadProducts() {
   const { data } = await db.from('products').select('*').order('name');

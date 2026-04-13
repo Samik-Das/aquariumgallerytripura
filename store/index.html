@@ -46,11 +46,11 @@
         <span id="hero-shop-name">AquariumGalleryTripura</span>
       </h1>
       <p id="hero-slogan">Your one-stop destination for all aquarium needs</p>
-      <div style="margin-top:1.5rem;display:flex;gap:12px;flex-wrap:wrap;">
-        <a href="products.html" style="display:inline-flex;align-items:center;gap:8px;padding:12px 28px;background:linear-gradient(135deg,#fbbf24,#f59e0b);color:#78350f;font-weight:700;border-radius:12px;text-decoration:none;font-family:'Poppins',sans-serif;box-shadow:0 4px 16px rgba(245,158,11,0.3);transition:all 0.3s;">
+      <div style="margin-top:1.2rem;display:flex;gap:10px;flex-wrap:wrap;">
+        <a href="products.html" class="hero-btn-primary">
           <i class="fa-solid fa-fish"></i> Browse Products
         </a>
-        <a href="contact.html" style="display:inline-flex;align-items:center;gap:8px;padding:12px 28px;border:2px solid rgba(255,255,255,0.5);color:white;font-weight:600;border-radius:12px;text-decoration:none;font-family:'Poppins',sans-serif;transition:all 0.3s;">
+        <a href="contact.html" class="hero-btn-outline">
           <i class="fa-solid fa-phone"></i> Contact Us
         </a>
       </div>
@@ -131,19 +131,19 @@
     }
 
     async function loadCategories() {
-      const { data } = await db.from('homepage_content').select('*').eq('type', 'category_card').order('sort_order');
+      const { data } = await db.from('categories').select('*').order('name');
       const grid = document.getElementById('category-grid');
       if (!data || data.length === 0) {
         document.getElementById('categories-section').style.display = 'none';
         return;
       }
       grid.innerHTML = data.map(c => `
-        <a href="products.html${c.title ? '?category=' + encodeURIComponent(c.title) : ''}" class="category-card">
+        <a href="products.html${c.name ? '?category=' + encodeURIComponent(c.name) : ''}" class="category-card">
           <div class="card-img">
-            ${c.image_url ? `<img src="${c.image_url}" alt="${c.title}">` : '<i class="fa-solid fa-fish" style="font-size:3rem;color:#a5f3fc;"></i>'}
+            ${c.image_url ? `<img src="${c.image_url}" alt="${c.name}">` : '<i class="fa-solid fa-fish" style="font-size:3rem;color:#a5f3fc;"></i>'}
           </div>
           <div class="card-body">
-            <h3>${c.title || ''}</h3>
+            <h3>${c.name || ''}</h3>
             <p>${c.description || ''}</p>
           </div>
         </a>
@@ -158,7 +158,7 @@
         return;
       }
 
-      const items = [...data, ...data]; // Duplicate for seamless scroll
+      const items = data.length > 3 ? [...data, ...data] : data; // Duplicate for seamless scroll
       track.innerHTML = items.map(p => {
         const isLow = p.quantity > 0 && p.quantity < 5;
         return `
