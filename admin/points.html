@@ -26,9 +26,21 @@
   <div class="page-container">
     <div class="page-header">
       <h1><i class="fa-solid fa-star"></i> Customer Points</h1>
-      <div class="search-box">
-        <i class="fa-solid fa-magnifying-glass"></i>
-        <input type="text" id="search-input" placeholder="Search by name or phone..." oninput="filterCustomers()">
+      <div class="flex items-center gap-3 flex-wrap">
+        <div class="search-box">
+          <i class="fa-solid fa-magnifying-glass"></i>
+          <input type="text" id="search-input" placeholder="Search by name or phone..." oninput="filterCustomers()">
+        </div>
+        <select id="points-filter" class="form-select" style="width:auto;min-width:160px;" onchange="filterCustomers()">
+          <option value="all">All Customers</option>
+          <option value="claimable">🎁 Claimable (1000+)</option>
+          <option value="900">⭐ 900+ points</option>
+          <option value="800">⭐ 800+ points</option>
+          <option value="700">700+ points</option>
+          <option value="600">600+ points</option>
+          <option value="500">500+ points</option>
+          <option value="below500">Below 500</option>
+        </select>
       </div>
     </div>
 
@@ -68,7 +80,11 @@
     <div class="card">
       <div class="card-header">
         <h2><i class="fa-solid fa-list"></i> Customer Records</h2>
-        <span id="customer-count" class="badge badge-gold">0 customers</span>
+        <div class="flex items-center gap-2 flex-wrap">
+          <span id="customer-count" class="badge badge-gold">0 customers</span>
+          <button onclick="exportClaimable()" class="btn btn-gold btn-sm"><i class="fa-solid fa-download"></i> Export Claimable</button>
+          <button onclick="exportAll()" class="btn btn-primary btn-sm"><i class="fa-solid fa-file-excel"></i> Export All</button>
+        </div>
       </div>
       <div class="table-wrapper" id="customer-table-wrapper">
         <table class="data-table">

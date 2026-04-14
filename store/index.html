@@ -27,9 +27,9 @@
         <i class="fa-solid fa-bars"></i>
       </button>
       <nav class="store-nav">
-        <a href="index.html" class="active">Home</a>
-        <a href="products.html">Products</a>
-        <a href="contact.html">Contact Us</a>
+        <a href="index.html" class="active"><i class="fa-solid fa-house"></i> Home</a>
+        <a href="products.html"><i class="fa-solid fa-bag-shopping"></i> Products</a>
+        <a href="contact.html"><i class="fa-solid fa-phone"></i> Contact Us</a>
       </nav>
     </div>
   </header>
@@ -61,6 +61,11 @@
       </div>
     </div>
   </section>
+
+  <!-- Running Text / Ticker -->
+  <div class="ticker-bar" id="ticker-bar" style="display:none;">
+    <div class="ticker-track" id="ticker-track"></div>
+  </div>
 
   <!-- Category Cards -->
   <section class="section" id="categories-section">
@@ -118,10 +123,21 @@
     // Load everything
     (async () => {
       await loadBanner();
+      await loadTicker();
       await loadCategories();
       await loadCarousel();
       await loadSocials();
     })();
+
+    async function loadTicker() {
+      const { data } = await db.from('homepage_content').select('*').eq('type', 'ticker').maybeSingle();
+      if (data && data.description) {
+        const bar = document.getElementById('ticker-bar');
+        const track = document.getElementById('ticker-track');
+        track.innerHTML = `<span>${data.description}</span>`;
+        bar.style.display = 'block';
+      }
+    }
 
     async function loadBanner() {
       const { data } = await db.from('homepage_content').select('*').eq('type', 'banner').single();

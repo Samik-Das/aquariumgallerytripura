@@ -27,11 +27,23 @@ function updateStats() {
 
 function filterCustomers() {
   const search = document.getElementById('search-input').value.toLowerCase().trim();
+  const pointsFilter = document.getElementById('points-filter').value;
+
   filteredCustomers = allCustomers.filter(c => {
-    return !search ||
+    const matchSearch = !search ||
       c.name.toLowerCase().includes(search) ||
       c.phone.includes(search);
+
+    let matchPoints = true;
+    if (pointsFilter === 'claimable') matchPoints = c.points >= 1000;
+    else if (pointsFilter === 'below500') matchPoints = c.points < 500;
+    else if (pointsFilter !== 'all') matchPoints = c.points >= parseInt(pointsFilter);
+
+    return matchSearch && matchPoints;
   });
+
+  // Sort by points descending
+  filteredCustomers.sort((a, b) => b.points - a.points);
   renderCustomers();
 }
 
@@ -55,7 +67,21 @@ function renderCustomers() {
 
   tbody.innerHTML = filteredCustomers.map(c => {
     const canClaim = c.points >= 1000;
+    const closeToClaim = c.points >= 500 && c.points < 1000;
     const claimCount = Math.floor(c.points / 1000);
+    const remaining = 1000 - (c.points % 1000);
+
+    // WhatsApp message based on points status
+    let waMsg = '';
+    if (canClaim) {
+      waMsg = `Hi ${c.name}! 🎉 You have ${c.points.toLocaleString('en-IN')} loyalty points at AquariumGalleryTripura! You can claim your reward now. Visit us soon! 🐠`;
+    } else if (closeToClaim) {
+      waMsg = `Hi ${c.name}! ⭐ You have ${c.points.toLocaleString('en-IN')} points at AquariumGalleryTripura! Just ${remaining} more to claim your reward. Visit us soon! 🐠`;
+    } else {
+      waMsg = `Hi ${c.name}! 👋 You have ${c.points.toLocaleString('en-IN')} loyalty points at AquariumGalleryTripura. Keep shopping to earn more rewards! 🐠`;
+    }
+    const waLink = `https://wa.me/91${c.phone}?text=${encodeURIComponent(waMsg)}`;
+
     return `
       <tr>
         <td><strong>${c.name}</strong></td>
@@ -68,12 +94,17 @@ function renderCustomers() {
         </td>
         <td>${formatDate(c.created_at)}</td>
         <td>
-          ${canClaim
-            ? `<button onclick="claimPoints('${c.id}', '${c.name}', ${c.points})" class="btn btn-gold btn-sm">
-                <i class="fa-solid fa-gift"></i> Claim 1000 pts
-              </button>`
-            : `<span class="text-xs text-gray-400">${1000 - (c.points || 0)} more to claim</span>`
-          }
+          <div class="flex items-center gap-2 flex-wrap">
+            ${canClaim
+              ? `<button onclick="claimPoints('${c.id}', '${c.name}', ${c.points})" class="btn btn-gold btn-sm">
+                  <i class="fa-solid fa-gift"></i> Claim
+                </button>`
+              : `<span class="text-xs text-gray-400">${remaining} more</span>`
+            }
+            <a href="${waLink}" target="_blank" class="btn btn-sm" style="background:#25D366;color:white;padding:6px 10px;border-radius:8px;text-decoration:none;display:inline-flex;align-items:center;gap:4px;">
+              <i class="fa-brands fa-whatsapp"></i>
+            </a>
+          </div>
         </td>
       </tr>
     `;
@@ -146,4 +177,58 @@ async function loadPointsHistory() {
       </td>
     </tr>
   `).join('');
+}
+
+// ===== Export Functions =====
+
+function exportClaimable() {
+  // Claimable (1000+) first, then close to claim (500+), sorted by points desc
+  const sorted = [...allCustomers]
+    .filter(c => c.points >= 500)
+    .sort((a, b) => b.points - a.points);
+
+  if (sorted.length === 0) {
+    showToast('No customers with 500+ points to export', 'error');
+    return;
+  }
+
+  const rows = [['Name', 'Phone', 'Points', 'Status', 'Rewards Available']];
+  sorted.forEach(c => {
+    const claimable = c.points >= 1000;
+    const rewards = Math.floor(c.points / 1000);
+    const status = claimable ? 'CLAIMABLE' : `${1000 - c.points} pts to claim`;
+    rows.push([c.name, c.phone, c.points, status, claimable ? rewards : 0]);
+  });
+
+  downloadCSV(rows, 'claimable-customers');
+  showToast(`Exported ${sorted.length} customers (500+ points)`);
+}
+
+function exportAll() {
+  if (allCustomers.length === 0) {
+    showToast('No customers to export', 'error');
+    return;
+  }
+
+  const sorted = [...allCustomers].sort((a, b) => b.points - a.points);
+  const rows = [['Name', 'Phone', 'Points', 'Status', 'Member Since']];
+  sorted.forEach(c => {
+    const claimable = c.points >= 1000;
+    const status = claimable ? `CLAIMABLE (${Math.floor(c.points / 1000)} rewards)` : `${1000 - c.points} pts to claim`;
+    rows.push([c.name, c.phone, c.points, status, new Date(c.created_at).toLocaleDateString('en-IN')]);
+  });
+
+  downloadCSV(rows, 'all-customers-points');
+  showToast(`Exported ${sorted.length} customers`);
+}
+
+function downloadCSV(rows, filename) {
+  const csv = rows.map(r => r.map(v => `"${String(v).replace(/"/g, '""')}"`).join(',')).join('\n');
+  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `${filename}-${new Date().toISOString().split('T')[0]}.csv`;
+  a.click();
+  URL.revokeObjectURL(url);
 }

@@ -126,6 +126,14 @@ async function saveSale() {
 
   if (!phone || !name) { showToast('Enter customer phone and name', 'error'); return; }
 
+  // Validate phone number - must be 10 digits
+  const phoneClean = phone.replace(/\D/g, '');
+  if (phoneClean.length !== 10) {
+    showToast('Phone number must be exactly 10 digits', 'error');
+    document.getElementById('customer-phone').focus();
+    return;
+  }
+
   // Validate items
   const items = [];
   for (const id of saleItems) {

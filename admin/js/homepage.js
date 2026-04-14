@@ -12,10 +12,48 @@ let cardImageFile = null;
   await checkAuth();
   buildNavbar('Home');
   await loadBanner();
+  await loadTicker();
   await loadCategoryCards();
   await loadProductCarousel();
   await loadSocialLinks();
 })();
+
+// ===== Ticker / Running Text =====
+let tickerData = null;
+
+async function loadTicker() {
+  const { data } = await db.from('homepage_content').select('*').eq('type', 'ticker').maybeSingle();
+  tickerData = data;
+  const el = document.getElementById('ticker-text');
+  if (data && data.description) {
+    el.textContent = data.description;
+  } else {
+    el.textContent = 'No announcement set yet';
+  }
+}
+
+function editTicker() {
+  document.getElementById('ticker-input').value = tickerData?.description || '';
+  document.getElementById('ticker-modal').style.display = 'flex';
+}
+
+async function saveTicker() {
+  const text = document.getElementById('ticker-input').value.trim();
+  if (!text) { showToast('Please enter announcement text', 'error'); return; }
+
+  try {
+    if (tickerData) {
+      await db.from('homepage_content').update({ description: text, updated_at: new Date().toISOString() }).eq('id', tickerData.id);
+    } else {
+      await db.from('homepage_content').insert({ type: 'ticker', title: 'Ticker', description: text, sort_order: 0 });
+    }
+    document.getElementById('ticker-modal').style.display = 'none';
+    showToast('Announcement updated!');
+    await loadTicker();
+  } catch (err) {
+    showToast(err.message, 'error');
+  }
+}
 
 // ===== Banner =====
 async function loadBanner() {

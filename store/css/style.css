@@ -570,6 +570,56 @@ h1, h2, h3, h4, h5, h6 { font-family: 'Poppins', sans-serif; }
   transition: all 0.3s;
 }
 
+/* ===== Ticker / Running Text ===== */
+.ticker-bar {
+  background: linear-gradient(90deg, #164e63, #0e7490, #0891b2, #0e7490, #164e63);
+  padding: 10px 0;
+  overflow: hidden;
+  position: relative;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+}
+
+.ticker-bar::before,
+.ticker-bar::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 40px;
+  z-index: 2;
+}
+
+.ticker-bar::before {
+  left: 0;
+  background: linear-gradient(90deg, #164e63, transparent);
+}
+
+.ticker-bar::after {
+  right: 0;
+  background: linear-gradient(90deg, transparent, #164e63);
+}
+
+.ticker-track {
+  display: inline-block;
+  white-space: nowrap;
+  animation: tickerScroll 12s linear infinite;
+  padding-left: 100%;
+}
+
+.ticker-track span {
+  display: inline-block;
+  color: #fbbf24;
+  font-family: 'Poppins', sans-serif;
+  font-weight: 600;
+  font-size: 0.95rem;
+  letter-spacing: 0.3px;
+}
+
+@keyframes tickerScroll {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-100%); }
+}
+
 /* ===== Responsive ===== */
 @media (max-width: 768px) {
   .hero { min-height: 320px; }
