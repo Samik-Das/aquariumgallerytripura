@@ -8,6 +8,9 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
   <link rel="stylesheet" href="css/style.css">
   <meta name="description" content="Browse our wide collection of aquarium fish, accessories, and supplies.">
+  <meta name="theme-color" content="#0891b2">
+  <link rel="manifest" href="manifest.json">
+  <link rel="apple-touch-icon" href="icons/icon-192.jpeg">
 </head>
 <body>
 
@@ -15,7 +18,7 @@
   <header class="store-header">
     <div class="store-header-inner">
       <a href="index.html" class="store-logo">
-        <div class="store-logo-icon">🐠</div>
+        <img src="icons/icon-192.jpeg" alt="AGT" class="store-logo-icon">
         <span class="store-logo-text">AquariumGalleryTripura</span>
       </a>
       <button class="store-nav-toggle" onclick="document.querySelector('.store-nav').classList.toggle('open')">
@@ -163,6 +166,11 @@
           </div>
         `;
       }).join('');
+    }
+  </script>
+  <script>
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('sw.js');
     }
   </script>
 </body>

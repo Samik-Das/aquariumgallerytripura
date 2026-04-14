@@ -17,7 +17,7 @@ function buildNavbar(activePage) {
   nav.innerHTML = `
     <div class="navbar-inner">
       <a href="index.html" class="navbar-logo">
-        <div class="navbar-logo-icon">🐠</div>
+        <img src="icons/icon-192.jpeg" alt="AGT" class="navbar-logo-icon" style="width:40px;height:40px;border-radius:10px;object-fit:cover;border:2px solid rgba(103,232,249,0.5);box-shadow:0 0 8px rgba(6,182,212,0.3);">
         <span>AquariumGalleryTripura</span>
       </a>
       <button class="navbar-toggle" onclick="document.querySelector('.navbar-links').classList.toggle('open')">
