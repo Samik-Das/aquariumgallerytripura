@@ -46,15 +46,16 @@
           <h2 style="font-family:'Poppins',sans-serif;font-size:1.2rem;font-weight:800;color:#155e75;">Welcome!</h2>
           <p style="color:#64748b;font-size:0.82rem;margin-top:4px;margin-bottom:1.2rem;">Enter your details to view your cart and place orders</p>
           <div style="display:flex;flex-direction:column;gap:10px;text-align:left;">
-            <input type="text" id="gate-name" placeholder="Your Name" class="cart-input" maxlength="100">
+            <input type="text" id="gate-name" placeholder="Your Full Name" class="cart-input" maxlength="100">
             <div style="position:relative;">
               <span style="position:absolute;left:12px;top:50%;transform:translateY(-50%);color:#94a3b8;font-size:0.85rem;">+91</span>
-              <input type="tel" id="gate-phone" placeholder="10-digit Phone Number" class="cart-input" style="padding-left:44px;" maxlength="10" oninput="this.value=this.value.replace(/\D/g,'')">
+              <input type="tel" id="gate-phone" placeholder="10-digit Phone Number" class="cart-input" style="padding-left:44px;" maxlength="10" oninput="this.value=this.value.replace(/\D/g,'');if(this.value.length===10)lookupPhone()">
             </div>
+            <p id="gate-hint" style="color:#0891b2;font-size:0.75rem;display:none;margin:0;"></p>
             <p id="gate-error" style="color:#ef4444;font-size:0.8rem;display:none;margin:0;"></p>
             <label style="display:flex;align-items:flex-start;gap:8px;cursor:pointer;margin-top:2px;">
               <input type="checkbox" id="gate-confirm" style="width:18px;height:18px;accent-color:#0891b2;margin-top:1px;flex-shrink:0;cursor:pointer;">
-              <span style="font-size:0.8rem;color:#475569;line-height:1.4;">I confirm these details are correct. This will be used to track my orders.</span>
+              <span style="font-size:0.8rem;color:#475569;line-height:1.4;">I confirm that my name and phone number are correct. These details will be used for order tracking, delivery coordination, and earning loyalty points.</span>
             </label>
             <button onclick="enterCart()" style="width:100%;padding:14px;background:linear-gradient(135deg,#06b6d4,#0891b2);color:white;border:none;border-radius:12px;font-size:0.95rem;font-weight:700;font-family:'Poppins',sans-serif;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;box-shadow:0 4px 16px rgba(6,182,212,0.3);transition:all 0.2s;" onmousedown="this.style.transform='scale(0.97)'" onmouseup="this.style.transform='scale(1)'">
               <i class="fa-solid fa-arrow-right"></i> Continue to Cart
@@ -264,6 +265,36 @@
       document.getElementById('cart-main').style.display = 'none';
       document.getElementById('gate-name').value = '';
       document.getElementById('gate-phone').value = '';
+      document.getElementById('gate-hint').style.display = 'none';
+    }
+
+    // ===== Phone Lookup: Auto-fill name from previous orders/customers =====
+    async function lookupPhone() {
+      const phone = document.getElementById('gate-phone').value.trim();
+      if (phone.length !== 10) return;
+
+      const hintEl = document.getElementById('gate-hint');
+      const nameEl = document.getElementById('gate-name');
+
+      // Check customers table first (from in-shop sales)
+      const { data: customer } = await db.from('customers').select('name').eq('phone', phone).maybeSingle();
+      if (customer && customer.name) {
+        nameEl.value = customer.name;
+        hintEl.innerHTML = '<i class="fa-solid fa-circle-check"></i> Welcome back, ' + customer.name + '!';
+        hintEl.style.display = 'block';
+        return;
+      }
+
+      // Check online_orders table
+      const { data: order } = await db.from('online_orders').select('customer_name').eq('customer_phone', phone).order('created_at', { ascending: false }).limit(1).maybeSingle();
+      if (order && order.customer_name) {
+        nameEl.value = order.customer_name;
+        hintEl.innerHTML = '<i class="fa-solid fa-circle-check"></i> Welcome back, ' + order.customer_name + '!';
+        hintEl.style.display = 'block';
+        return;
+      }
+
+      hintEl.style.display = 'none';
     }
 
     // ===== Cart Utilities =====
@@ -292,6 +323,7 @@
         document.querySelector('.cart-tab:last-child').classList.add('active');
         document.getElementById('cart-tab-content').style.display = 'none';
         document.getElementById('status-tab-content').style.display = 'block';
+        trackOrders(); // Auto-load orders when switching to track tab
       }
     }
 

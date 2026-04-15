@@ -158,16 +158,111 @@ function viewOrder(id) {
 
 async function updateOrderStatus(id, status) {
   const labels = { confirmed: 'Confirmed', declined: 'Declined', delivered: 'Delivered' };
-  const yes = await showConfirm('Update Order', `Mark this order as <strong>${labels[status]}</strong>?`);
+  const yes = await showConfirm('Update Order', `Mark this order as <strong>${labels[status]}</strong>?${status === 'delivered' ? '<br><small style="color:#059669;">This will create a sale entry, update inventory, and award loyalty points.</small>' : ''}`);
   if (!yes) return;
 
   try {
-    await db.from('online_orders').update({ status, updated_at: new Date().toISOString() }).eq('id', id);
+    const { error } = await db.from('online_orders').update({ status }).eq('id', id);
+    if (error) throw error;
+
+    // If delivered, create a full sale entry (same as in-shop sale)
+    if (status === 'delivered') {
+      const order = allOrders.find(o => o.id === id);
+      if (order) await createSaleFromOrder(order);
+    }
+
     document.getElementById('order-modal').style.display = 'none';
     showToast(`Order ${labels[status]}!`);
     await loadOrders();
   } catch (err) {
     showToast(err.message, 'error');
+  }
+}
+
+// ===== Create Sale Entry from Delivered Order =====
+async function createSaleFromOrder(order) {
+  const items = typeof order.items === 'string' ? JSON.parse(order.items) : order.items;
+  const phone = order.customer_phone;
+  const name = order.customer_name;
+
+  try {
+    // Get or create customer
+    let customerId;
+    const { data: existing } = await db.from('customers').select('id').eq('phone', phone).maybeSingle();
+    if (existing) {
+      customerId = existing.id;
+      await db.from('customers').update({ name }).eq('id', customerId);
+    } else {
+      const { data: newCust, error } = await db.from('customers').insert({ name, phone, points: 0 }).select().single();
+      if (error) throw error;
+      customerId = newCust.id;
+    }
+
+    // Match order items to products
+    const saleItemsData = [];
+    for (const item of items) {
+      // Try to find the product by name
+      const { data: product } = await db.from('products').select('*').ilike('name', item.name).maybeSingle();
+
+      saleItemsData.push({
+        product_id: product ? product.id : null,
+        product_name: item.name,
+        category: product ? product.category : 'Online Order',
+        quantity: item.qty,
+        selling_price: item.price,
+        actual_selling_price: item.price,
+        buying_price: product ? product.buying_price : 0,
+        is_referral: false,
+        commission_percent: 0,
+        commission_amount: 0
+      });
+
+      // Deduct inventory if product found
+      if (product) {
+        await db.from('products').update({
+          quantity: Math.max(0, product.quantity - item.qty)
+        }).eq('id', product.id);
+      }
+    }
+
+    const totalAmount = items.reduce((s, i) => s + (i.price * i.qty), 0);
+
+    // Create sale record
+    const { data: sale, error: saleErr } = await db.from('sales').insert({
+      customer_id: customerId,
+      customer_name: name,
+      customer_phone: phone,
+      total_amount: totalAmount,
+      is_referral: false,
+      referrer_name: null,
+      total_commission: 0
+    }).select().single();
+    if (saleErr) throw saleErr;
+
+    // Insert sale items
+    const itemsWithSaleId = saleItemsData.map(i => ({ sale_id: sale.id, ...i }));
+    const { error: itemsErr } = await db.from('sale_items').insert(itemsWithSaleId);
+    if (itemsErr) throw itemsErr;
+
+    // Award loyalty points (1 point per ₹1 spent)
+    const pointsEarned = Math.floor(totalAmount);
+    if (pointsEarned > 0) {
+      const { data: cust } = await db.from('customers').select('points').eq('id', customerId).single();
+      const newPoints = (cust?.points || 0) + pointsEarned;
+      await db.from('customers').update({ points: newPoints }).eq('id', customerId);
+
+      await db.from('points_history').insert({
+        customer_id: customerId,
+        customer_name: name,
+        points_change: pointsEarned,
+        type: 'earned',
+        sale_id: sale.id
+      });
+    }
+
+    showToast(`Sale created! ${name} earned ${pointsEarned} points.`);
+  } catch (err) {
+    showToast('Sale creation failed: ' + err.message, 'error');
   }
 }
 
