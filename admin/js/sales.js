@@ -35,6 +35,18 @@ function lookupCustomer() {
       document.getElementById('customer-name').value = data.name;
       document.getElementById('returning-badge').style.display = 'inline-flex';
       existingCustomerId = data.id;
+
+      // Auto-populate referrer name from most recent referral sale
+      const { data: lastReferral } = await db.from('sales')
+        .select('referrer_name')
+        .eq('customer_id', data.id)
+        .eq('is_referral', true)
+        .order('created_at', { ascending: false })
+        .limit(1)
+        .maybeSingle();
+      if (lastReferral && lastReferral.referrer_name) {
+        document.getElementById('referrer-name').value = lastReferral.referrer_name;
+      }
     } else {
       document.getElementById('returning-badge').style.display = 'none';
       existingCustomerId = null;

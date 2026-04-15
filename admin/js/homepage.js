@@ -16,6 +16,7 @@ let cardImageFile = null;
   await loadCategoryCards();
   await loadProductCarousel();
   await loadSocialLinks();
+  await loadContact();
 })();
 
 // ===== Ticker / Running Text =====
@@ -400,6 +401,64 @@ async function deleteSocialLink(id) {
     await db.from('homepage_content').delete().eq('id', id);
     showToast('Link deleted');
     await loadSocialLinks();
+  } catch (err) {
+    showToast(err.message, 'error');
+  }
+}
+
+// ===== Contact Us =====
+let contactData = null;
+
+async function loadContact() {
+  const { data } = await db.from('homepage_content').select('*').eq('type', 'contact').maybeSingle();
+  contactData = data;
+  const info = contactData ? JSON.parse(contactData.description || '{}') : {};
+  document.getElementById('contact-address-preview').textContent = info.address || 'Not set';
+  document.getElementById('contact-map-preview').textContent = info.map_link || 'Not set';
+  document.getElementById('contact-phone-preview').textContent = info.phone || 'Not set';
+  document.getElementById('contact-whatsapp-preview').textContent = info.whatsapp || 'Not set';
+  document.getElementById('contact-hours-preview').textContent = info.hours || 'Not set';
+  document.getElementById('contact-email-preview').textContent = info.email || 'Not set';
+}
+
+function editContact() {
+  const info = contactData ? JSON.parse(contactData.description || '{}') : {};
+  document.getElementById('contact-address-input').value = info.address || '';
+  document.getElementById('contact-map-input').value = info.map_link || '';
+  document.getElementById('contact-phone-input').value = info.phone || '';
+  document.getElementById('contact-whatsapp-input').value = info.whatsapp || '';
+  document.getElementById('contact-email-input').value = info.email || '';
+  document.getElementById('contact-hours-input').value = info.hours || '';
+  document.getElementById('contact-modal').style.display = 'flex';
+}
+
+async function saveContact() {
+  const info = {
+    address: document.getElementById('contact-address-input').value.trim(),
+    map_link: document.getElementById('contact-map-input').value.trim(),
+    phone: document.getElementById('contact-phone-input').value.trim(),
+    whatsapp: document.getElementById('contact-whatsapp-input').value.trim(),
+    email: document.getElementById('contact-email-input').value.trim(),
+    hours: document.getElementById('contact-hours-input').value.trim()
+  };
+
+  try {
+    if (contactData) {
+      await db.from('homepage_content').update({
+        description: JSON.stringify(info),
+        updated_at: new Date().toISOString()
+      }).eq('id', contactData.id);
+    } else {
+      await db.from('homepage_content').insert({
+        type: 'contact',
+        title: 'Contact Info',
+        description: JSON.stringify(info),
+        sort_order: 0
+      });
+    }
+    document.getElementById('contact-modal').style.display = 'none';
+    showToast('Contact info saved!');
+    await loadContact();
   } catch (err) {
     showToast(err.message, 'error');
   }

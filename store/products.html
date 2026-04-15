@@ -10,7 +10,7 @@
   <meta name="description" content="Browse our wide collection of aquarium fish, accessories, and supplies.">
   <meta name="theme-color" content="#0891b2">
   <link rel="manifest" href="manifest.json">
-  <link rel="apple-touch-icon" href="icons/icon-192.jpeg">
+  <link rel="apple-touch-icon" href="icons/logo.jpeg">
 </head>
 <body>
 
@@ -18,7 +18,7 @@
   <header class="store-header">
     <div class="store-header-inner">
       <a href="index.html" class="store-logo">
-        <img src="icons/icon-192.jpeg" alt="AGT" class="store-logo-icon">
+        <img src="icons/logo.jpeg" alt="AGT" class="store-logo-icon">
         <span class="store-logo-text">AquariumGalleryTripura</span>
       </a>
       <button class="store-nav-toggle" onclick="document.querySelector('.store-nav').classList.toggle('open')">
@@ -204,6 +204,16 @@
     <i class="fa-solid fa-star"></i>
     <span>My Points</span>
   </a>
+
+  <!-- Mobile Bottom Nav -->
+  <nav class="bottom-nav">
+    <div class="bottom-nav-inner">
+      <a href="index.html"><i class="fa-solid fa-house"></i><span>Home</span></a>
+      <a href="products.html" class="active"><i class="fa-solid fa-bag-shopping"></i><span>Products</span></a>
+      <a href="index.html?points=open" class="bnav-points"><i class="fa-solid fa-star"></i><span>My Points</span></a>
+      <a href="contact.html"><i class="fa-solid fa-phone"></i><span>Contact</span></a>
+    </div>
+  </nav>
 
   <script>
     if ('serviceWorker' in navigator) {

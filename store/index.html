@@ -12,7 +12,7 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <link rel="manifest" href="manifest.json">
-  <link rel="apple-touch-icon" href="icons/icon-192.jpeg">
+  <link rel="apple-touch-icon" href="icons/logo.jpeg">
 </head>
 <body>
 
@@ -20,7 +20,7 @@
   <header class="store-header">
     <div class="store-header-inner">
       <a href="index.html" class="store-logo">
-        <img src="icons/icon-192.jpeg" alt="AGT" class="store-logo-icon">
+        <img src="icons/logo.jpeg" alt="AGT" class="store-logo-icon">
         <span class="store-logo-text">AquariumGalleryTripura</span>
       </a>
       <button class="store-nav-toggle" onclick="document.querySelector('.store-nav').classList.toggle('open')">
@@ -108,6 +108,16 @@
     <p>&copy; 2026 <a href="index.html">AquariumGalleryTripura</a>. All rights reserved.</p>
     <p style="margin-top:4px;font-size:0.75rem;">Bringing aquatic beauty to your home 🐠</p>
   </footer>
+
+  <!-- Mobile Bottom Nav -->
+  <nav class="bottom-nav">
+    <div class="bottom-nav-inner">
+      <a href="index.html" class="active"><i class="fa-solid fa-house"></i><span>Home</span></a>
+      <a href="products.html"><i class="fa-solid fa-bag-shopping"></i><span>Products</span></a>
+      <a href="#" class="bnav-points" onclick="openPointsModal();return false;"><i class="fa-solid fa-star"></i><span>My Points</span></a>
+      <a href="contact.html"><i class="fa-solid fa-phone"></i><span>Contact</span></a>
+    </div>
+  </nav>
 
   <!-- Floating Check Points Button -->
   <button onclick="openPointsModal()" class="points-fab" id="points-fab" title="Check Your Points">

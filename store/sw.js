@@ -7,8 +7,7 @@ const STATIC_ASSETS = [
   'css/style.css',
   'js/supabase-config.js',
   'manifest.json',
-  'icons/icon-192.jpeg',
-  'icons/icon-512.jpeg'
+  'icons/logo.jpeg'
 ];
 
 // Install: Pre-cache static pages

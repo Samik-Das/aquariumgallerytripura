@@ -9,7 +9,7 @@
   <link rel="stylesheet" href="css/style.css">
   <meta name="theme-color" content="#0891b2">
   <link rel="manifest" href="manifest.json">
-  <link rel="apple-touch-icon" href="icons/icon-192.jpeg">
+  <link rel="apple-touch-icon" href="icons/logo.jpeg">
 </head>
 <body>
 
@@ -17,7 +17,7 @@
   <header class="store-header">
     <div class="store-header-inner">
       <a href="index.html" class="store-logo">
-        <img src="icons/icon-192.jpeg" alt="AGT" class="store-logo-icon">
+        <img src="icons/logo.jpeg" alt="AGT" class="store-logo-icon">
         <span class="store-logo-text">AquariumGalleryTripura</span>
       </a>
       <button class="store-nav-toggle" onclick="document.querySelector('.store-nav').classList.toggle('open')">
@@ -46,9 +46,7 @@
       <!-- Contact Card -->
       <div class="contact-card">
         <div style="text-align:center;margin-bottom:2rem;">
-          <div style="width:80px;height:80px;border-radius:20px;background:linear-gradient(135deg,#0891b2,#0e7490);display:inline-flex;align-items:center;justify-content:center;font-size:2rem;margin-bottom:1rem;">
-            🐠
-          </div>
+          <img src="icons/logo.jpeg" alt="AGT" style="width:80px;height:80px;border-radius:20px;object-fit:cover;margin-bottom:1rem;box-shadow:0 4px 16px rgba(0,0,0,0.15);">
           <h2 style="font-family:'Poppins',sans-serif;font-weight:800;font-size:1.5rem;color:#155e75;">AquariumGalleryTripura</h2>
           <p style="color:#64748b;margin-top:4px;">Your one-stop destination for all aquarium needs</p>
         </div>
@@ -133,21 +131,55 @@
     };
 
     (async () => {
+      // Load contact info
+      const { data: contactRow } = await db.from('homepage_content').select('*').eq('type', 'contact').maybeSingle();
+      if (contactRow && contactRow.description) {
+        try {
+          const info = JSON.parse(contactRow.description);
+          if (info.address) {
+            const addrEl = document.getElementById('shop-address');
+            if (info.map_link) {
+              addrEl.innerHTML = `<a href="${info.map_link}" target="_blank" rel="noopener noreferrer" style="color:#059669;text-decoration:none;font-weight:600;">${info.address} <i class="fa-solid fa-arrow-up-right-from-square" style="font-size:0.75rem;"></i></a>`;
+            } else {
+              addrEl.textContent = info.address;
+            }
+          }
+          if (info.phone) {
+            document.getElementById('shop-phone').innerHTML = `<a href="tel:${info.phone.replace(/\s/g,'')}" style="color:#2563eb;text-decoration:none;font-weight:600;">${info.phone}</a>`;
+          }
+          if (info.whatsapp) {
+            const num = info.whatsapp.replace(/\D/g, '');
+            document.getElementById('shop-whatsapp').innerHTML = `<a href="https://wa.me/${num}" target="_blank" style="color:#16a34a;text-decoration:none;font-weight:600;">${info.whatsapp}</a>`;
+          }
+          if (info.hours) {
+            document.querySelector('#contact-details .contact-item:nth-child(4) p:last-child').textContent = info.hours;
+          }
+          if (info.email) {
+            // Insert email item before hours
+            const hoursItem = document.querySelector('#contact-details .contact-item:nth-child(4)');
+            const emailItem = document.createElement('div');
+            emailItem.className = 'contact-item';
+            emailItem.innerHTML = `
+              <div class="contact-icon" style="background:#faf5ff;color:#7c3aed;">
+                <i class="fa-solid fa-envelope"></i>
+              </div>
+              <div>
+                <h4>Email Us</h4>
+                <p><a href="mailto:${info.email}" style="color:#7c3aed;text-decoration:none;font-weight:600;">${info.email}</a></p>
+              </div>
+            `;
+            hoursItem.parentNode.insertBefore(emailItem, hoursItem);
+          }
+        } catch (e) { /* ignore parse errors */ }
+      }
+
+      // Load social links
       const { data } = await db.from('homepage_content').select('*').eq('type', 'social_link').order('sort_order');
       if (!data) return;
 
       const container = document.getElementById('social-links');
       container.innerHTML = data.filter(s => s.link).map(s => {
         const info = socialIcons[s.title] || { icon: 'fa-link', bg: '#0891b2' };
-
-        // Auto-fill WhatsApp link
-        if (s.title === 'WhatsApp' && s.link) {
-          const num = s.link.replace(/\D/g, '');
-          if (num) {
-            document.getElementById('shop-whatsapp').innerHTML = `<a href="https://wa.me/${num}" target="_blank" style="color:#16a34a;text-decoration:none;font-weight:600;">Chat on WhatsApp</a>`;
-          }
-        }
-
         return `
           <a href="${s.link}" target="_blank" rel="noopener noreferrer"
             style="width:48px;height:48px;border-radius:14px;display:inline-flex;align-items:center;justify-content:center;color:white;font-size:1.1rem;text-decoration:none;background:${info.bg};transition:all 0.3s;box-shadow:0 2px 8px rgba(0,0,0,0.15);"
@@ -164,6 +196,16 @@
     <i class="fa-solid fa-star"></i>
     <span>My Points</span>
   </a>
+
+  <!-- Mobile Bottom Nav -->
+  <nav class="bottom-nav">
+    <div class="bottom-nav-inner">
+      <a href="index.html"><i class="fa-solid fa-house"></i><span>Home</span></a>
+      <a href="products.html"><i class="fa-solid fa-bag-shopping"></i><span>Products</span></a>
+      <a href="index.html?points=open" class="bnav-points"><i class="fa-solid fa-star"></i><span>My Points</span></a>
+      <a href="contact.html" class="active"><i class="fa-solid fa-phone"></i><span>Contact</span></a>
+    </div>
+  </nav>
 
   <script>
     if ('serviceWorker' in navigator) {
