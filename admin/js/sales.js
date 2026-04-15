@@ -65,7 +65,7 @@ function addSaleItem() {
 
   const html = `
     <div class="sale-item p-4 mb-3 rounded-xl bg-gray-50 border border-gray-100" id="sale-item-${id}">
-      <div class="flex items-center justify-between mb-3">
+      <div class="flex items-center justify-between mb-2">
         <span class="badge badge-gold"><i class="fa-solid fa-box"></i> Item #${id}</span>
         <div class="flex items-center gap-3">
           <label class="flex items-center gap-2 cursor-pointer text-sm font-medium text-purple-700">
@@ -75,7 +75,8 @@ function addSaleItem() {
           ${saleItemCounter > 1 ? `<button onclick="removeSaleItem(${id})" class="btn btn-danger btn-sm btn-icon"><i class="fa-solid fa-xmark"></i></button>` : ''}
         </div>
       </div>
-      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3">
+      <!-- Product + Category row -->
+      <div class="grid grid-cols-2 gap-2 mb-2">
         <div class="form-group mb-0">
           <label class="form-label text-xs">Product</label>
           <select class="form-select" id="item-product-${id}" onchange="onItemProductChange(${id})">
@@ -87,6 +88,9 @@ function addSaleItem() {
           <label class="form-label text-xs">Category</label>
           <input type="text" class="form-input" id="item-category-${id}" readonly style="background:#f8fafc;">
         </div>
+      </div>
+      <!-- SP + Actual SP + Qty row -->
+      <div class="grid grid-cols-3 gap-2">
         <div class="form-group mb-0">
           <label class="form-label text-xs">Default SP</label>
           <input type="text" class="form-input" id="item-sp-${id}" readonly style="background:#f8fafc;">
@@ -96,19 +100,19 @@ function addSaleItem() {
           <input type="number" class="form-input" id="item-actual-sp-${id}" placeholder="₹" step="0.01" min="0" oninput="calculateTotal()">
         </div>
         <div class="form-group mb-0">
-          <label class="form-label text-xs">Quantity</label>
+          <label class="form-label text-xs">Qty</label>
           <input type="number" class="form-input" id="item-qty-${id}" placeholder="0" min="1" oninput="calculateTotal()">
         </div>
       </div>
       <!-- Referral Commission Row (hidden by default) -->
-      <div class="mt-3 p-3 rounded-lg bg-purple-50 border border-purple-200" id="item-referral-row-${id}" style="display:none;">
-        <div class="grid grid-cols-2 gap-3">
+      <div class="mt-2 p-2 rounded-lg bg-purple-50 border border-purple-200" id="item-referral-row-${id}" style="display:none;">
+        <div class="grid grid-cols-2 gap-2">
           <div class="form-group mb-0">
             <label class="form-label text-xs text-purple-700"><i class="fa-solid fa-percent"></i> Commission %</label>
             <input type="number" class="form-input" id="item-commission-pct-${id}" placeholder="e.g. 10" step="0.01" min="0" max="100" oninput="calculateTotal()">
           </div>
           <div class="form-group mb-0">
-            <label class="form-label text-xs text-purple-700"><i class="fa-solid fa-indian-rupee-sign"></i> Commission Amount</label>
+            <label class="form-label text-xs text-purple-700"><i class="fa-solid fa-indian-rupee-sign"></i> Commission</label>
             <input type="text" class="form-input" id="item-commission-amt-${id}" readonly style="background:#faf5ff;color:#7e22ce;font-weight:600;">
           </div>
         </div>

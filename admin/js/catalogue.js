@@ -105,28 +105,25 @@ function renderProductCard(p) {
   const isLow = p.quantity > 0 && p.quantity < 5;
   const isOut = p.quantity <= 0;
   return `
-    <div class="product-card ${isLow ? 'ring-2 ring-red-300' : ''}">
+    <div class="product-card ${isLow ? 'ring-1 ring-red-300' : ''}">
       <div class="product-image">
         ${p.image_url
           ? `<img src="${p.image_url}" alt="${p.name}">`
           : `<div class="no-image"><i class="fa-solid fa-fish"></i></div>`
         }
-        ${isLow ? '<div class="absolute top-2 left-2"><span class="badge badge-red"><i class="fa-solid fa-triangle-exclamation"></i> Low Stock</span></div>' : ''}
-        ${isOut ? '<div class="absolute top-2 left-2"><span class="badge badge-red"><i class="fa-solid fa-xmark"></i> Out of Stock</span></div>' : ''}
+        ${isLow ? '<div class="absolute top-1 left-1"><span class="badge badge-red" style="font-size:0.5rem;padding:1px 4px;"><i class="fa-solid fa-triangle-exclamation"></i> Low</span></div>' : ''}
+        ${isOut ? '<div class="absolute top-1 left-1"><span class="badge badge-red" style="font-size:0.5rem;padding:1px 4px;"><i class="fa-solid fa-xmark"></i> Out</span></div>' : ''}
       </div>
       <div class="product-info">
         <div class="product-category">${p.category}</div>
         <div class="product-name">${p.name}</div>
         <div class="product-prices">
           <span class="product-sp">₹${Number(p.selling_price).toLocaleString('en-IN')}</span>
-          <span class="product-bp">BP: ₹${Number(p.buying_price).toLocaleString('en-IN')}</span>
+          <span class="product-bp">BP:₹${Number(p.buying_price).toLocaleString('en-IN')}</span>
         </div>
-        <div class="mt-2">
-          <span class="product-qty ${isLow || isOut ? 'low-stock' : 'in-stock'}">
-            <i class="fa-solid ${isOut ? 'fa-xmark' : 'fa-boxes-stacked'}"></i>
-            ${isOut ? 'Out of stock' : p.quantity + ' in stock'}
-          </span>
-        </div>
+        <span class="product-qty ${isLow || isOut ? 'low-stock' : 'in-stock'}">
+          ${isOut ? '✗ Out' : p.quantity + ' pcs'}
+        </span>
         <div class="product-actions">
           <button onclick="openEditModal('${p.id}')" class="btn btn-primary btn-sm flex-1">
             <i class="fa-solid fa-pen"></i> Edit

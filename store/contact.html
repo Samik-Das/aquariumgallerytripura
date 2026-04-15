@@ -20,6 +20,7 @@
         <img src="icons/logo.jpeg" alt="AGT" class="store-logo-icon">
         <span class="store-logo-text">AquariumGalleryTripura</span>
       </a>
+      <a href="index.html?points=open" class="header-points-btn"><i class="fa-solid fa-star"></i> My Points</a>
       <button class="store-nav-toggle" onclick="document.querySelector('.store-nav').classList.toggle('open')">
         <i class="fa-solid fa-bars"></i>
       </button>
@@ -32,23 +33,14 @@
     </div>
   </header>
 
-  <!-- Page Title -->
-  <div style="background:linear-gradient(135deg,#164e63,#0891b2);padding:2rem 0;">
-    <div style="max-width:1200px;margin:0 auto;padding:0 1.5rem;">
-      <h1 style="font-family:'Poppins',sans-serif;font-size:2rem;font-weight:800;color:white;">Contact Us</h1>
-      <p style="color:rgba(255,255,255,0.7);margin-top:4px;">We'd love to hear from you!</p>
-    </div>
-  </div>
-
-  <section class="section">
+  <section class="section" style="padding-top:1.5rem;">
     <div style="max-width:800px;margin:0 auto;">
 
       <!-- Contact Card -->
       <div class="contact-card">
-        <div style="text-align:center;margin-bottom:2rem;">
-          <img src="icons/logo.jpeg" alt="AGT" style="width:80px;height:80px;border-radius:20px;object-fit:cover;margin-bottom:1rem;box-shadow:0 4px 16px rgba(0,0,0,0.15);">
-          <h2 style="font-family:'Poppins',sans-serif;font-weight:800;font-size:1.5rem;color:#155e75;">AquariumGalleryTripura</h2>
-          <p style="color:#64748b;margin-top:4px;">Your one-stop destination for all aquarium needs</p>
+        <div style="text-align:center;margin-bottom:1.2rem;">
+          <img src="icons/logocontact.jpeg" alt="AGT" style="width:60px;height:60px;border-radius:16px;object-fit:cover;margin:0 auto 0.5rem;display:block;box-shadow:0 4px 16px rgba(0,0,0,0.15);">
+          <p style="color:#64748b;font-size:0.85rem;">Your one-stop destination for all aquarium needs</p>
         </div>
 
         <div id="contact-details">
@@ -94,8 +86,8 @@
         </div>
 
         <!-- Social Links -->
-        <div style="margin-top:2rem;padding-top:2rem;border-top:2px solid #f1f5f9;text-align:center;">
-          <h3 style="font-family:'Poppins',sans-serif;font-weight:600;font-size:1rem;color:#155e75;margin-bottom:1rem;">Follow Us On Social Media</h3>
+        <div style="margin-top:1.2rem;padding-top:1rem;border-top:2px solid #f1f5f9;text-align:center;">
+          <h3 style="font-family:'Poppins',sans-serif;font-weight:600;font-size:0.85rem;color:#155e75;margin-bottom:0.75rem;">Follow Us On Social Media</h3>
           <div id="social-links" style="display:flex;justify-content:center;gap:12px;flex-wrap:wrap;">
             <!-- Loaded dynamically -->
           </div>
@@ -103,10 +95,10 @@
       </div>
 
       <!-- CTA -->
-      <div style="text-align:center;margin-top:2rem;padding:2rem;background:linear-gradient(135deg,#fffbeb,#ecfeff);border-radius:16px;border:1px solid rgba(0,0,0,0.04);">
-        <h3 style="font-family:'Poppins',sans-serif;font-weight:700;color:#155e75;margin-bottom:0.5rem;">Ready to explore?</h3>
-        <p style="color:#64748b;margin-bottom:1rem;font-size:0.9rem;">Check out our latest collection of aquarium products</p>
-        <a href="products.html" style="display:inline-flex;align-items:center;gap:8px;padding:12px 28px;background:linear-gradient(135deg,#fbbf24,#f59e0b);color:#78350f;font-weight:700;border-radius:12px;text-decoration:none;font-family:'Poppins',sans-serif;box-shadow:0 4px 16px rgba(245,158,11,0.3);transition:all 0.3s;">
+      <div style="text-align:center;margin-top:1.2rem;padding:1.2rem;background:linear-gradient(135deg,#fffbeb,#ecfeff);border-radius:12px;border:1px solid rgba(0,0,0,0.04);">
+        <h3 style="font-family:'Poppins',sans-serif;font-weight:700;color:#155e75;font-size:0.95rem;margin-bottom:0.3rem;">Ready to explore?</h3>
+        <p style="color:#64748b;margin-bottom:0.75rem;font-size:0.8rem;">Check out our latest collection of aquarium products</p>
+        <a href="products.html" style="display:inline-flex;align-items:center;gap:6px;padding:10px 22px;background:linear-gradient(135deg,#fbbf24,#f59e0b);color:#78350f;font-weight:700;border-radius:10px;text-decoration:none;font-family:'Poppins',sans-serif;font-size:0.85rem;box-shadow:0 4px 16px rgba(245,158,11,0.3);transition:all 0.3s;">
           <i class="fa-solid fa-fish"></i> View Products
         </a>
       </div>
@@ -115,7 +107,7 @@
 
   <!-- Footer -->
   <footer class="store-footer">
-    <p>&copy; 2026 <a href="index.html">AquariumGalleryTripura</a>. All rights reserved.</p>
+    <p>&copy; 2022 <a href="index.html">AquariumGalleryTripura</a>. All rights reserved.</p>
   </footer>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -202,7 +194,6 @@
     <div class="bottom-nav-inner">
       <a href="index.html"><i class="fa-solid fa-house"></i><span>Home</span></a>
       <a href="products.html"><i class="fa-solid fa-bag-shopping"></i><span>Products</span></a>
-      <a href="index.html?points=open" class="bnav-points"><i class="fa-solid fa-star"></i><span>My Points</span></a>
       <a href="contact.html" class="active"><i class="fa-solid fa-phone"></i><span>Contact</span></a>
     </div>
   </nav>

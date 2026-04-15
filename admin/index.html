@@ -25,16 +25,16 @@
   </script>
 </head>
 <body>
-  <div class="page-container" id="main-content">
+  <div class="page-container" id="main-content" style="overflow-x:hidden;">
     <!-- Banner Section -->
-    <section id="banner-section" class="mb-8">
-      <div class="relative rounded-2xl overflow-hidden shadow-lg banner-wrap" style="min-height:300px; background: linear-gradient(135deg, #164e63, #0891b2, #f59e0b);">
-        <img id="banner-image" src="" alt="Banner" class="w-full h-72 object-cover" style="display:none;">
+    <section id="banner-section" class="mb-4 sm:mb-8">
+      <div class="relative rounded-2xl overflow-hidden shadow-lg banner-wrap" style="min-height:180px; background: linear-gradient(135deg, #164e63, #0891b2, #f59e0b);">
+        <img id="banner-image" src="" alt="Banner" class="w-full object-cover" style="display:none;height:180px;">
         <div class="absolute inset-0 bg-gradient-to-r from-aqua-900/70 via-aqua-800/50 to-transparent flex items-center">
           <div class="p-4 sm:p-8 md:p-12 max-w-2xl">
-            <h1 id="banner-title" class="font-heading text-xl sm:text-3xl md:text-4xl font-extrabold text-white mb-2 sm:mb-3"></h1>
-            <p id="banner-slogan" class="text-aqua-100 text-sm sm:text-lg md:text-xl font-light"></p>
-            <div class="mt-3 sm:mt-4 flex flex-wrap gap-2 sm:gap-3">
+            <h1 id="banner-title" class="font-heading text-lg sm:text-2xl md:text-3xl font-extrabold text-white mb-1 sm:mb-2"></h1>
+            <p id="banner-slogan" class="text-aqua-100 text-xs sm:text-base md:text-lg font-light"></p>
+            <div class="mt-2 sm:mt-3 flex flex-wrap gap-2">
               <button onclick="editBanner()" class="btn btn-gold btn-sm text-xs sm:text-sm"><i class="fa-solid fa-pen"></i> Edit</button>
               <label class="btn btn-outline btn-sm text-xs sm:text-sm" style="border-color:rgba(255,255,255,0.4);color:white;cursor:pointer;">
                 <i class="fa-solid fa-image"></i> Change Image
@@ -47,7 +47,7 @@
     </section>
 
     <!-- Running Text / Ticker Section -->
-    <section class="mb-8">
+    <section class="mb-4 sm:mb-8">
       <div class="card">
         <div class="card-header">
           <h2><i class="fa-solid fa-bullhorn"></i> Running Text / Announcement</h2>
@@ -63,13 +63,13 @@
     </section>
 
     <!-- Category Cards Section -->
-    <section class="mb-8">
+    <section class="mb-4 sm:mb-8">
       <div class="card">
         <div class="card-header">
           <h2><i class="fa-solid fa-layer-group"></i> Category Cards</h2>
           <button onclick="addCategoryCard()" class="btn btn-primary btn-sm"><i class="fa-solid fa-plus"></i> Add Card</button>
         </div>
-        <div id="category-cards" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+        <div id="category-cards" class="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-4">
           <!-- Cards loaded dynamically -->
         </div>
         <div id="category-empty" class="empty-state" style="display:none;">
@@ -81,7 +81,7 @@
     </section>
 
     <!-- Product Carousel Section -->
-    <section class="mb-8">
+    <section class="mb-4 sm:mb-8">
       <div class="card">
         <div class="card-header">
           <h2><i class="fa-solid fa-fish"></i> Featured Products</h2>
@@ -101,20 +101,20 @@
     </section>
 
     <!-- Social Links Section -->
-    <section class="mb-8">
+    <section class="mb-4 sm:mb-8">
       <div class="card">
         <div class="card-header">
           <h2><i class="fa-solid fa-share-nodes"></i> Social Media Links</h2>
           <button onclick="addSocialLink()" class="btn btn-primary btn-sm"><i class="fa-solid fa-plus"></i> Add Link</button>
         </div>
-        <div id="social-links" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div id="social-links" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3" style="overflow:hidden;">
           <!-- Social links loaded dynamically -->
         </div>
       </div>
     </section>
 
     <!-- Contact Us Section -->
-    <section class="mb-8">
+    <section class="mb-4 sm:mb-8">
       <div class="card">
         <div class="card-header">
           <h2><i class="fa-solid fa-phone"></i> Contact Us Page</h2>

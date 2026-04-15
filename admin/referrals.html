@@ -29,7 +29,7 @@
     </div>
 
     <!-- Stats Cards -->
-    <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+    <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-4">
       <div class="stat-card">
         <div class="stat-icon" style="background:linear-gradient(135deg,#a855f7,#7c3aed);"><i class="fa-solid fa-handshake"></i></div>
         <div class="stat-info">
@@ -61,14 +61,14 @@
     </div>
 
     <!-- Filters -->
-    <div class="card mb-6">
+    <div class="card mb-3">
       <div class="card-header">
         <h2><i class="fa-solid fa-filter"></i> Filters</h2>
       </div>
-      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div class="grid grid-cols-2 lg:grid-cols-4 gap-3">
         <div class="form-group mb-0">
-          <label class="form-label text-xs">Referrer Name</label>
-          <input type="text" id="filter-referrer" class="form-input" placeholder="Search referrer..." oninput="applyFilters()">
+          <label class="form-label text-xs">Referrer</label>
+          <input type="text" id="filter-referrer" class="form-input" placeholder="Search..." oninput="applyFilters()">
         </div>
         <div class="form-group mb-0">
           <label class="form-label text-xs">Period</label>
@@ -84,18 +84,18 @@
           <label class="form-label text-xs">Status</label>
           <select id="filter-status" class="form-select" onchange="applyFilters()">
             <option value="all">All</option>
-            <option value="unpaid">Unpaid Only</option>
-            <option value="paid">Paid Only</option>
+            <option value="unpaid">Unpaid</option>
+            <option value="paid">Paid</option>
           </select>
         </div>
         <div class="form-group mb-0 flex items-end">
-          <button onclick="exportReferralCSV()" class="btn btn-gold btn-sm w-full"><i class="fa-solid fa-file-csv"></i> Export CSV</button>
+          <button onclick="exportReferralCSV()" class="btn btn-gold btn-sm w-full"><i class="fa-solid fa-file-csv"></i> Export</button>
         </div>
       </div>
     </div>
 
     <!-- Referrer Summary -->
-    <div class="card mb-6">
+    <div class="card mb-3">
       <div class="card-header">
         <h2><i class="fa-solid fa-users"></i> Referrer Summary</h2>
         <span id="referrer-count" class="badge badge-purple">0 referrers</span>
@@ -151,7 +151,7 @@
     </div>
 
     <!-- Payment History -->
-    <div class="card mt-6">
+    <div class="card mt-3">
       <div class="card-header">
         <h2><i class="fa-solid fa-money-bill-wave"></i> Payment History</h2>
       </div>

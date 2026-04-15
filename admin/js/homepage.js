@@ -332,21 +332,20 @@ async function loadSocialLinks() {
 function renderSocialLinks() {
   const container = document.getElementById('social-links');
   container.innerHTML = socialLinks.map(link => `
-    <div class="flex items-center gap-4 p-4 bg-gray-50 rounded-xl group hover:bg-white hover:shadow-md transition-all">
-      <div class="w-12 h-12 rounded-xl flex items-center justify-center text-white text-xl"
-           style="background: ${socialColors[link.title] || '#0891b2'};">
+    <div class="social-link-card" style="display:flex;align-items:center;gap:8px;padding:8px 10px;background:#f8fafc;border-radius:10px;min-width:0;">
+      <div style="width:36px;height:36px;min-width:36px;border-radius:8px;display:flex;align-items:center;justify-content:center;color:white;font-size:1rem;background:${socialColors[link.title] || '#0891b2'};">
         <i class="fa-brands ${socialIcons[link.title] || 'fa-solid fa-link'}"></i>
       </div>
-      <div class="flex-1">
-        <h4 class="font-heading font-semibold text-sm">${link.title}</h4>
-        <p class="text-xs text-gray-400 truncate max-w-xs">${link.link || 'No link set'}</p>
+      <div style="flex:1;min-width:0;overflow:hidden;">
+        <h4 style="font-family:'Poppins',sans-serif;font-weight:600;font-size:0.8rem;margin:0;">${link.title}</h4>
+        <p style="font-size:0.65rem;color:#94a3b8;margin:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${link.link || 'No link set'}</p>
       </div>
-      <div class="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-        <button onclick="editSocialLink('${link.id}')" class="btn btn-sm btn-outline" style="padding:4px 10px;">
-          <i class="fa-solid fa-pen text-xs"></i>
+      <div style="display:flex;gap:4px;flex-shrink:0;">
+        <button onclick="editSocialLink('${link.id}')" class="btn btn-sm btn-outline" style="padding:3px 8px;font-size:0.65rem;">
+          <i class="fa-solid fa-pen" style="font-size:0.6rem;"></i>
         </button>
-        <button onclick="deleteSocialLink('${link.id}')" class="btn btn-sm btn-danger" style="padding:4px 10px;">
-          <i class="fa-solid fa-trash text-xs"></i>
+        <button onclick="deleteSocialLink('${link.id}')" class="btn btn-sm btn-danger" style="padding:3px 8px;font-size:0.65rem;">
+          <i class="fa-solid fa-trash" style="font-size:0.6rem;"></i>
         </button>
       </div>
     </div>

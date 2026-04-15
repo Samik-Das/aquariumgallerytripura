@@ -86,24 +86,22 @@ function renderCustomers() {
 
     return `
       <tr>
-        <td><strong>${c.name}</strong></td>
-        <td>${c.phone}</td>
+        <td><strong style="font-size:0.75rem;">${c.name}</strong></td>
+        <td style="font-size:0.72rem;">${c.phone}</td>
         <td>
-          <div class="flex items-center gap-2">
-            <span class="font-heading font-bold text-lg ${canClaim ? 'text-amber-500' : 'text-gray-600'}">${(c.points || 0).toLocaleString('en-IN')}</span>
-            ${canClaim ? `<span class="badge badge-gold"><i class="fa-solid fa-gift"></i> ${claimCount} reward${claimCount > 1 ? 's' : ''} available</span>` : ''}
-          </div>
+          <span class="font-heading font-bold ${canClaim ? 'text-amber-500' : 'text-gray-600'}" style="font-size:0.82rem;">${(c.points || 0).toLocaleString('en-IN')}</span>
+          ${canClaim ? `<span class="badge badge-gold" style="font-size:0.5rem;padding:1px 4px;margin-left:2px;"><i class="fa-solid fa-gift"></i> ${claimCount}</span>` : ''}
         </td>
-        <td>${formatDate(c.created_at)}</td>
+        <td style="font-size:0.65rem;">${formatDate(c.created_at)}</td>
         <td>
-          <div class="flex items-center gap-2 flex-wrap">
+          <div class="flex items-center gap-1 flex-nowrap">
             ${canClaim
-              ? `<button onclick="claimPoints('${c.id}', '${c.name}', ${c.points})" class="btn btn-gold btn-sm">
-                  <i class="fa-solid fa-gift"></i> Claim
+              ? `<button onclick="claimPoints('${c.id}', '${c.name}', ${c.points})" class="btn btn-gold btn-sm" style="padding:3px 7px;font-size:0.6rem;min-height:22px;">
+                  <i class="fa-solid fa-gift"></i>
                 </button>`
-              : `<span class="text-xs text-gray-400">${remaining} more</span>`
+              : `<span style="font-size:0.55rem;color:#94a3b8;white-space:nowrap;">${remaining} more</span>`
             }
-            <a href="${waLink}" target="_blank" class="btn btn-sm" style="background:#25D366;color:white;padding:6px 10px;border-radius:8px;text-decoration:none;display:inline-flex;align-items:center;gap:4px;">
+            <a href="${waLink}" target="_blank" style="background:#25D366;color:white;padding:3px 7px;border-radius:6px;text-decoration:none;display:inline-flex;align-items:center;font-size:0.65rem;min-height:22px;">
               <i class="fa-brands fa-whatsapp"></i>
             </a>
           </div>

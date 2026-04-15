@@ -40,6 +40,49 @@ function buildNavbar(activePage) {
   `;
 
   document.body.prepend(nav);
+
+  // Mobile bottom nav (5 key pages)
+  const bottomPages = [
+    { name: 'Home', href: 'index.html', icon: 'fa-house' },
+    { name: 'Sales', href: 'sales.html', icon: 'fa-cash-register' },
+    { name: 'Products', href: 'products.html', icon: 'fa-box' },
+    { name: 'Dashboard', href: 'dashboard.html', icon: 'fa-chart-line' },
+    { name: 'More', href: '#', icon: 'fa-ellipsis', isMore: true },
+  ];
+
+  const morePages = pages.filter(p => !['Home','Sales','Products','Dashboard'].includes(p.name));
+
+  const bottomNav = document.createElement('nav');
+  bottomNav.className = 'admin-bottom-nav';
+  bottomNav.innerHTML = `
+    <div class="admin-more-menu" id="admin-more-menu">
+      ${morePages.map(p => `
+        <a href="${p.href}" class="${activePage === p.name ? 'active' : ''}">
+          <i class="fa-solid ${p.icon}"></i> ${p.name}
+        </a>
+      `).join('')}
+      <a href="#" class="more-logout" onclick="signOut();return false;">
+        <i class="fa-solid fa-right-from-bracket"></i> Logout
+      </a>
+    </div>
+    <div class="admin-bottom-nav-inner">
+      ${bottomPages.map(p => {
+        if (p.isMore) {
+          return `<a href="#" onclick="document.getElementById('admin-more-menu').classList.toggle('open');return false;"><i class="fa-solid ${p.icon}"></i><span>${p.name}</span></a>`;
+        }
+        return `<a href="${p.href}" class="${activePage === p.name ? 'active' : ''}"><i class="fa-solid ${p.icon}"></i><span>${p.name}</span></a>`;
+      }).join('')}
+    </div>
+  `;
+  document.body.appendChild(bottomNav);
+
+  // Close more menu on outside tap
+  document.addEventListener('click', (e) => {
+    const menu = document.getElementById('admin-more-menu');
+    if (menu && menu.classList.contains('open') && !e.target.closest('.admin-bottom-nav')) {
+      menu.classList.remove('open');
+    }
+  });
 }
 
 // Toast Notification

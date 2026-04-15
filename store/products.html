@@ -21,6 +21,7 @@
         <img src="icons/logo.jpeg" alt="AGT" class="store-logo-icon">
         <span class="store-logo-text">AquariumGalleryTripura</span>
       </a>
+      <a href="index.html?points=open" class="header-points-btn"><i class="fa-solid fa-star"></i> My Points</a>
       <button class="store-nav-toggle" onclick="document.querySelector('.store-nav').classList.toggle('open')">
         <i class="fa-solid fa-bars"></i>
       </button>
@@ -33,34 +34,31 @@
     </div>
   </header>
 
-  <!-- Page Title -->
-  <div style="background:linear-gradient(135deg,#164e63,#0891b2);padding:2rem 0;">
-    <div style="max-width:1200px;margin:0 auto;padding:0 1.5rem;">
-      <h1 style="font-family:'Poppins',sans-serif;font-size:2rem;font-weight:800;color:white;">Our Products</h1>
-      <p style="color:rgba(255,255,255,0.7);margin-top:4px;">Explore our collection of premium aquarium items</p>
+  <!-- Search & Filters (sticky below header) -->
+  <div class="products-toolbar">
+    <div class="products-toolbar-inner">
+      <div class="toolbar-search">
+        <i class="fa-solid fa-magnifying-glass"></i>
+        <input type="text" id="search-input" placeholder="Search products..." oninput="filterProducts()">
+      </div>
+      <div class="toolbar-filters">
+        <select id="category-filter" onchange="filterProducts()">
+          <option value="">All Categories</option>
+        </select>
+        <select id="sort-filter" onchange="filterProducts()">
+          <option value="">Sort by</option>
+          <option value="low">Price: Low to High</option>
+          <option value="high">Price: High to Low</option>
+          <option value="name">Name: A-Z</option>
+        </select>
+      </div>
+    </div>
+    <div class="toolbar-count">
+      <span id="product-count" style="font-weight:700;color:#0891b2;">0</span> products
     </div>
   </div>
 
-  <section class="section">
-    <!-- Filters -->
-    <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:2rem;">
-      <div style="position:relative;flex:1;min-width:250px;">
-        <i class="fa-solid fa-magnifying-glass" style="position:absolute;left:14px;top:50%;transform:translateY(-50%);color:#94a3b8;"></i>
-        <input type="text" id="search-input" placeholder="Search products..." oninput="filterProducts()"
-          style="width:100%;padding:12px 14px 12px 42px;border:2px solid #e2e8f0;border-radius:12px;font-size:0.95rem;font-family:'Inter',sans-serif;outline:none;transition:all 0.3s;"
-          onfocus="this.style.borderColor='#06b6d4';this.style.boxShadow='0 0 0 3px rgba(6,182,212,0.15)'"
-          onblur="this.style.borderColor='#e2e8f0';this.style.boxShadow='none'">
-      </div>
-      <select id="category-filter" onchange="filterProducts()"
-        style="padding:12px 36px 12px 14px;border:2px solid #e2e8f0;border-radius:12px;font-size:0.95rem;font-family:'Inter',sans-serif;background:white;appearance:none;background-image:url('data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 width=%2720%27 height=%2720%27 viewBox=%270 0 24 24%27 fill=%27none%27 stroke=%27%230891b2%27 stroke-width=%272%27%3E%3Cpath d=%27M6 9l6 6 6-6%27/%3E%3C/svg%3E');background-repeat:no-repeat;background-position:right 12px center;min-width:180px;">
-        <option value="">All Categories</option>
-      </select>
-    </div>
-
-    <!-- Product Count -->
-    <div style="margin-bottom:1rem;color:#64748b;font-size:0.9rem;">
-      Showing <strong id="product-count" style="color:#0891b2;">0</strong> products
-    </div>
+  <section class="section" style="padding-top:1rem;">
 
     <!-- Product Grid -->
     <div class="product-grid-store" id="product-grid"></div>
@@ -85,7 +83,7 @@
 
   <!-- Footer -->
   <footer class="store-footer">
-    <p>&copy; 2026 <a href="index.html">AquariumGalleryTripura</a>. All rights reserved.</p>
+    <p>&copy; 2022 <a href="index.html">AquariumGalleryTripura</a>. All rights reserved.</p>
   </footer>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -128,12 +126,17 @@
     function filterProducts() {
       const search = document.getElementById('search-input').value.toLowerCase().trim();
       const category = document.getElementById('category-filter').value;
+      const sort = document.getElementById('sort-filter').value;
 
       currentFiltered = allProducts.filter(p => {
         const matchSearch = !search || p.name.toLowerCase().includes(search) || p.category.toLowerCase().includes(search);
         const matchCat = !category || p.category === category;
         return matchSearch && matchCat;
       });
+
+      if (sort === 'low') currentFiltered.sort((a, b) => a.selling_price - b.selling_price);
+      else if (sort === 'high') currentFiltered.sort((a, b) => b.selling_price - a.selling_price);
+      else if (sort === 'name') currentFiltered.sort((a, b) => a.name.localeCompare(b.name));
 
       displayedCount = 0;
       document.getElementById('product-grid').innerHTML = '';
@@ -170,28 +173,35 @@
     }
 
     function renderProductCard(p) {
-      const isLow = p.quantity > 0 && p.quantity < 5;
       const isOut = p.quantity <= 0;
+      const isLow = p.quantity > 0 && p.quantity < 5;
+      let badge = '';
+      if (isOut) badge = `<div class="prod-badge" style="background:#fef2f2;color:#dc2626;">Out of Stock</div>`;
+      else if (isLow) badge = `<div class="prod-badge" style="background:#fef2f2;color:#dc2626;">Only ${p.quantity} left!</div>`;
+
+      let stockPill;
+      if (isOut) {
+        stockPill = `<span class="stock-pill stock-out"><i class="fa-solid fa-xmark"></i></span>`;
+      } else if (isLow) {
+        stockPill = `<span class="stock-pill stock-low">${p.quantity}</span>`;
+      } else {
+        stockPill = `<span class="stock-pill stock-ok">${p.quantity}</span>`;
+      }
+
       return `
-        <div class="store-product-card">
+        <div class="store-product-card${isOut ? ' out-of-stock' : ''}">
           <div class="prod-img">
             ${p.image_url
-              ? `<img src="${p.image_url}" alt="${p.name}">`
-              : `<i class="fa-solid fa-fish" style="font-size:3rem;color:#a5f3fc;"></i>`
+              ? `<img src="${p.image_url}" alt="${p.name}" loading="lazy">`
+              : `<i class="fa-solid fa-fish" style="font-size:2rem;color:#a5f3fc;"></i>`
             }
-            ${isLow ? `<div class="prod-badge" style="background:#fef2f2;color:#dc2626;">Only ${p.quantity} left!</div>` : ''}
-            ${isOut ? `<div class="prod-badge" style="background:#fef2f2;color:#dc2626;">Out of Stock</div>` : ''}
-            ${!isLow && !isOut ? `<div class="prod-badge" style="background:#ecfdf5;color:#059669;">${p.quantity} available</div>` : ''}
+            ${badge}
           </div>
           <div class="prod-body">
-            <div class="prod-category">${p.category}</div>
             <div class="prod-name">${p.name}</div>
-            <div class="prod-price">₹${Number(p.selling_price).toLocaleString('en-IN')}</div>
-            <div class="prod-stock">
-              ${isOut
-                ? `<span style="color:#dc2626;font-weight:600;"><i class="fa-solid fa-xmark"></i> Currently unavailable</span>`
-                : `<span style="color:#059669;"><i class="fa-solid fa-check"></i> In Stock (${p.quantity})</span>`
-              }
+            <div class="prod-bottom">
+              <span class="prod-price">₹${Number(p.selling_price).toLocaleString('en-IN')}</span>
+              ${stockPill}
             </div>
           </div>
         </div>
@@ -210,7 +220,6 @@
     <div class="bottom-nav-inner">
       <a href="index.html"><i class="fa-solid fa-house"></i><span>Home</span></a>
       <a href="products.html" class="active"><i class="fa-solid fa-bag-shopping"></i><span>Products</span></a>
-      <a href="index.html?points=open" class="bnav-points"><i class="fa-solid fa-star"></i><span>My Points</span></a>
       <a href="contact.html"><i class="fa-solid fa-phone"></i><span>Contact</span></a>
     </div>
   </nav>
