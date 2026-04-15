@@ -42,7 +42,7 @@
     </div>
 
     <!-- Summary Stats -->
-    <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6 stat-grid">
+    <div class="grid grid-cols-2 md:grid-cols-5 gap-4 mb-6 stat-grid">
       <div class="stat-card aqua">
         <div class="stat-icon"><i class="fa-solid fa-indian-rupee-sign"></i></div>
         <div class="stat-value" id="stat-revenue">₹0</div>
@@ -51,12 +51,17 @@
       <div class="stat-card green">
         <div class="stat-icon"><i class="fa-solid fa-arrow-trend-up"></i></div>
         <div class="stat-value" id="stat-profit">₹0</div>
-        <div class="stat-label">Total Profit</div>
+        <div class="stat-label">Net Profit</div>
       </div>
       <div class="stat-card gold">
         <div class="stat-icon"><i class="fa-solid fa-receipt"></i></div>
         <div class="stat-value" id="stat-sales-count">0</div>
         <div class="stat-label">Total Sales</div>
+      </div>
+      <div class="stat-card" style="background:linear-gradient(135deg,#faf5ff,#f3e8ff);border-color:#c084fc;">
+        <div class="stat-icon" style="background:linear-gradient(135deg,#a855f7,#7c3aed);"><i class="fa-solid fa-handshake"></i></div>
+        <div class="stat-value" id="stat-commission" style="color:#7c3aed;">₹0</div>
+        <div class="stat-label">Referral Commission</div>
       </div>
       <div class="stat-card red">
         <div class="stat-icon"><i class="fa-solid fa-heart-crack"></i></div>
@@ -83,6 +88,8 @@
               <th>Actual SP</th>
               <th>BP</th>
               <th>Revenue</th>
+              <th>Referrer</th>
+              <th>Comm.</th>
               <th>Profit</th>
             </tr>
           </thead>
@@ -93,6 +100,32 @@
         <i class="fa-solid fa-chart-line"></i>
         <h3>No sales data</h3>
         <p>Sales records will appear here based on the selected filter</p>
+      </div>
+    </div>
+
+    <!-- Top Referrers -->
+    <div class="card mb-6" id="referrer-card">
+      <div class="card-header">
+        <h2><i class="fa-solid fa-handshake" style="color:#7c3aed;"></i> Top Referrers</h2>
+        <span id="referrer-count" class="badge badge-purple">0 referrers</span>
+      </div>
+      <div class="table-wrapper" id="referrer-table-wrapper">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Referrer</th>
+              <th>Sales</th>
+              <th>Revenue</th>
+              <th>Commission</th>
+            </tr>
+          </thead>
+          <tbody id="referrer-summary-body"></tbody>
+        </table>
+      </div>
+      <div id="referrer-empty" class="empty-state" style="display:none;">
+        <i class="fa-solid fa-handshake"></i>
+        <h3>No referral sales</h3>
+        <p>Sales with referrals will appear here</p>
       </div>
     </div>
 

@@ -55,7 +55,13 @@ function addSaleItem() {
     <div class="sale-item p-4 mb-3 rounded-xl bg-gray-50 border border-gray-100" id="sale-item-${id}">
       <div class="flex items-center justify-between mb-3">
         <span class="badge badge-gold"><i class="fa-solid fa-box"></i> Item #${id}</span>
-        ${saleItemCounter > 1 ? `<button onclick="removeSaleItem(${id})" class="btn btn-danger btn-sm btn-icon"><i class="fa-solid fa-xmark"></i></button>` : ''}
+        <div class="flex items-center gap-3">
+          <label class="flex items-center gap-2 cursor-pointer text-sm font-medium text-purple-700">
+            <input type="checkbox" id="item-referral-${id}" onchange="toggleReferralCommission(${id})" class="w-4 h-4 accent-purple-600">
+            <i class="fa-solid fa-handshake"></i> Referral
+          </label>
+          ${saleItemCounter > 1 ? `<button onclick="removeSaleItem(${id})" class="btn btn-danger btn-sm btn-icon"><i class="fa-solid fa-xmark"></i></button>` : ''}
+        </div>
       </div>
       <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3">
         <div class="form-group mb-0">
@@ -80,6 +86,19 @@ function addSaleItem() {
         <div class="form-group mb-0">
           <label class="form-label text-xs">Quantity</label>
           <input type="number" class="form-input" id="item-qty-${id}" placeholder="0" min="1" oninput="calculateTotal()">
+        </div>
+      </div>
+      <!-- Referral Commission Row (hidden by default) -->
+      <div class="mt-3 p-3 rounded-lg bg-purple-50 border border-purple-200" id="item-referral-row-${id}" style="display:none;">
+        <div class="grid grid-cols-2 gap-3">
+          <div class="form-group mb-0">
+            <label class="form-label text-xs text-purple-700"><i class="fa-solid fa-percent"></i> Commission %</label>
+            <input type="number" class="form-input" id="item-commission-pct-${id}" placeholder="e.g. 10" step="0.01" min="0" max="100" oninput="calculateTotal()">
+          </div>
+          <div class="form-group mb-0">
+            <label class="form-label text-xs text-purple-700"><i class="fa-solid fa-indian-rupee-sign"></i> Commission Amount</label>
+            <input type="text" class="form-input" id="item-commission-amt-${id}" readonly style="background:#faf5ff;color:#7e22ce;font-weight:600;">
+          </div>
         </div>
       </div>
     </div>
@@ -111,12 +130,56 @@ function onItemProductChange(id) {
 
 function calculateTotal() {
   let total = 0;
+  let totalCommission = 0;
   saleItems.forEach(id => {
     const qty = parseInt(document.getElementById(`item-qty-${id}`)?.value) || 0;
     const asp = parseFloat(document.getElementById(`item-actual-sp-${id}`)?.value) || 0;
-    total += qty * asp;
+    const itemTotal = qty * asp;
+    total += itemTotal;
+
+    // Calculate commission if referral checked
+    const isRef = document.getElementById(`item-referral-${id}`)?.checked;
+    if (isRef) {
+      const pct = parseFloat(document.getElementById(`item-commission-pct-${id}`)?.value) || 0;
+      const commAmt = (itemTotal * pct) / 100;
+      totalCommission += commAmt;
+      const amtEl = document.getElementById(`item-commission-amt-${id}`);
+      if (amtEl) amtEl.value = '₹' + commAmt.toLocaleString('en-IN', { minimumFractionDigits: 2 });
+    }
   });
   document.getElementById('sale-total').textContent = '₹' + total.toLocaleString('en-IN', { minimumFractionDigits: 2 });
+
+  // Show total commission if any referral items
+  let commEl = document.getElementById('total-commission-display');
+  if (totalCommission > 0) {
+    if (!commEl) {
+      const container = document.getElementById('sale-total').parentElement;
+      container.insertAdjacentHTML('afterend', `
+        <div id="total-commission-display" class="mt-2 text-right">
+          <span class="text-sm font-heading font-bold text-purple-700"><i class="fa-solid fa-handshake"></i> Total Commission:</span>
+          <span class="text-lg font-heading font-extrabold text-purple-600 ml-2" id="commission-total">₹0.00</span>
+        </div>
+      `);
+      commEl = document.getElementById('total-commission-display');
+    }
+    document.getElementById('commission-total').textContent = '₹' + totalCommission.toLocaleString('en-IN', { minimumFractionDigits: 2 });
+    commEl.style.display = 'block';
+  } else if (commEl) {
+    commEl.style.display = 'none';
+  }
+}
+
+function toggleReferralCommission(id) {
+  const isChecked = document.getElementById(`item-referral-${id}`).checked;
+  const row = document.getElementById(`item-referral-row-${id}`);
+  if (row) {
+    row.style.display = isChecked ? 'block' : 'none';
+    if (!isChecked) {
+      document.getElementById(`item-commission-pct-${id}`).value = '';
+      document.getElementById(`item-commission-amt-${id}`).value = '';
+    }
+  }
+  calculateTotal();
 }
 
 // ===== Save Sale =====
@@ -136,6 +199,7 @@ async function saveSale() {
 
   // Validate items
   const items = [];
+  let hasReferralItems = false;
   for (const id of saleItems) {
     const productId = document.getElementById(`item-product-${id}`)?.value;
     const qty = parseInt(document.getElementById(`item-qty-${id}`)?.value) || 0;
@@ -151,6 +215,11 @@ async function saveSale() {
       return;
     }
 
+    const isRef = document.getElementById(`item-referral-${id}`)?.checked || false;
+    const commPct = isRef ? (parseFloat(document.getElementById(`item-commission-pct-${id}`)?.value) || 0) : 0;
+    const commAmt = isRef ? ((actualSp * qty * commPct) / 100) : 0;
+    if (isRef) hasReferralItems = true;
+
     items.push({
       product_id: productId,
       product_name: product.name,
@@ -158,8 +227,18 @@ async function saveSale() {
       quantity: qty,
       selling_price: product.selling_price,
       actual_selling_price: actualSp,
-      buying_price: product.buying_price
+      buying_price: product.buying_price,
+      is_referral: isRef,
+      commission_percent: commPct,
+      commission_amount: commAmt
     });
+  }
+
+  const referrerName = document.getElementById('referrer-name').value.trim();
+  if (hasReferralItems && !referrerName) {
+    showToast('Enter referrer name for referral items', 'error');
+    document.getElementById('referrer-name').focus();
+    return;
   }
 
   if (items.length === 0) { showToast('Add at least one item', 'error'); return; }
@@ -186,13 +265,17 @@ async function saveSale() {
 
     // Calculate total
     const totalAmount = items.reduce((s, i) => s + i.actual_selling_price * i.quantity, 0);
+    const totalCommission = items.reduce((s, i) => s + i.commission_amount, 0);
 
     // Create sale
     const { data: sale, error: saleErr } = await db.from('sales').insert({
       customer_id: customerId,
       customer_name: name,
       customer_phone: phone,
-      total_amount: totalAmount
+      total_amount: totalAmount,
+      is_referral: hasReferralItems,
+      referrer_name: hasReferralItems ? referrerName : null,
+      total_commission: totalCommission
     }).select().single();
     if (saleErr) throw saleErr;
 
@@ -230,11 +313,12 @@ async function saveSale() {
       });
     }
 
-    showToast(`Sale saved! ${name} earned ${pointsEarned} points.`);
+    showToast(`Sale saved! ${name} earned ${pointsEarned} points.${hasReferralItems ? ' Referral commission: ₹' + totalCommission.toLocaleString('en-IN') : ''}`);
 
     // Reset form
     document.getElementById('customer-phone').value = '';
     document.getElementById('customer-name').value = '';
+    document.getElementById('referrer-name').value = '';
     document.getElementById('returning-badge').style.display = 'none';
     existingCustomerId = null;
     document.getElementById('sale-items-container').innerHTML = '';
@@ -242,6 +326,8 @@ async function saveSale() {
     saleItemCounter = 0;
     addSaleItem();
     calculateTotal();
+    const commDisplay = document.getElementById('total-commission-display');
+    if (commDisplay) commDisplay.remove();
 
     await loadProducts();
     await loadSalesHistory();
@@ -288,6 +374,8 @@ async function loadSalesHistory() {
         <td>${s.customer_phone || '-'}</td>
         <td class="text-xs max-w-xs truncate">${itemNames || '-'}</td>
         <td><strong class="text-green-600">${formatCurrency(s.total_amount)}</strong></td>
+        <td>${s.is_referral ? `<span class="badge badge-purple text-xs">${s.referrer_name || '-'}</span>` : '<span class="text-gray-300">—</span>'}</td>
+        <td>${s.total_commission > 0 ? `<strong class="text-purple-600">${formatCurrency(s.total_commission)}</strong>` : '<span class="text-gray-300">—</span>'}</td>
       </tr>
     `;
   }).join('');

@@ -1,6 +1,6 @@
 {
   "name": "AquariumGalleryTripura",
-  "short_name": "AGT Store",
+  "short_name": "AGT",
   "description": "Your one-stop destination for all aquarium needs",
   "start_url": "/index.html",
   "display": "standalone",

@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Referrals - AquariumGalleryTripura Admin</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <link rel="stylesheet" href="css/style.css">
+  <meta name="theme-color" content="#0891b2">
+  <link rel="manifest" href="manifest.json">
+  <link rel="apple-touch-icon" href="icons/icon-192.jpeg">
+  <script>
+    tailwind.config = {
+      theme: { extend: {
+        colors: {
+          aqua: { 50:'#ecfeff',100:'#cffafe',200:'#a5f3fc',300:'#67e8f9',400:'#22d3ee',500:'#06b6d4',600:'#0891b2',700:'#0e7490',800:'#155e75',900:'#164e63' },
+          golden: { 50:'#fffbeb',100:'#fef3c7',200:'#fde68a',300:'#fcd34d',400:'#fbbf24',500:'#f59e0b',600:'#d97706',700:'#b45309' }
+        },
+        fontFamily: { heading: ['Poppins','sans-serif'], body: ['Inter','sans-serif'] }
+      }}
+    }
+  </script>
+</head>
+<body>
+  <div class="page-container">
+    <div class="page-header">
+      <h1><i class="fa-solid fa-handshake"></i> Referral Commissions</h1>
+    </div>
+
+    <!-- Stats Cards -->
+    <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+      <div class="stat-card">
+        <div class="stat-icon" style="background:linear-gradient(135deg,#a855f7,#7c3aed);"><i class="fa-solid fa-handshake"></i></div>
+        <div class="stat-info">
+          <span class="stat-label">Total Referral Sales</span>
+          <span class="stat-value" id="stat-total-sales">0</span>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon" style="background:linear-gradient(135deg,#f59e0b,#d97706);"><i class="fa-solid fa-indian-rupee-sign"></i></div>
+        <div class="stat-info">
+          <span class="stat-label">Total Commission</span>
+          <span class="stat-value" id="stat-total-commission">₹0</span>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon" style="background:linear-gradient(135deg,#ef4444,#dc2626);"><i class="fa-solid fa-clock"></i></div>
+        <div class="stat-info">
+          <span class="stat-label">Unpaid Commission</span>
+          <span class="stat-value" id="stat-unpaid">₹0</span>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon" style="background:linear-gradient(135deg,#22c55e,#16a34a);"><i class="fa-solid fa-check-circle"></i></div>
+        <div class="stat-info">
+          <span class="stat-label">Paid Commission</span>
+          <span class="stat-value" id="stat-paid">₹0</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Filters -->
+    <div class="card mb-6">
+      <div class="card-header">
+        <h2><i class="fa-solid fa-filter"></i> Filters</h2>
+      </div>
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div class="form-group mb-0">
+          <label class="form-label text-xs">Referrer Name</label>
+          <input type="text" id="filter-referrer" class="form-input" placeholder="Search referrer..." oninput="applyFilters()">
+        </div>
+        <div class="form-group mb-0">
+          <label class="form-label text-xs">Period</label>
+          <select id="filter-period" class="form-select" onchange="applyFilters()">
+            <option value="all">All Time</option>
+            <option value="today">Today</option>
+            <option value="week">This Week</option>
+            <option value="month" selected>This Month</option>
+            <option value="year">This Year</option>
+          </select>
+        </div>
+        <div class="form-group mb-0">
+          <label class="form-label text-xs">Status</label>
+          <select id="filter-status" class="form-select" onchange="applyFilters()">
+            <option value="all">All</option>
+            <option value="unpaid">Unpaid Only</option>
+            <option value="paid">Paid Only</option>
+          </select>
+        </div>
+        <div class="form-group mb-0 flex items-end">
+          <button onclick="exportReferralCSV()" class="btn btn-gold btn-sm w-full"><i class="fa-solid fa-file-csv"></i> Export CSV</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Referrer Summary -->
+    <div class="card mb-6">
+      <div class="card-header">
+        <h2><i class="fa-solid fa-users"></i> Referrer Summary</h2>
+        <span id="referrer-count" class="badge badge-purple">0 referrers</span>
+      </div>
+      <div class="table-wrapper" id="referrer-summary-wrapper">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Referrer</th>
+              <th>Sales Count</th>
+              <th>Total Commission</th>
+              <th>Paid</th>
+              <th>Unpaid</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody id="referrer-summary-body"></tbody>
+        </table>
+      </div>
+      <div id="referrer-empty" class="empty-state" style="display:none;">
+        <i class="fa-solid fa-handshake"></i>
+        <h3>No referrals yet</h3>
+        <p>Referral commissions will appear here when sales with referrals are made</p>
+      </div>
+    </div>
+
+    <!-- Detailed Sales -->
+    <div class="card">
+      <div class="card-header">
+        <h2><i class="fa-solid fa-list"></i> Referral Sales Detail</h2>
+        <span id="sales-count" class="badge badge-aqua">0 sales</span>
+      </div>
+      <div class="table-wrapper" id="sales-detail-wrapper">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Date</th>
+              <th>Customer</th>
+              <th>Referrer</th>
+              <th>Items</th>
+              <th>Sale Total</th>
+              <th>Commission</th>
+            </tr>
+          </thead>
+          <tbody id="sales-detail-body"></tbody>
+        </table>
+      </div>
+      <div id="sales-empty" class="empty-state" style="display:none;">
+        <i class="fa-solid fa-receipt"></i>
+        <h3>No matching sales</h3>
+        <p>Adjust filters to see referral sales</p>
+      </div>
+    </div>
+
+    <!-- Payment History -->
+    <div class="card mt-6">
+      <div class="card-header">
+        <h2><i class="fa-solid fa-money-bill-wave"></i> Payment History</h2>
+      </div>
+      <div class="table-wrapper" id="payments-wrapper">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Date</th>
+              <th>Referrer</th>
+              <th>Amount Paid</th>
+              <th>Sales Covered</th>
+            </tr>
+          </thead>
+          <tbody id="payments-body"></tbody>
+        </table>
+      </div>
+      <div id="payments-empty" class="empty-state" style="display:none;">
+        <i class="fa-solid fa-money-bill-wave"></i>
+        <h3>No payments yet</h3>
+        <p>Payment records appear when you mark referrals as paid</p>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="js/supabase-config.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/components.js"></script>
+  <script src="js/referrals.js"></script>
+</body>
+</html>

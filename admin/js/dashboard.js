@@ -69,6 +69,7 @@ async function loadDashboard() {
   let totalRevenue = 0;
   let totalProfit = 0;
   let totalDamageLoss = 0;
+  let totalCommission = 0;
 
   const detailRows = [];
 
@@ -76,10 +77,12 @@ async function loadDashboard() {
     const sale = salesData.find(s => s.id === item.sale_id);
     const revenue = item.actual_selling_price * item.quantity;
     const cost = item.buying_price * item.quantity;
-    const profit = revenue - cost;
+    const commission = item.commission_amount || 0;
+    const profit = revenue - cost - commission;
 
     totalRevenue += revenue;
     totalProfit += profit;
+    totalCommission += commission;
 
     detailRows.push({
       date: sale?.sale_date || item.created_at,
@@ -90,7 +93,9 @@ async function loadDashboard() {
       actual_sp: item.actual_selling_price,
       bp: item.buying_price,
       revenue,
-      profit
+      profit,
+      commission,
+      referrer: (item.is_referral && sale?.referrer_name) ? sale.referrer_name : null
     });
   });
 
@@ -103,10 +108,12 @@ async function loadDashboard() {
   document.getElementById('stat-profit').textContent = '₹' + totalProfit.toLocaleString('en-IN', { minimumFractionDigits: 0 });
   document.getElementById('stat-profit').parentElement.className = `stat-card ${totalProfit >= 0 ? 'green' : 'red'}`;
   document.getElementById('stat-sales-count').textContent = salesData.length;
+  document.getElementById('stat-commission').textContent = '₹' + totalCommission.toLocaleString('en-IN', { minimumFractionDigits: 0 });
   document.getElementById('stat-damage-loss').textContent = '₹' + totalDamageLoss.toLocaleString('en-IN', { minimumFractionDigits: 0 });
 
   // Render sales table
   renderSalesTable(detailRows);
+  renderReferrerSummary(salesData);
   renderDamageTable();
 }
 
@@ -138,6 +145,8 @@ function renderSalesTable(rows) {
       <td>${formatCurrency(r.actual_sp)}</td>
       <td class="text-gray-400">${formatCurrency(r.bp)}</td>
       <td><strong class="text-aqua-600">${formatCurrency(r.revenue)}</strong></td>
+      <td>${r.referrer ? `<span class="badge badge-purple text-xs">${r.referrer}</span>` : '<span class="text-gray-300">—</span>'}</td>
+      <td>${r.commission > 0 ? `<strong class="text-purple-600">${formatCurrency(r.commission)}</strong>` : '<span class="text-gray-300">—</span>'}</td>
       <td><strong class="${r.profit >= 0 ? 'text-green-600' : 'text-red-600'}">${formatCurrency(r.profit)}</strong></td>
     </tr>
   `).join('');
@@ -169,6 +178,51 @@ function renderDamageTable() {
       <td>${formatCurrency(d.buying_price_per_item)}</td>
       <td class="text-red-600 font-bold">${formatCurrency(d.total_buying_price)}</td>
       <td>${d.auto_fix_sp ? '<span class="badge badge-green">Yes</span>' : '<span class="badge badge-red">No</span>'}</td>
+    </tr>
+  `).join('');
+}
+
+// ===== Referrer Summary =====
+function renderReferrerSummary(sales) {
+  const tbody = document.getElementById('referrer-summary-body');
+  const empty = document.getElementById('referrer-empty');
+  const wrapper = document.getElementById('referrer-table-wrapper');
+  const count = document.getElementById('referrer-count');
+
+  const referralSales = sales.filter(s => s.is_referral && s.referrer_name);
+
+  if (referralSales.length === 0) {
+    tbody.innerHTML = '';
+    empty.style.display = 'block';
+    wrapper.style.display = 'none';
+    count.textContent = '0 referrers';
+    return;
+  }
+
+  // Group by referrer
+  const map = {};
+  referralSales.forEach(s => {
+    const name = s.referrer_name;
+    if (!map[name]) map[name] = { salesCount: 0, revenue: 0, commission: 0 };
+    map[name].salesCount++;
+    map[name].revenue += (s.total_amount || 0);
+    map[name].commission += (s.total_commission || 0);
+  });
+
+  const referrers = Object.entries(map)
+    .map(([name, d]) => ({ name, ...d }))
+    .sort((a, b) => b.commission - a.commission);
+
+  empty.style.display = 'none';
+  wrapper.style.display = 'block';
+  count.textContent = referrers.length + ' referrers';
+
+  tbody.innerHTML = referrers.map(r => `
+    <tr>
+      <td><strong class="text-purple-700"><i class="fa-solid fa-user"></i> ${r.name}</strong></td>
+      <td>${r.salesCount}</td>
+      <td>${formatCurrency(r.revenue)}</td>
+      <td><strong class="text-purple-600">${formatCurrency(r.commission)}</strong></td>
     </tr>
   `).join('');
 }

@@ -9,6 +9,7 @@ function buildNavbar(activePage) {
     { name: 'Sales', href: 'sales.html', icon: 'fa-cash-register' },
     { name: 'Damage', href: 'damage.html', icon: 'fa-triangle-exclamation' },
     { name: 'Points', href: 'points.html', icon: 'fa-star' },
+    { name: 'Referrals', href: 'referrals.html', icon: 'fa-handshake' },
     { name: 'Dashboard', href: 'dashboard.html', icon: 'fa-chart-line' },
   ];
 
