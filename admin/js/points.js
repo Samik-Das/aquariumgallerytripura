@@ -72,8 +72,7 @@ function renderCustomers() {
     const remaining = 1000 - (c.points % 1000);
 
     // WhatsApp message based on points status
-    // TODO: Replace with your actual store URL
-    const storeUrl = 'https://aquariumgallerytripura-store.netlify.app';
+    const storeUrl = 'https://aquariumgallerytripurastore.netlify.app';
     const pointsLink = `${storeUrl}/?points=${c.phone}`;
     let waMsg = '';
     if (canClaim) {
