@@ -113,13 +113,48 @@
 
           <!-- Payment Section -->
           <div class="cart-section-card">
-            <h3><i class="fa-solid fa-indian-rupee-sign"></i> Payment</h3>
-            <p style="color:#64748b;font-size:0.82rem;margin-bottom:12px;">Pay securely via UPI. Click the button below to open your UPI app.</p>
-            <button id="pay-upi-btn" onclick="payViaUPI()" class="cart-pay-btn">
-              <i class="fa-solid fa-mobile-screen-button"></i> Pay ₹<span id="pay-amount">0</span> via UPI
-            </button>
-            <div id="upi-note" style="display:none;margin-top:10px;padding:10px;background:#ecfdf5;border-radius:10px;border:1px solid #a7f3d0;">
-              <p style="color:#065f46;font-size:0.8rem;font-weight:600;"><i class="fa-solid fa-circle-info"></i> UPI app opened? After completing payment, come back here and tap "I've Paid".</p>
+            <h3><i class="fa-solid fa-indian-rupee-sign"></i> Payment via UPI</h3>
+
+            <!-- Amount Display -->
+            <div style="text-align:center;padding:12px;background:linear-gradient(135deg,#ecfdf5,#f0fdfa);border-radius:12px;border:1.5px solid #a7f3d0;margin-bottom:14px;">
+              <div style="font-size:0.7rem;color:#059669;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;">Amount to Pay</div>
+              <div style="font-family:'Poppins',sans-serif;font-weight:900;font-size:1.6rem;color:#059669;line-height:1.2;">₹<span id="pay-amount">0</span></div>
+            </div>
+
+            <!-- UPI ID + Copy -->
+            <div id="upi-display" style="display:flex;align-items:center;justify-content:space-between;background:#f8fafc;border:1.5px solid #e2e8f0;border-radius:10px;padding:10px 14px;margin-bottom:14px;">
+              <div>
+                <div style="font-size:0.6rem;color:#94a3b8;text-transform:uppercase;font-weight:600;letter-spacing:0.5px;">UPI ID</div>
+                <div id="upi-id-label" style="font-family:'Poppins',sans-serif;font-weight:700;font-size:0.9rem;color:#155e75;word-break:break-all;">—</div>
+              </div>
+              <button onclick="copyUpiId()" style="background:linear-gradient(135deg,#06b6d4,#0891b2);color:white;border:none;border-radius:8px;padding:8px 16px;font-size:0.75rem;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:5px;font-family:'Inter',sans-serif;white-space:nowrap;">
+                <i class="fa-regular fa-copy"></i> Copy
+              </button>
+            </div>
+
+            <!-- Pay with App -->
+            <p style="font-size:0.75rem;color:#64748b;font-weight:600;margin-bottom:8px;">Choose your payment app</p>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px;">
+              <button onclick="payWithApp('tez')" class="upi-app-btn">
+                <svg viewBox="0 0 24 24" width="20" height="20" style="flex-shrink:0;"><circle cx="12" cy="12" r="12" fill="#4285F4"/><text x="12" y="16" text-anchor="middle" fill="white" font-size="11" font-weight="bold" font-family="sans-serif">G</text></svg>
+                Google Pay
+              </button>
+              <button onclick="payWithApp('phonepe')" class="upi-app-btn">
+                <svg viewBox="0 0 24 24" width="20" height="20" style="flex-shrink:0;"><circle cx="12" cy="12" r="12" fill="#5F259F"/><text x="12" y="16" text-anchor="middle" fill="white" font-size="11" font-weight="bold" font-family="sans-serif">P</text></svg>
+                PhonePe
+              </button>
+              <button onclick="payWithApp('paytm')" class="upi-app-btn">
+                <svg viewBox="0 0 24 24" width="20" height="20" style="flex-shrink:0;"><circle cx="12" cy="12" r="12" fill="#00BAF2"/><text x="12" y="16" text-anchor="middle" fill="white" font-size="11" font-weight="bold" font-family="sans-serif">₹</text></svg>
+                Paytm
+              </button>
+              <button onclick="payWithApp('upi')" class="upi-app-btn">
+                <i class="fa-solid fa-mobile-screen-button" style="font-size:1.1rem;color:#0891b2;"></i>
+                Other UPI
+              </button>
+            </div>
+
+            <div id="upi-note" style="display:none;padding:10px;background:#ecfdf5;border-radius:10px;border:1px solid #a7f3d0;">
+              <p style="color:#065f46;font-size:0.8rem;font-weight:600;margin:0;"><i class="fa-solid fa-circle-info"></i> After completing payment in your app, come back here and tap "I've Paid" below.</p>
             </div>
           </div>
 
@@ -387,6 +422,10 @@
       document.getElementById('summary-subtotal').textContent = '₹' + totalAmt.toLocaleString('en-IN');
       document.getElementById('summary-total').textContent = '₹' + totalAmt.toLocaleString('en-IN');
       document.getElementById('pay-amount').textContent = totalAmt.toLocaleString('en-IN');
+      // Show UPI ID
+      if (upiData.upi_id) {
+        document.getElementById('upi-id-label').textContent = upiData.upi_id;
+      }
     }
 
     function changeQty(index, delta) {
@@ -408,29 +447,55 @@
     }
 
     // ===== UPI Payment =====
-    function payViaUPI() {
+    function getUpiParams() {
       const cart = getCart();
-      if (cart.length === 0) return;
-
+      if (cart.length === 0) return null;
       const name = sessionStorage.getItem('agt_cust_name') || '';
       const phone = sessionStorage.getItem('agt_cust_phone') || '';
-      if (!name || !phone || phone.length !== 10) { alert('Please re-enter your details.'); changeUser(); return; }
-
-      if (!upiData.upi_id) {
-        alert('Online payment is not set up yet. Please contact the shop directly.');
-        return;
-      }
-
+      if (!name || !phone || phone.length !== 10) { alert('Please re-enter your details.'); changeUser(); return null; }
+      if (!upiData.upi_id) { alert('Online payment is not set up yet. Please contact the shop directly.'); return null; }
       const total = cart.reduce((s, c) => s + (c.price * c.qty), 0);
-      const upiUrl = `upi://pay?pa=${encodeURIComponent(upiData.upi_id)}&pn=${encodeURIComponent(upiData.upi_name || 'AquariumGalleryTripura')}&am=${total}&cu=INR&tn=${encodeURIComponent('Order from AquariumGalleryTripura')}`;
+      return { pa: upiData.upi_id, pn: upiData.upi_name || 'AquariumGalleryTripura', am: total, tn: 'Order from AquariumGalleryTripura' };
+    }
 
-      window.location.href = upiUrl;
-
-      // Show confirm button after a short delay
+    function payWithApp(app) {
+      const p = getUpiParams();
+      if (!p) return;
+      const params = `pa=${encodeURIComponent(p.pa)}&pn=${encodeURIComponent(p.pn)}&am=${p.am}&cu=INR&tn=${encodeURIComponent(p.tn)}`;
+      const schemes = {
+        tez: `tez://upi/pay?${params}`,
+        phonepe: `phonepe://pay?${params}`,
+        paytm: `paytm://upi/pay?${params}`,
+        upi: `upi://pay?${params}`
+      };
+      window.location.href = schemes[app] || schemes.upi;
       setTimeout(() => {
         document.getElementById('upi-note').style.display = 'block';
         document.getElementById('confirm-paid-btn').style.display = 'flex';
       }, 1500);
+    }
+
+    function copyUpiId() {
+      if (!upiData.upi_id) return;
+      navigator.clipboard.writeText(upiData.upi_id).then(() => {
+        showCopyToast('UPI ID copied! Open your UPI app to pay.');
+      }).catch(() => {
+        const t = document.createElement('textarea');
+        t.value = upiData.upi_id;
+        document.body.appendChild(t);
+        t.select();
+        document.execCommand('copy');
+        document.body.removeChild(t);
+        showCopyToast('UPI ID copied! Open your UPI app to pay.');
+      });
+    }
+
+    function showCopyToast(msg) {
+      let t = document.getElementById('cart-toast');
+      if (!t) { t = document.createElement('div'); t.id = 'cart-toast'; document.body.appendChild(t); }
+      t.textContent = msg;
+      t.className = 'cart-toast show';
+      setTimeout(() => t.className = 'cart-toast', 2500);
     }
 
     // ===== Confirm Payment & Place Order =====
