@@ -27,6 +27,7 @@
       <nav class="store-nav">
         <a href="index.html"><i class="fa-solid fa-house"></i> Home</a>
         <a href="products.html"><i class="fa-solid fa-bag-shopping"></i> Products</a>
+        <a href="cart.html" class="cart-nav-link"><i class="fa-solid fa-cart-shopping"></i> Cart <span class="cart-badge nav-cart-badge" style="display:none;">0</span></a>
         <a href="index.html?points=open"><i class="fa-solid fa-star" style="color:#f59e0b;"></i> My Points</a>
         <a href="contact.html" class="active"><i class="fa-solid fa-phone"></i> Contact Us</a>
       </nav>
@@ -113,6 +114,18 @@
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="js/supabase-config.js"></script>
   <script>
+    // Cart badge updater
+    (function() {
+      try {
+        const cart = JSON.parse(localStorage.getItem('agt_cart') || '[]');
+        const count = cart.reduce((s, c) => s + c.qty, 0);
+        document.querySelectorAll('.cart-badge').forEach(b => {
+          b.textContent = count;
+          b.style.display = count > 0 ? 'flex' : 'none';
+        });
+      } catch {}
+    })();
+
     const socialIcons = {
       'Facebook': { icon: 'fa-facebook-f', bg: '#1877F2' },
       'Instagram': { icon: 'fa-instagram', bg: '#E4405F' },
@@ -194,6 +207,7 @@
     <div class="bottom-nav-inner">
       <a href="index.html"><i class="fa-solid fa-house"></i><span>Home</span></a>
       <a href="products.html"><i class="fa-solid fa-bag-shopping"></i><span>Products</span></a>
+      <a href="cart.html" class="cart-bottom-link"><i class="fa-solid fa-cart-shopping"></i><span>Cart</span><span class="cart-badge bottom-cart-badge" style="display:none;">0</span></a>
       <a href="contact.html" class="active"><i class="fa-solid fa-phone"></i><span>Contact</span></a>
     </div>
   </nav>

@@ -7,6 +7,7 @@ function buildNavbar(activePage) {
     { name: 'Products', href: 'products.html', icon: 'fa-box' },
     { name: 'Catalogue', href: 'catalogue.html', icon: 'fa-store' },
     { name: 'Sales', href: 'sales.html', icon: 'fa-cash-register' },
+    { name: 'Orders', href: 'orders.html', icon: 'fa-truck' },
     { name: 'Damage', href: 'damage.html', icon: 'fa-triangle-exclamation' },
     { name: 'Points', href: 'points.html', icon: 'fa-star' },
     { name: 'Referrals', href: 'referrals.html', icon: 'fa-handshake' },
@@ -45,12 +46,12 @@ function buildNavbar(activePage) {
   const bottomPages = [
     { name: 'Home', href: 'index.html', icon: 'fa-house' },
     { name: 'Sales', href: 'sales.html', icon: 'fa-cash-register' },
-    { name: 'Products', href: 'products.html', icon: 'fa-box' },
+    { name: 'Orders', href: 'orders.html', icon: 'fa-truck' },
     { name: 'Dashboard', href: 'dashboard.html', icon: 'fa-chart-line' },
     { name: 'More', href: '#', icon: 'fa-ellipsis', isMore: true },
   ];
 
-  const morePages = pages.filter(p => !['Home','Sales','Products','Dashboard'].includes(p.name));
+  const morePages = pages.filter(p => !['Home','Sales','Orders','Dashboard'].includes(p.name));
 
   const bottomNav = document.createElement('nav');
   bottomNav.className = 'admin-bottom-nav';

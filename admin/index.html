@@ -148,6 +148,26 @@
         </div>
       </div>
     </section>
+
+    <!-- UPI Payment Settings -->
+    <section class="mb-8">
+      <div class="card">
+        <div class="card-header">
+          <h2><i class="fa-solid fa-indian-rupee-sign"></i> UPI Payment</h2>
+          <button onclick="editUpi()" class="btn btn-primary btn-sm"><i class="fa-solid fa-pen"></i> Edit</button>
+        </div>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div class="p-4 rounded-xl bg-gray-50 border border-gray-100">
+            <div class="text-xs font-bold text-gray-400 uppercase mb-1"><i class="fa-solid fa-qrcode"></i> UPI ID</div>
+            <p id="upi-id-preview" class="text-sm text-gray-700 font-semibold">Not set</p>
+          </div>
+          <div class="p-4 rounded-xl bg-gray-50 border border-gray-100">
+            <div class="text-xs font-bold text-gray-400 uppercase mb-1"><i class="fa-solid fa-user"></i> Display Name</div>
+            <p id="upi-name-preview" class="text-sm text-gray-700">Not set</p>
+          </div>
+        </div>
+      </div>
+    </section>
   </div>
 
   <!-- Ticker Modal -->
@@ -274,6 +294,26 @@
       <div class="modal-actions">
         <button class="btn btn-outline" onclick="document.getElementById('contact-modal').style.display='none'">Cancel</button>
         <button class="btn btn-primary" onclick="saveContact()"><i class="fa-solid fa-check"></i> Save</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- UPI Edit Modal -->
+  <div id="upi-modal" class="modal-overlay" style="display:none;">
+    <div class="modal">
+      <h3><i class="fa-solid fa-indian-rupee-sign" style="color:var(--gold-500);"></i> Edit UPI Settings</h3>
+      <div class="form-group">
+        <label class="form-label"><i class="fa-solid fa-qrcode"></i> UPI ID</label>
+        <input type="text" id="upi-id-input" class="form-input" placeholder="e.g. 9876543210@ybl or shopname@okaxis">
+      </div>
+      <div class="form-group">
+        <label class="form-label"><i class="fa-solid fa-user"></i> Display Name (shown to customer)</label>
+        <input type="text" id="upi-name-input" class="form-input" placeholder="e.g. AquariumGalleryTripura">
+      </div>
+      <p style="font-size:0.75rem;color:#94a3b8;">Find your UPI ID in Google Pay/PhonePe → Profile → UPI IDs</p>
+      <div class="modal-actions">
+        <button class="btn btn-outline" onclick="document.getElementById('upi-modal').style.display='none'">Cancel</button>
+        <button class="btn btn-primary" onclick="saveUpi()"><i class="fa-solid fa-check"></i> Save</button>
       </div>
     </div>
   </div>

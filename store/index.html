@@ -30,6 +30,7 @@
       <nav class="store-nav">
         <a href="index.html" class="active"><i class="fa-solid fa-house"></i> Home</a>
         <a href="products.html"><i class="fa-solid fa-bag-shopping"></i> Products</a>
+        <a href="cart.html" class="cart-nav-link"><i class="fa-solid fa-cart-shopping"></i> Cart <span class="cart-badge nav-cart-badge" style="display:none;">0</span></a>
         <a href="#" onclick="openPointsModal();document.querySelector('.store-nav').classList.remove('open');return false;"><i class="fa-solid fa-star" style="color:#f59e0b;"></i> My Points</a>
         <a href="contact.html"><i class="fa-solid fa-phone"></i> Contact Us</a>
       </nav>
@@ -115,6 +116,7 @@
     <div class="bottom-nav-inner">
       <a href="index.html" class="active"><i class="fa-solid fa-house"></i><span>Home</span></a>
       <a href="products.html"><i class="fa-solid fa-bag-shopping"></i><span>Products</span></a>
+      <a href="cart.html" class="cart-bottom-link"><i class="fa-solid fa-cart-shopping"></i><span>Cart</span><span class="cart-badge bottom-cart-badge" style="display:none;">0</span></a>
       <a href="contact.html"><i class="fa-solid fa-phone"></i><span>Contact</span></a>
     </div>
   </nav>
@@ -330,6 +332,18 @@
   </script>
   <script>
     // ===== Points Modal Logic =====
+    // Cart badge updater
+    (function() {
+      try {
+        const cart = JSON.parse(localStorage.getItem('agt_cart') || '[]');
+        const count = cart.reduce((s, c) => s + c.qty, 0);
+        document.querySelectorAll('.cart-badge').forEach(b => {
+          b.textContent = count;
+          b.style.display = count > 0 ? 'flex' : 'none';
+        });
+      } catch {}
+    })();
+
     function openPointsModal() {
       document.getElementById('points-overlay').classList.add('active');
       document.body.style.overflow = 'hidden';

@@ -17,6 +17,7 @@ let cardImageFile = null;
   await loadProductCarousel();
   await loadSocialLinks();
   await loadContact();
+  await loadUpi();
 })();
 
 // ===== Ticker / Running Text =====
@@ -458,6 +459,54 @@ async function saveContact() {
     document.getElementById('contact-modal').style.display = 'none';
     showToast('Contact info saved!');
     await loadContact();
+  } catch (err) {
+    showToast(err.message, 'error');
+  }
+}
+
+// ===== UPI Payment Settings =====
+let upiData = null;
+
+async function loadUpi() {
+  const { data } = await db.from('homepage_content').select('*').eq('type', 'upi').maybeSingle();
+  upiData = data;
+  const info = upiData ? JSON.parse(upiData.description || '{}') : {};
+  document.getElementById('upi-id-preview').textContent = info.upi_id || 'Not set';
+  document.getElementById('upi-name-preview').textContent = info.upi_name || 'Not set';
+}
+
+function editUpi() {
+  const info = upiData ? JSON.parse(upiData.description || '{}') : {};
+  document.getElementById('upi-id-input').value = info.upi_id || '';
+  document.getElementById('upi-name-input').value = info.upi_name || '';
+  document.getElementById('upi-modal').style.display = 'flex';
+}
+
+async function saveUpi() {
+  const info = {
+    upi_id: document.getElementById('upi-id-input').value.trim(),
+    upi_name: document.getElementById('upi-name-input').value.trim()
+  };
+  if (!info.upi_id) { showToast('Please enter UPI ID', 'error'); return; }
+
+  try {
+    if (upiData) {
+      const { error } = await db.from('homepage_content').update({
+        description: JSON.stringify(info),
+      }).eq('id', upiData.id);
+      if (error) throw error;
+    } else {
+      const { error } = await db.from('homepage_content').insert({
+        type: 'upi',
+        title: 'UPI Settings',
+        description: JSON.stringify(info),
+        sort_order: 0
+      });
+      if (error) throw error;
+    }
+    document.getElementById('upi-modal').style.display = 'none';
+    showToast('UPI settings saved!');
+    await loadUpi();
   } catch (err) {
     showToast(err.message, 'error');
   }

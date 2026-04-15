@@ -1,0 +1,526 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cart - AquariumGalleryTripura</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <link rel="stylesheet" href="css/style.css">
+  <meta name="theme-color" content="#0891b2">
+  <link rel="manifest" href="manifest.json">
+  <link rel="apple-touch-icon" href="icons/logo.jpeg">
+</head>
+<body>
+
+  <!-- Header -->
+  <header class="store-header">
+    <div class="store-header-inner">
+      <a href="index.html" class="store-logo">
+        <img src="icons/logo.jpeg" alt="AGT" class="store-logo-icon">
+        <span class="store-logo-text">AquariumGalleryTripura</span>
+      </a>
+      <a href="index.html?points=open" class="header-points-btn"><i class="fa-solid fa-star"></i> My Points</a>
+      <button class="store-nav-toggle" onclick="document.querySelector('.store-nav').classList.toggle('open')">
+        <i class="fa-solid fa-bars"></i>
+      </button>
+      <nav class="store-nav">
+        <a href="index.html"><i class="fa-solid fa-house"></i> Home</a>
+        <a href="products.html"><i class="fa-solid fa-bag-shopping"></i> Products</a>
+        <a href="cart.html" class="active cart-nav-link"><i class="fa-solid fa-cart-shopping"></i> Cart <span class="cart-badge nav-cart-badge" style="display:none;">0</span></a>
+        <a href="index.html?points=open"><i class="fa-solid fa-star" style="color:#f59e0b;"></i> My Points</a>
+        <a href="contact.html"><i class="fa-solid fa-phone"></i> Contact Us</a>
+      </nav>
+    </div>
+  </header>
+
+  <section class="section" style="padding-top:1.2rem;">
+    <div style="max-width:600px;margin:0 auto;">
+
+      <!-- ===== GATE: Name + Phone before accessing cart ===== -->
+      <div id="cart-gate">
+        <div class="cart-section-card" style="text-align:center;margin-top:1rem;">
+          <div style="width:64px;height:64px;margin:0 auto 12px;background:linear-gradient(135deg,#06b6d4,#0891b2);border-radius:50%;display:flex;align-items:center;justify-content:center;">
+            <i class="fa-solid fa-cart-shopping" style="font-size:1.8rem;color:white;"></i>
+          </div>
+          <h2 style="font-family:'Poppins',sans-serif;font-size:1.2rem;font-weight:800;color:#155e75;">Welcome!</h2>
+          <p style="color:#64748b;font-size:0.82rem;margin-top:4px;margin-bottom:1.2rem;">Enter your details to view your cart and place orders</p>
+          <div style="display:flex;flex-direction:column;gap:10px;text-align:left;">
+            <input type="text" id="gate-name" placeholder="Your Name" class="cart-input" maxlength="100">
+            <div style="position:relative;">
+              <span style="position:absolute;left:12px;top:50%;transform:translateY(-50%);color:#94a3b8;font-size:0.85rem;">+91</span>
+              <input type="tel" id="gate-phone" placeholder="10-digit Phone Number" class="cart-input" style="padding-left:44px;" maxlength="10" oninput="this.value=this.value.replace(/\D/g,'')">
+            </div>
+            <p id="gate-error" style="color:#ef4444;font-size:0.8rem;display:none;margin:0;"></p>
+            <label style="display:flex;align-items:flex-start;gap:8px;cursor:pointer;margin-top:2px;">
+              <input type="checkbox" id="gate-confirm" style="width:18px;height:18px;accent-color:#0891b2;margin-top:1px;flex-shrink:0;cursor:pointer;">
+              <span style="font-size:0.8rem;color:#475569;line-height:1.4;">I confirm these details are correct. This will be used to track my orders.</span>
+            </label>
+            <button onclick="enterCart()" style="width:100%;padding:14px;background:linear-gradient(135deg,#06b6d4,#0891b2);color:white;border:none;border-radius:12px;font-size:0.95rem;font-weight:700;font-family:'Poppins',sans-serif;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;box-shadow:0 4px 16px rgba(6,182,212,0.3);transition:all 0.2s;" onmousedown="this.style.transform='scale(0.97)'" onmouseup="this.style.transform='scale(1)'">
+              <i class="fa-solid fa-arrow-right"></i> Continue to Cart
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- ===== MAIN CART CONTENT (hidden until gate passed) ===== -->
+      <div id="cart-main" style="display:none;">
+
+      <!-- Logged in as strip -->
+      <div id="user-strip" style="display:flex;align-items:center;justify-content:space-between;background:linear-gradient(135deg,#ecfeff,#f0fdfa);border:1px solid #a5f3fc;border-radius:10px;padding:8px 14px;margin-bottom:10px;">
+        <span style="font-size:0.8rem;color:#0e7490;"><i class="fa-solid fa-user-check"></i> <strong id="strip-name"></strong> • <span id="strip-phone"></span></span>
+        <button onclick="changeUser()" style="background:none;border:none;color:#0891b2;font-size:0.75rem;font-weight:600;cursor:pointer;text-decoration:underline;">Change</button>
+      </div>
+
+      <!-- Tab Switcher -->
+      <div class="cart-tabs">
+        <button class="cart-tab active" onclick="switchTab('cart')"><i class="fa-solid fa-cart-shopping"></i> My Cart</button>
+        <button class="cart-tab" onclick="switchTab('status')"><i class="fa-solid fa-truck"></i> Track Order</button>
+      </div>
+
+      <!-- ===== CART TAB ===== -->
+      <div id="cart-tab-content">
+
+        <!-- Cart Items -->
+        <div id="cart-items"></div>
+
+        <!-- Empty Cart State -->
+        <div id="empty-cart" style="display:none;text-align:center;padding:3rem 1.5rem;">
+          <i class="fa-solid fa-cart-shopping" style="font-size:3.5rem;color:#a5f3fc;margin-bottom:1rem;display:block;"></i>
+          <h3 style="font-family:'Poppins',sans-serif;font-size:1.1rem;color:#64748b;margin-bottom:0.5rem;">Your cart is empty</h3>
+          <p style="color:#94a3b8;font-size:0.85rem;margin-bottom:1.2rem;">Browse our products and add items to get started</p>
+          <a href="products.html" style="display:inline-flex;align-items:center;gap:8px;padding:12px 28px;background:linear-gradient(135deg,#06b6d4,#0891b2);color:white;font-weight:700;border-radius:12px;text-decoration:none;font-family:'Poppins',sans-serif;font-size:0.9rem;box-shadow:0 4px 16px rgba(6,182,212,0.25);">
+            <i class="fa-solid fa-bag-shopping"></i> Browse Products
+          </a>
+        </div>
+
+        <!-- Cart Summary & Checkout (hidden when empty) -->
+        <div id="cart-checkout" style="display:none;">
+
+          <!-- Order Summary -->
+          <div class="cart-summary-card">
+            <h3><i class="fa-solid fa-receipt"></i> Order Summary</h3>
+            <div class="cart-summary-row">
+              <span>Items (<span id="summary-count">0</span>)</span>
+              <span id="summary-subtotal">₹0</span>
+            </div>
+            <div class="cart-summary-total">
+              <span>Total</span>
+              <span id="summary-total">₹0</span>
+            </div>
+          </div>
+
+          <!-- Payment Section -->
+          <div class="cart-section-card">
+            <h3><i class="fa-solid fa-indian-rupee-sign"></i> Payment</h3>
+            <p style="color:#64748b;font-size:0.82rem;margin-bottom:12px;">Pay securely via UPI. Click the button below to open your UPI app.</p>
+            <button id="pay-upi-btn" onclick="payViaUPI()" class="cart-pay-btn">
+              <i class="fa-solid fa-mobile-screen-button"></i> Pay ₹<span id="pay-amount">0</span> via UPI
+            </button>
+            <div id="upi-note" style="display:none;margin-top:10px;padding:10px;background:#ecfdf5;border-radius:10px;border:1px solid #a7f3d0;">
+              <p style="color:#065f46;font-size:0.8rem;font-weight:600;"><i class="fa-solid fa-circle-info"></i> UPI app opened? After completing payment, come back here and tap "I've Paid".</p>
+            </div>
+          </div>
+
+          <!-- Confirm Payment Button -->
+          <button id="confirm-paid-btn" onclick="confirmPaid()" class="cart-confirm-btn" style="display:none;">
+            <i class="fa-solid fa-check-circle"></i> I've Paid — Place My Order
+          </button>
+
+        </div>
+
+        <!-- Order Placed Success (hidden initially) -->
+        <div id="order-success" style="display:none;">
+          <div class="cart-section-card" style="text-align:center;background:linear-gradient(135deg,#ecfdf5,#f0fdfa);border:2px solid #a7f3d0;">
+            <div style="font-size:3rem;margin-bottom:0.5rem;">🎉</div>
+            <h3 style="color:#065f46;font-size:1.1rem;margin-bottom:4px;">Order Placed Successfully!</h3>
+            <p style="color:#059669;font-size:0.85rem;">Your order has been received and is awaiting confirmation.</p>
+            <div id="order-id-display" style="margin-top:12px;padding:10px;background:white;border-radius:10px;border:1px solid #d1fae5;">
+              <span style="font-size:0.75rem;color:#64748b;">Order ID</span>
+              <div id="success-order-id" style="font-family:'Poppins',sans-serif;font-weight:700;color:#0891b2;font-size:0.9rem;word-break:break-all;"></div>
+            </div>
+          </div>
+
+          <!-- Trust Messaging: Contact Admin -->
+          <div class="cart-section-card" style="background:linear-gradient(135deg,#fffbeb,#fef3c7);border:2px solid #fcd34d;">
+            <h3 style="color:#92400e;"><i class="fa-solid fa-phone-volume"></i> Next Step: Confirm Your Order</h3>
+            <p style="color:#b45309;font-size:0.82rem;margin-bottom:12px;">Please contact the shop owner to confirm your order and arrange delivery. Your order will be processed once confirmed.</p>
+            <div style="display:flex;gap:8px;flex-wrap:wrap;">
+              <a id="contact-call-btn" href="tel:" class="cart-contact-btn" style="background:#2563eb;">
+                <i class="fa-solid fa-phone"></i> Call Now
+              </a>
+              <a id="contact-wa-btn" href="" target="_blank" class="cart-contact-btn" style="background:#25D366;">
+                <i class="fa-brands fa-whatsapp"></i> WhatsApp
+              </a>
+            </div>
+          </div>
+
+          <div style="text-align:center;margin-top:1rem;">
+            <a href="products.html" style="display:inline-flex;align-items:center;gap:8px;padding:12px 28px;background:linear-gradient(135deg,#06b6d4,#0891b2);color:white;font-weight:700;border-radius:12px;text-decoration:none;font-family:'Poppins',sans-serif;font-size:0.9rem;box-shadow:0 4px 16px rgba(6,182,212,0.25);">
+              <i class="fa-solid fa-bag-shopping"></i> Continue Shopping
+            </a>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- ===== TRACK ORDER TAB ===== -->
+      <div id="status-tab-content" style="display:none;">
+        <div class="cart-section-card">
+          <h3><i class="fa-solid fa-magnifying-glass"></i> Your Orders</h3>
+          <p style="color:#64748b;font-size:0.82rem;margin-bottom:12px;">Showing orders for your phone number.</p>
+          <button onclick="trackOrders()" class="cart-track-btn" style="width:100%;">
+            <i class="fa-solid fa-rotate"></i> Refresh Orders
+          </button>
+        </div>
+
+        <div id="track-results"></div>
+
+        <div id="track-empty" style="display:none;text-align:center;padding:2rem 1.5rem;">
+          <i class="fa-solid fa-box-open" style="font-size:2.5rem;color:#a5f3fc;margin-bottom:0.8rem;display:block;"></i>
+          <h3 style="font-family:'Poppins',sans-serif;font-size:1rem;color:#64748b;">No orders found</h3>
+          <p style="color:#94a3b8;font-size:0.82rem;">No orders found for this phone number.</p>
+        </div>
+      </div>
+
+      </div><!-- /cart-main -->
+
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="store-footer">
+    <p>&copy; 2022 <a href="index.html">AquariumGalleryTripura</a>. All rights reserved.</p>
+  </footer>
+
+  <!-- Floating Points Button -->
+  <a href="index.html?points=open" class="points-fab" style="text-decoration:none;">
+    <i class="fa-solid fa-star"></i>
+    <span>My Points</span>
+  </a>
+
+  <!-- Mobile Bottom Nav -->
+  <nav class="bottom-nav">
+    <div class="bottom-nav-inner">
+      <a href="index.html"><i class="fa-solid fa-house"></i><span>Home</span></a>
+      <a href="products.html"><i class="fa-solid fa-bag-shopping"></i><span>Products</span></a>
+      <a href="cart.html" class="active cart-bottom-link"><i class="fa-solid fa-cart-shopping"></i><span>Cart</span><span class="cart-badge bottom-cart-badge" style="display:none;">0</span></a>
+      <a href="contact.html"><i class="fa-solid fa-phone"></i><span>Contact</span></a>
+    </div>
+  </nav>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="js/supabase-config.js"></script>
+  <script>
+    let contactInfo = {};
+    let upiData = {};
+
+    (async () => {
+      await loadContactInfo();
+      await loadUpiData();
+      checkGate();
+      updateCartBadge();
+    })();
+
+    // ===== Gate Logic =====
+    function checkGate() {
+      const name = sessionStorage.getItem('agt_cust_name');
+      const phone = sessionStorage.getItem('agt_cust_phone');
+      if (name && phone && phone.length === 10) {
+        showCartMain(name, phone);
+      } else {
+        document.getElementById('cart-gate').style.display = 'block';
+        document.getElementById('cart-main').style.display = 'none';
+      }
+    }
+
+    function enterCart() {
+      const name = document.getElementById('gate-name').value.trim();
+      const phone = document.getElementById('gate-phone').value.trim();
+      const errEl = document.getElementById('gate-error');
+
+      if (!name) { errEl.textContent = 'Please enter your name'; errEl.style.display = 'block'; document.getElementById('gate-name').focus(); return; }
+      if (!phone || phone.length !== 10) { errEl.textContent = 'Please enter a valid 10-digit phone number'; errEl.style.display = 'block'; document.getElementById('gate-phone').focus(); return; }
+      if (!document.getElementById('gate-confirm').checked) { errEl.textContent = 'Please confirm that your details are correct'; errEl.style.display = 'block'; return; }
+
+      errEl.style.display = 'none';
+      sessionStorage.setItem('agt_cust_name', name);
+      sessionStorage.setItem('agt_cust_phone', phone);
+      showCartMain(name, phone);
+    }
+
+    function showCartMain(name, phone) {
+      document.getElementById('cart-gate').style.display = 'none';
+      document.getElementById('cart-main').style.display = 'block';
+      document.getElementById('strip-name').textContent = name;
+      document.getElementById('strip-phone').textContent = '+91 ' + phone;
+      renderCart();
+    }
+
+    function changeUser() {
+      sessionStorage.removeItem('agt_cust_name');
+      sessionStorage.removeItem('agt_cust_phone');
+      document.getElementById('cart-gate').style.display = 'block';
+      document.getElementById('cart-main').style.display = 'none';
+      document.getElementById('gate-name').value = '';
+      document.getElementById('gate-phone').value = '';
+    }
+
+    // ===== Cart Utilities =====
+    function getCart() {
+      try { return JSON.parse(localStorage.getItem('agt_cart') || '[]'); }
+      catch { return []; }
+    }
+    function saveCart(cart) { localStorage.setItem('agt_cart', JSON.stringify(cart)); }
+
+    function updateCartBadge() {
+      const count = getCart().reduce((s, c) => s + c.qty, 0);
+      document.querySelectorAll('.cart-badge').forEach(b => {
+        b.textContent = count;
+        b.style.display = count > 0 ? 'flex' : 'none';
+      });
+    }
+
+    // ===== Tab Switching =====
+    function switchTab(tab) {
+      document.querySelectorAll('.cart-tab').forEach(t => t.classList.remove('active'));
+      if (tab === 'cart') {
+        document.querySelector('.cart-tab:first-child').classList.add('active');
+        document.getElementById('cart-tab-content').style.display = 'block';
+        document.getElementById('status-tab-content').style.display = 'none';
+      } else {
+        document.querySelector('.cart-tab:last-child').classList.add('active');
+        document.getElementById('cart-tab-content').style.display = 'none';
+        document.getElementById('status-tab-content').style.display = 'block';
+      }
+    }
+
+    // ===== Load Shop Contact Info =====
+    async function loadContactInfo() {
+      const { data } = await db.from('homepage_content').select('*').eq('type', 'contact').maybeSingle();
+      if (data && data.description) {
+        try { contactInfo = JSON.parse(data.description); } catch {}
+      }
+    }
+
+    // ===== Load UPI Data =====
+    async function loadUpiData() {
+      const { data } = await db.from('homepage_content').select('*').eq('type', 'upi').maybeSingle();
+      if (data && data.description) {
+        try { upiData = JSON.parse(data.description); } catch {}
+      }
+    }
+
+    // ===== Render Cart =====
+    function renderCart() {
+      const cart = getCart();
+      const itemsEl = document.getElementById('cart-items');
+      const emptyEl = document.getElementById('empty-cart');
+      const checkoutEl = document.getElementById('cart-checkout');
+
+      if (cart.length === 0) {
+        itemsEl.innerHTML = '';
+        emptyEl.style.display = 'block';
+        checkoutEl.style.display = 'none';
+        return;
+      }
+
+      emptyEl.style.display = 'none';
+      checkoutEl.style.display = 'block';
+
+      itemsEl.innerHTML = cart.map((item, i) => `
+        <div class="cart-item-card">
+          <div class="cart-item-img">
+            ${item.image ? `<img src="${item.image}" alt="${item.name}">` : `<i class="fa-solid fa-fish" style="font-size:1.5rem;color:#a5f3fc;"></i>`}
+          </div>
+          <div class="cart-item-info">
+            <div class="cart-item-name">${item.name}</div>
+            <div class="cart-item-price">₹${Number(item.price).toLocaleString('en-IN')}</div>
+          </div>
+          <div class="cart-item-controls">
+            <div class="qty-controls">
+              <button onclick="changeQty(${i},-1)"><i class="fa-solid fa-minus"></i></button>
+              <span>${item.qty}</span>
+              <button onclick="changeQty(${i},1)"><i class="fa-solid fa-plus"></i></button>
+            </div>
+            <button class="cart-remove-btn" onclick="removeItem(${i})"><i class="fa-solid fa-trash"></i></button>
+          </div>
+        </div>
+      `).join('');
+
+      // Update summary
+      const totalQty = cart.reduce((s, c) => s + c.qty, 0);
+      const totalAmt = cart.reduce((s, c) => s + (c.price * c.qty), 0);
+      document.getElementById('summary-count').textContent = totalQty;
+      document.getElementById('summary-subtotal').textContent = '₹' + totalAmt.toLocaleString('en-IN');
+      document.getElementById('summary-total').textContent = '₹' + totalAmt.toLocaleString('en-IN');
+      document.getElementById('pay-amount').textContent = totalAmt.toLocaleString('en-IN');
+    }
+
+    function changeQty(index, delta) {
+      const cart = getCart();
+      if (!cart[index]) return;
+      cart[index].qty += delta;
+      if (cart[index].qty <= 0) cart.splice(index, 1);
+      saveCart(cart);
+      renderCart();
+      updateCartBadge();
+    }
+
+    function removeItem(index) {
+      const cart = getCart();
+      cart.splice(index, 1);
+      saveCart(cart);
+      renderCart();
+      updateCartBadge();
+    }
+
+    // ===== UPI Payment =====
+    function payViaUPI() {
+      const cart = getCart();
+      if (cart.length === 0) return;
+
+      const name = sessionStorage.getItem('agt_cust_name') || '';
+      const phone = sessionStorage.getItem('agt_cust_phone') || '';
+      if (!name || !phone || phone.length !== 10) { alert('Please re-enter your details.'); changeUser(); return; }
+
+      if (!upiData.upi_id) {
+        alert('Online payment is not set up yet. Please contact the shop directly.');
+        return;
+      }
+
+      const total = cart.reduce((s, c) => s + (c.price * c.qty), 0);
+      const upiUrl = `upi://pay?pa=${encodeURIComponent(upiData.upi_id)}&pn=${encodeURIComponent(upiData.upi_name || 'AquariumGalleryTripura')}&am=${total}&cu=INR&tn=${encodeURIComponent('Order from AquariumGalleryTripura')}`;
+
+      window.location.href = upiUrl;
+
+      // Show confirm button after a short delay
+      setTimeout(() => {
+        document.getElementById('upi-note').style.display = 'block';
+        document.getElementById('confirm-paid-btn').style.display = 'flex';
+      }, 1500);
+    }
+
+    // ===== Confirm Payment & Place Order =====
+    async function confirmPaid() {
+      const name = sessionStorage.getItem('agt_cust_name') || '';
+      const phone = sessionStorage.getItem('agt_cust_phone') || '';
+      const cart = getCart();
+
+      if (!name || !phone || phone.length !== 10 || cart.length === 0) {
+        alert('Please re-enter your details and ensure cart is not empty.');
+        changeUser();
+        return;
+      }
+
+      const btn = document.getElementById('confirm-paid-btn');
+      btn.disabled = true;
+      btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Placing Order...';
+
+      const items = cart.map(c => ({ name: c.name, price: c.price, qty: c.qty, image: c.image }));
+      const total = cart.reduce((s, c) => s + (c.price * c.qty), 0);
+
+      const { data, error } = await db.from('online_orders').insert({
+        customer_name: name,
+        customer_phone: phone,
+        items: items,
+        total_amount: total,
+        status: 'pending'
+      }).select().single();
+
+      if (error) {
+        alert('Failed to place order. Please try again or contact the shop directly.');
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fa-solid fa-check-circle"></i> I\'ve Paid — Place My Order';
+        return;
+      }
+
+      // Clear cart
+      localStorage.removeItem('agt_cart');
+      updateCartBadge();
+
+      // Show success
+      document.getElementById('cart-items').style.display = 'none';
+      document.getElementById('cart-checkout').style.display = 'none';
+      document.getElementById('order-success').style.display = 'block';
+      document.getElementById('success-order-id').textContent = data.id;
+
+      // Set contact buttons
+      if (contactInfo.phone) {
+        const cleanPhone = contactInfo.phone.replace(/\s/g, '');
+        document.getElementById('contact-call-btn').href = `tel:${cleanPhone}`;
+      }
+      if (contactInfo.whatsapp) {
+        const waNum = contactInfo.whatsapp.replace(/\D/g, '');
+        document.getElementById('contact-wa-btn').href = `https://wa.me/${waNum}?text=${encodeURIComponent(`Hi, I just placed an order (ID: ${data.id}). Please confirm. - ${name}`)}`;
+      }
+
+      // Scroll to top
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    // ===== Track Orders =====
+    async function trackOrders() {
+      const phone = sessionStorage.getItem('agt_cust_phone') || '';
+      if (!phone || phone.length !== 10) {
+        alert('Please re-enter your details.');
+        changeUser();
+        return;
+      }
+
+      const resultsEl = document.getElementById('track-results');
+      const emptyEl = document.getElementById('track-empty');
+      resultsEl.innerHTML = '<div style="text-align:center;padding:2rem;color:#94a3b8;"><i class="fa-solid fa-spinner fa-spin" style="font-size:1.5rem;"></i></div>';
+      emptyEl.style.display = 'none';
+
+      const { data, error } = await db.from('online_orders').select('*').eq('customer_phone', phone).order('created_at', { ascending: false });
+
+      if (error || !data || data.length === 0) {
+        resultsEl.innerHTML = '';
+        emptyEl.style.display = 'block';
+        return;
+      }
+
+      resultsEl.innerHTML = data.map(order => {
+        const statusConfig = {
+          pending: { label: 'Pending Confirmation', bg: '#fef3c7', color: '#92400e', icon: 'fa-clock' },
+          confirmed: { label: 'Confirmed', bg: '#dcfce7', color: '#166534', icon: 'fa-check' },
+          delivered: { label: 'Delivered', bg: '#ecfeff', color: '#0e7490', icon: 'fa-truck' },
+          declined: { label: 'Declined', bg: '#fef2f2', color: '#991b1b', icon: 'fa-xmark' },
+        };
+        const s = statusConfig[order.status] || statusConfig.pending;
+        const items = order.items || [];
+        const date = new Date(order.created_at).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+
+        return `
+          <div class="cart-section-card" style="margin-top:10px;">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+              <span style="font-size:0.7rem;color:#94a3b8;">${date}</span>
+              <span style="padding:4px 10px;border-radius:20px;font-size:0.7rem;font-weight:700;background:${s.bg};color:${s.color};">
+                <i class="fa-solid ${s.icon}"></i> ${s.label}
+              </span>
+            </div>
+            <div style="font-size:0.75rem;color:#64748b;margin-bottom:6px;">
+              ${items.map(it => `<div style="display:flex;justify-content:space-between;padding:3px 0;border-bottom:1px solid #f1f5f9;">
+                <span>${it.name} × ${it.qty}</span>
+                <span style="font-weight:600;">₹${(it.price * it.qty).toLocaleString('en-IN')}</span>
+              </div>`).join('')}
+            </div>
+            <div style="display:flex;justify-content:space-between;align-items:center;padding-top:6px;border-top:2px solid #e2e8f0;">
+              <span style="font-weight:700;font-family:'Poppins',sans-serif;color:#0891b2;font-size:0.9rem;">₹${Number(order.total_amount).toLocaleString('en-IN')}</span>
+              <span style="font-size:0.65rem;color:#94a3b8;">ID: ${order.id.substring(0, 8)}...</span>
+            </div>
+            ${order.admin_notes ? `<div style="margin-top:8px;padding:8px;background:#f8fafc;border-radius:8px;font-size:0.75rem;color:#64748b;"><i class="fa-solid fa-note-sticky"></i> ${order.admin_notes}</div>` : ''}
+          </div>
+        `;
+      }).join('');
+    }
+  </script>
+
+  <script>
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('sw.js');
+    }
+  </script>
+</body>
+</html>
