@@ -29,6 +29,7 @@
       <nav class="store-nav">
         <a href="index.html" class="active"><i class="fa-solid fa-house"></i> Home</a>
         <a href="products.html"><i class="fa-solid fa-bag-shopping"></i> Products</a>
+        <a href="#" onclick="openPointsModal();document.querySelector('.store-nav').classList.remove('open');return false;"><i class="fa-solid fa-star" style="color:#f59e0b;"></i> My Points</a>
         <a href="contact.html"><i class="fa-solid fa-phone"></i> Contact Us</a>
       </nav>
     </div>
@@ -107,6 +108,97 @@
     <p>&copy; 2026 <a href="index.html">AquariumGalleryTripura</a>. All rights reserved.</p>
     <p style="margin-top:4px;font-size:0.75rem;">Bringing aquatic beauty to your home 🐠</p>
   </footer>
+
+  <!-- Floating Check Points Button -->
+  <button onclick="openPointsModal()" class="points-fab" id="points-fab" title="Check Your Points">
+    <i class="fa-solid fa-star"></i>
+    <span>My Points</span>
+  </button>
+
+  <!-- Points Modal -->
+  <div class="points-overlay" id="points-overlay" onclick="if(event.target===this)closePointsModal()">
+    <div class="points-modal">
+      <!-- Phone Input View -->
+      <div id="points-input-view">
+        <button class="points-modal-close" onclick="closePointsModal()"><i class="fa-solid fa-xmark"></i></button>
+        <div style="text-align:center;margin-bottom:1.5rem;">
+          <div style="width:64px;height:64px;margin:0 auto 12px;background:linear-gradient(135deg,#fbbf24,#f59e0b);border-radius:50%;display:flex;align-items:center;justify-content:center;">
+            <i class="fa-solid fa-star" style="font-size:1.8rem;color:white;"></i>
+          </div>
+          <h2 style="font-family:'Poppins',sans-serif;font-size:1.4rem;font-weight:800;color:#155e75;">Check Your Points</h2>
+          <p style="color:#64748b;font-size:0.85rem;margin-top:4px;">Enter your registered phone number</p>
+        </div>
+        <div style="position:relative;margin-bottom:1rem;">
+          <span style="position:absolute;left:14px;top:50%;transform:translateY(-50%);color:#94a3b8;font-size:0.9rem;">+91</span>
+          <input type="tel" id="points-phone" maxlength="10" placeholder="Enter 10-digit phone" oninput="this.value=this.value.replace(/\D/g,'')"
+            style="width:100%;padding:14px 14px 14px 48px;border:2px solid #e2e8f0;border-radius:14px;font-size:1rem;font-family:'Inter',sans-serif;outline:none;transition:border 0.2s;"
+            onfocus="this.style.borderColor='#06b6d4'" onblur="this.style.borderColor='#e2e8f0'">
+        </div>
+        <button onclick="checkPoints()" id="check-points-btn"
+          style="width:100%;padding:14px;background:linear-gradient(135deg,#06b6d4,#0891b2);color:white;border:none;border-radius:14px;font-size:1rem;font-weight:700;font-family:'Poppins',sans-serif;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;transition:transform 0.2s,box-shadow 0.2s;box-shadow:0 4px 16px rgba(6,182,212,0.3);"
+          onmousedown="this.style.transform='scale(0.97)'" onmouseup="this.style.transform='scale(1)'">
+          <i class="fa-solid fa-magnifying-glass"></i> Check Points
+        </button>
+        <p id="points-error" style="color:#ef4444;text-align:center;margin-top:10px;font-size:0.85rem;display:none;"></p>
+      </div>
+
+      <!-- Points Result View -->
+      <div id="points-result-view" style="display:none;">
+        <button class="points-modal-close" onclick="closePointsModal()"><i class="fa-solid fa-xmark"></i></button>
+        
+        <!-- Customer Greeting -->
+        <div style="text-align:center;margin-bottom:1.2rem;">
+          <h2 style="font-family:'Poppins',sans-serif;font-size:1.3rem;font-weight:800;color:#155e75;" id="points-greeting">Hi there!</h2>
+        </div>
+
+        <!-- Points Display -->
+        <div id="points-display-card" style="background:linear-gradient(135deg,#ecfeff,#cffafe);border-radius:16px;padding:1.2rem;text-align:center;margin-bottom:1rem;border:2px solid #a5f3fc;">
+          <div style="font-size:0.8rem;color:#0e7490;font-weight:600;text-transform:uppercase;letter-spacing:1px;">Your Loyalty Points</div>
+          <div id="points-value" style="font-family:'Poppins',sans-serif;font-size:2.8rem;font-weight:900;color:#0891b2;line-height:1.1;margin:6px 0;"></div>
+          <div id="points-status-badge" style="display:inline-block;padding:4px 14px;border-radius:20px;font-size:0.8rem;font-weight:700;"></div>
+        </div>
+
+        <!-- Progress Bar -->
+        <div style="margin-bottom:1rem;">
+          <div style="display:flex;justify-content:space-between;font-size:0.75rem;color:#64748b;margin-bottom:4px;">
+            <span id="progress-label">Progress to reward</span>
+            <span id="progress-pct">0%</span>
+          </div>
+          <div style="height:10px;background:#e2e8f0;border-radius:10px;overflow:hidden;">
+            <div id="progress-bar" style="height:100%;background:linear-gradient(90deg,#06b6d4,#fbbf24);border-radius:10px;transition:width 1s ease;width:0%;"></div>
+          </div>
+          <div style="text-align:center;margin-top:4px;">
+            <span id="points-remaining-text" style="font-size:0.8rem;color:#64748b;"></span>
+          </div>
+        </div>
+
+        <!-- Claim Message (only if claimable) -->
+        <div id="claim-message" style="display:none;background:linear-gradient(135deg,#fef3c7,#fffbeb);border:2px solid #fbbf24;border-radius:14px;padding:1rem;text-align:center;margin-bottom:1rem;">
+          <div style="font-size:1.5rem;margin-bottom:4px;">🎉</div>
+          <p style="font-family:'Poppins',sans-serif;font-weight:700;color:#92400e;font-size:0.95rem;">Congratulations! Reward Available!</p>
+          <p style="color:#b45309;font-size:0.8rem;margin-top:4px;">Visit our shop to claim your reward. Hurry, don't miss out!</p>
+        </div>
+
+        <!-- Points History -->
+        <div id="points-history-section" style="margin-bottom:1rem;">
+          <h3 style="font-family:'Poppins',sans-serif;font-size:0.9rem;font-weight:700;color:#155e75;margin-bottom:8px;">
+            <i class="fa-solid fa-clock-rotate-left"></i> Recent Activity
+          </h3>
+          <div id="points-history-list" style="max-height:160px;overflow-y:auto;"></div>
+        </div>
+
+        <!-- CTA Buttons -->
+        <div style="display:flex;gap:8px;">
+          <a href="products.html" style="flex:1;padding:12px;background:linear-gradient(135deg,#06b6d4,#0891b2);color:white;border-radius:12px;text-align:center;text-decoration:none;font-weight:700;font-family:'Poppins',sans-serif;font-size:0.9rem;display:flex;align-items:center;justify-content:center;gap:6px;box-shadow:0 4px 12px rgba(6,182,212,0.3);">
+            <i class="fa-solid fa-bag-shopping"></i> Shop Now
+          </a>
+          <button onclick="resetPointsModal()" style="flex:0.6;padding:12px;background:#f1f5f9;color:#475569;border:none;border-radius:12px;font-weight:600;font-family:'Inter',sans-serif;cursor:pointer;font-size:0.85rem;">
+            <i class="fa-solid fa-arrow-left"></i> Back
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="js/supabase-config.js"></script>
@@ -225,6 +317,181 @@
         `;
       }).join('');
     }
+  </script>
+  <script>
+    // ===== Points Modal Logic =====
+    function openPointsModal() {
+      document.getElementById('points-overlay').classList.add('active');
+      document.body.style.overflow = 'hidden';
+      document.getElementById('points-phone').focus();
+    }
+
+    function closePointsModal() {
+      document.getElementById('points-overlay').classList.remove('active');
+      document.body.style.overflow = '';
+    }
+
+    function resetPointsModal() {
+      document.getElementById('points-input-view').style.display = 'block';
+      document.getElementById('points-result-view').style.display = 'none';
+      document.getElementById('points-phone').value = '';
+      document.getElementById('points-error').style.display = 'none';
+    }
+
+    async function checkPoints() {
+      const phone = document.getElementById('points-phone').value.trim().replace(/\D/g, '');
+      const errEl = document.getElementById('points-error');
+
+      if (phone.length !== 10) {
+        errEl.textContent = 'Please enter a valid 10-digit phone number';
+        errEl.style.display = 'block';
+        return;
+      }
+
+      const btn = document.getElementById('check-points-btn');
+      btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Checking...';
+      btn.disabled = true;
+      errEl.style.display = 'none';
+
+      try {
+        const { data: customer } = await db.from('customers').select('*').eq('phone', phone).single();
+
+        if (!customer) {
+          errEl.textContent = 'No account found with this phone number. Shop with us to start earning points!';
+          errEl.style.display = 'block';
+          btn.innerHTML = '<i class="fa-solid fa-magnifying-glass"></i> Check Points';
+          btn.disabled = false;
+          return;
+        }
+
+        // Load points history
+        const { data: history } = await db.from('points_history')
+          .select('*')
+          .eq('customer_id', customer.id)
+          .order('created_at', { ascending: false })
+          .limit(10);
+
+        showPointsResult(customer, history || []);
+      } catch (err) {
+        errEl.textContent = 'Something went wrong. Please try again.';
+        errEl.style.display = 'block';
+      }
+
+      btn.innerHTML = '<i class="fa-solid fa-magnifying-glass"></i> Check Points';
+      btn.disabled = false;
+    }
+
+    function showPointsResult(customer, history) {
+      document.getElementById('points-input-view').style.display = 'none';
+      document.getElementById('points-result-view').style.display = 'block';
+
+      const points = customer.points || 0;
+      const canClaim = points >= 1000;
+      const claimCount = Math.floor(points / 1000);
+      const remaining = 1000 - (points % 1000);
+      const progressPct = Math.min(100, ((points % 1000) / 1000) * 100);
+
+      // Greeting
+      document.getElementById('points-greeting').textContent = `Hi, ${customer.name}! 👋`;
+
+      // Points value (animate counting up)
+      const valueEl = document.getElementById('points-value');
+      animateCount(valueEl, 0, points, 800);
+
+      // Status badge
+      const badge = document.getElementById('points-status-badge');
+      if (canClaim) {
+        badge.textContent = `🎁 ${claimCount} Reward${claimCount > 1 ? 's' : ''} Available!`;
+        badge.style.background = 'linear-gradient(135deg,#fbbf24,#f59e0b)';
+        badge.style.color = '#78350f';
+      } else {
+        badge.textContent = `⭐ ${remaining} points to next reward`;
+        badge.style.background = '#f1f5f9';
+        badge.style.color = '#475569';
+      }
+
+      // Progress bar
+      const effectivePct = canClaim ? 100 : progressPct;
+      document.getElementById('progress-pct').textContent = Math.round(effectivePct) + '%';
+      document.getElementById('progress-label').textContent = canClaim ? 'Reward unlocked!' : 'Progress to reward';
+      setTimeout(() => {
+        document.getElementById('progress-bar').style.width = effectivePct + '%';
+      }, 100);
+
+      document.getElementById('points-remaining-text').textContent = canClaim
+        ? `You can claim ${claimCount} reward${claimCount > 1 ? 's' : ''}!`
+        : `Shop for ₹${remaining.toLocaleString('en-IN')} more to unlock your reward`;
+
+      // Claim message
+      document.getElementById('claim-message').style.display = canClaim ? 'block' : 'none';
+
+      // Points display card glow for claimable
+      const card = document.getElementById('points-display-card');
+      if (canClaim) {
+        card.style.background = 'linear-gradient(135deg,#fffbeb,#fef3c7)';
+        card.style.borderColor = '#fbbf24';
+        card.style.animation = 'glow-pulse 2s ease-in-out infinite';
+      } else {
+        card.style.background = 'linear-gradient(135deg,#ecfeff,#cffafe)';
+        card.style.borderColor = '#a5f3fc';
+        card.style.animation = 'none';
+      }
+
+      // History
+      const listEl = document.getElementById('points-history-list');
+      if (history.length === 0) {
+        listEl.innerHTML = '<p style="text-align:center;color:#94a3b8;font-size:0.8rem;padding:12px;">No activity yet</p>';
+      } else {
+        listEl.innerHTML = history.map(h => {
+          const isEarned = h.type === 'earned';
+          const date = new Date(h.created_at).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' });
+          return `
+            <div style="display:flex;align-items:center;justify-content:space-between;padding:8px 10px;border-bottom:1px solid #f1f5f9;">
+              <div style="display:flex;align-items:center;gap:8px;">
+                <div style="width:28px;height:28px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:0.7rem;color:white;background:${isEarned ? '#22c55e' : '#f59e0b'};">
+                  <i class="fa-solid ${isEarned ? 'fa-plus' : 'fa-gift'}"></i>
+                </div>
+                <div>
+                  <div style="font-size:0.8rem;font-weight:600;color:#1e293b;">${isEarned ? 'Points Earned' : 'Reward Claimed'}</div>
+                  <div style="font-size:0.7rem;color:#94a3b8;">${date}</div>
+                </div>
+              </div>
+              <div style="font-size:0.85rem;font-weight:700;color:${isEarned ? '#22c55e' : '#f59e0b'};">
+                ${isEarned ? '+' : '-'}${Math.abs(h.points_change).toLocaleString('en-IN')}
+              </div>
+            </div>
+          `;
+        }).join('');
+      }
+    }
+
+    function animateCount(el, start, end, duration) {
+      const startTime = performance.now();
+      function tick(now) {
+        const elapsed = now - startTime;
+        const progress = Math.min(elapsed / duration, 1);
+        const eased = 1 - Math.pow(1 - progress, 3);
+        const current = Math.floor(start + (end - start) * eased);
+        el.textContent = current.toLocaleString('en-IN');
+        if (progress < 1) requestAnimationFrame(tick);
+      }
+      requestAnimationFrame(tick);
+    }
+
+    // Auto-open if URL has ?points=PHONE or ?points=open
+    (function() {
+      const params = new URLSearchParams(window.location.search);
+      const pointsParam = params.get('points');
+      if (pointsParam) {
+        setTimeout(() => {
+          openPointsModal();
+          if (pointsParam !== 'open') {
+            document.getElementById('points-phone').value = pointsParam.replace(/\D/g, '').slice(0, 10);
+            setTimeout(() => checkPoints(), 300);
+          }
+        }, 500);
+      }
+    })();
   </script>
   <script>
     if ('serviceWorker' in navigator) {

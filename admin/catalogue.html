@@ -66,6 +66,14 @@
       <!-- Products loaded dynamically -->
     </div>
 
+    <!-- Load More Button -->
+    <div id="load-more-wrapper" style="display:none;text-align:center;margin-top:1.5rem;">
+      <button onclick="loadMoreProducts()" class="btn btn-primary" id="load-more-btn">
+        <i class="fa-solid fa-angles-down"></i> Load More Products
+      </button>
+      <p id="load-more-count" style="margin-top:6px;color:#94a3b8;font-size:0.8rem;"></p>
+    </div>
+
     <div id="products-empty" class="empty-state card" style="display:none;">
       <i class="fa-solid fa-store"></i>
       <h3>No products in catalogue</h3>

@@ -3,6 +3,8 @@
 let allProducts = [];
 let filteredProducts = [];
 let editImageFile = null;
+let displayedCount = 0;
+const PAGE_SIZE = 20;
 
 // Initialize
 (async () => {
@@ -26,6 +28,7 @@ async function loadProducts() {
   const { data } = await db.from('products').select('*').order('name');
   allProducts = data || [];
   filteredProducts = [...allProducts];
+  displayedCount = 0;
   renderProducts();
   updateStats();
 }
@@ -60,58 +63,81 @@ function filterProducts() {
     return matchSearch && matchCat;
   });
 
+  displayedCount = 0;
   renderProducts();
 }
 
 function renderProducts() {
   const grid = document.getElementById('product-grid');
   const empty = document.getElementById('products-empty');
+  const wrapper = document.getElementById('load-more-wrapper');
+  const countLabel = document.getElementById('load-more-count');
 
   if (filteredProducts.length === 0) {
     grid.innerHTML = '';
     empty.style.display = 'block';
+    wrapper.style.display = 'none';
     return;
   }
 
   empty.style.display = 'none';
-  grid.innerHTML = filteredProducts.map(p => {
-    const isLow = p.quantity > 0 && p.quantity < 5;
-    const isOut = p.quantity <= 0;
-    return `
-      <div class="product-card ${isLow ? 'ring-2 ring-red-300' : ''}">
-        <div class="product-image">
-          ${p.image_url
-            ? `<img src="${p.image_url}" alt="${p.name}">`
-            : `<div class="no-image"><i class="fa-solid fa-fish"></i></div>`
-          }
-          ${isLow ? '<div class="absolute top-2 left-2"><span class="badge badge-red"><i class="fa-solid fa-triangle-exclamation"></i> Low Stock</span></div>' : ''}
-          ${isOut ? '<div class="absolute top-2 left-2"><span class="badge badge-red"><i class="fa-solid fa-xmark"></i> Out of Stock</span></div>' : ''}
+
+  if (displayedCount === 0) grid.innerHTML = '';
+
+  const nextBatch = filteredProducts.slice(displayedCount, displayedCount + PAGE_SIZE);
+  grid.insertAdjacentHTML('beforeend', nextBatch.map(p => renderProductCard(p)).join(''));
+  displayedCount += nextBatch.length;
+
+  const remaining = filteredProducts.length - displayedCount;
+  if (remaining > 0) {
+    wrapper.style.display = 'block';
+    countLabel.textContent = `Showing ${displayedCount} of ${filteredProducts.length} products • ${remaining} more`;
+  } else {
+    wrapper.style.display = 'none';
+  }
+}
+
+function loadMoreProducts() {
+  renderProducts();
+}
+
+function renderProductCard(p) {
+  const isLow = p.quantity > 0 && p.quantity < 5;
+  const isOut = p.quantity <= 0;
+  return `
+    <div class="product-card ${isLow ? 'ring-2 ring-red-300' : ''}">
+      <div class="product-image">
+        ${p.image_url
+          ? `<img src="${p.image_url}" alt="${p.name}">`
+          : `<div class="no-image"><i class="fa-solid fa-fish"></i></div>`
+        }
+        ${isLow ? '<div class="absolute top-2 left-2"><span class="badge badge-red"><i class="fa-solid fa-triangle-exclamation"></i> Low Stock</span></div>' : ''}
+        ${isOut ? '<div class="absolute top-2 left-2"><span class="badge badge-red"><i class="fa-solid fa-xmark"></i> Out of Stock</span></div>' : ''}
+      </div>
+      <div class="product-info">
+        <div class="product-category">${p.category}</div>
+        <div class="product-name">${p.name}</div>
+        <div class="product-prices">
+          <span class="product-sp">₹${Number(p.selling_price).toLocaleString('en-IN')}</span>
+          <span class="product-bp">BP: ₹${Number(p.buying_price).toLocaleString('en-IN')}</span>
         </div>
-        <div class="product-info">
-          <div class="product-category">${p.category}</div>
-          <div class="product-name">${p.name}</div>
-          <div class="product-prices">
-            <span class="product-sp">₹${Number(p.selling_price).toLocaleString('en-IN')}</span>
-            <span class="product-bp">BP: ₹${Number(p.buying_price).toLocaleString('en-IN')}</span>
-          </div>
-          <div class="mt-2">
-            <span class="product-qty ${isLow || isOut ? 'low-stock' : 'in-stock'}">
-              <i class="fa-solid ${isOut ? 'fa-xmark' : 'fa-boxes-stacked'}"></i>
-              ${isOut ? 'Out of stock' : p.quantity + ' in stock'}
-            </span>
-          </div>
-          <div class="product-actions">
-            <button onclick="openEditModal('${p.id}')" class="btn btn-primary btn-sm flex-1">
-              <i class="fa-solid fa-pen"></i> Edit
-            </button>
-            <button onclick="deleteProduct('${p.id}')" class="btn btn-danger btn-sm">
-              <i class="fa-solid fa-trash"></i>
-            </button>
-          </div>
+        <div class="mt-2">
+          <span class="product-qty ${isLow || isOut ? 'low-stock' : 'in-stock'}">
+            <i class="fa-solid ${isOut ? 'fa-xmark' : 'fa-boxes-stacked'}"></i>
+            ${isOut ? 'Out of stock' : p.quantity + ' in stock'}
+          </span>
+        </div>
+        <div class="product-actions">
+          <button onclick="openEditModal('${p.id}')" class="btn btn-primary btn-sm flex-1">
+            <i class="fa-solid fa-pen"></i> Edit
+          </button>
+          <button onclick="deleteProduct('${p.id}')" class="btn btn-danger btn-sm">
+            <i class="fa-solid fa-trash"></i>
+          </button>
         </div>
       </div>
-    `;
-  }).join('');
+    </div>
+  `;
 }
 
 // ===== Edit Modal =====

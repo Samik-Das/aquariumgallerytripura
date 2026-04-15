@@ -26,6 +26,7 @@
       <nav class="store-nav">
         <a href="index.html"><i class="fa-solid fa-house"></i> Home</a>
         <a href="products.html"><i class="fa-solid fa-bag-shopping"></i> Products</a>
+        <a href="index.html?points=open"><i class="fa-solid fa-star" style="color:#f59e0b;"></i> My Points</a>
         <a href="contact.html" class="active"><i class="fa-solid fa-phone"></i> Contact Us</a>
       </nav>
     </div>
@@ -157,6 +158,13 @@
       }).join('');
     })();
   </script>
+
+  <!-- Floating Points Button -->
+  <a href="index.html?points=open" class="points-fab" style="text-decoration:none;">
+    <i class="fa-solid fa-star"></i>
+    <span>My Points</span>
+  </a>
+
   <script>
     if ('serviceWorker' in navigator) {
       navigator.serviceWorker.register('sw.js');

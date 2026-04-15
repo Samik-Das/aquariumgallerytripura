@@ -27,6 +27,7 @@
       <nav class="store-nav">
         <a href="index.html"><i class="fa-solid fa-house"></i> Home</a>
         <a href="products.html" class="active"><i class="fa-solid fa-bag-shopping"></i> Products</a>
+        <a href="index.html?points=open"><i class="fa-solid fa-star" style="color:#f59e0b;"></i> My Points</a>
         <a href="contact.html"><i class="fa-solid fa-phone"></i> Contact Us</a>
       </nav>
     </div>
@@ -64,6 +65,16 @@
     <!-- Product Grid -->
     <div class="product-grid-store" id="product-grid"></div>
 
+    <!-- Load More Button -->
+    <div id="load-more-wrapper" style="display:none;text-align:center;margin-top:1.5rem;">
+      <button onclick="loadMore()" id="load-more-btn"
+        style="padding:12px 36px;background:linear-gradient(135deg,#06b6d4,#0891b2);color:white;border:none;border-radius:12px;font-size:0.95rem;font-weight:700;font-family:'Poppins',sans-serif;cursor:pointer;box-shadow:0 4px 16px rgba(6,182,212,0.25);transition:all 0.2s;display:inline-flex;align-items:center;gap:8px;"
+        onmousedown="this.style.transform='scale(0.97)'" onmouseup="this.style.transform='scale(1)'">
+        <i class="fa-solid fa-angles-down"></i> Load More Products
+      </button>
+      <p id="load-more-count" style="margin-top:8px;color:#94a3b8;font-size:0.8rem;"></p>
+    </div>
+
     <!-- Empty State -->
     <div id="empty-state" style="display:none;text-align:center;padding:4rem 2rem;">
       <i class="fa-solid fa-fish" style="font-size:4rem;color:#a5f3fc;margin-bottom:1rem;display:block;"></i>
@@ -81,6 +92,9 @@
   <script src="js/supabase-config.js"></script>
   <script>
     let allProducts = [];
+    let currentFiltered = [];
+    let displayedCount = 0;
+    const PAGE_SIZE = 20;
 
     (async () => {
       await loadCategories();
@@ -115,59 +129,82 @@
       const search = document.getElementById('search-input').value.toLowerCase().trim();
       const category = document.getElementById('category-filter').value;
 
-      const filtered = allProducts.filter(p => {
+      currentFiltered = allProducts.filter(p => {
         const matchSearch = !search || p.name.toLowerCase().includes(search) || p.category.toLowerCase().includes(search);
         const matchCat = !category || p.category === category;
         return matchSearch && matchCat;
       });
 
-      renderProducts(filtered);
+      displayedCount = 0;
+      document.getElementById('product-grid').innerHTML = '';
+      document.getElementById('product-count').textContent = currentFiltered.length;
+      loadMore();
     }
 
-    function renderProducts(products) {
+    function loadMore() {
       const grid = document.getElementById('product-grid');
       const empty = document.getElementById('empty-state');
-      const count = document.getElementById('product-count');
+      const wrapper = document.getElementById('load-more-wrapper');
+      const countLabel = document.getElementById('load-more-count');
 
-      count.textContent = products.length;
-
-      if (products.length === 0) {
+      if (currentFiltered.length === 0) {
         grid.innerHTML = '';
         empty.style.display = 'block';
+        wrapper.style.display = 'none';
         return;
       }
 
       empty.style.display = 'none';
-      grid.innerHTML = products.map(p => {
-        const isLow = p.quantity > 0 && p.quantity < 5;
-        const isOut = p.quantity <= 0;
-        return `
-          <div class="store-product-card">
-            <div class="prod-img">
-              ${p.image_url
-                ? `<img src="${p.image_url}" alt="${p.name}">`
-                : `<i class="fa-solid fa-fish" style="font-size:3rem;color:#a5f3fc;"></i>`
+
+      const nextBatch = currentFiltered.slice(displayedCount, displayedCount + PAGE_SIZE);
+      grid.insertAdjacentHTML('beforeend', nextBatch.map(p => renderProductCard(p)).join(''));
+      displayedCount += nextBatch.length;
+
+      const remaining = currentFiltered.length - displayedCount;
+      if (remaining > 0) {
+        wrapper.style.display = 'block';
+        countLabel.textContent = `Showing ${displayedCount} of ${currentFiltered.length} products • ${remaining} more`;
+      } else {
+        wrapper.style.display = 'none';
+      }
+    }
+
+    function renderProductCard(p) {
+      const isLow = p.quantity > 0 && p.quantity < 5;
+      const isOut = p.quantity <= 0;
+      return `
+        <div class="store-product-card">
+          <div class="prod-img">
+            ${p.image_url
+              ? `<img src="${p.image_url}" alt="${p.name}">`
+              : `<i class="fa-solid fa-fish" style="font-size:3rem;color:#a5f3fc;"></i>`
+            }
+            ${isLow ? `<div class="prod-badge" style="background:#fef2f2;color:#dc2626;">Only ${p.quantity} left!</div>` : ''}
+            ${isOut ? `<div class="prod-badge" style="background:#fef2f2;color:#dc2626;">Out of Stock</div>` : ''}
+            ${!isLow && !isOut ? `<div class="prod-badge" style="background:#ecfdf5;color:#059669;">${p.quantity} available</div>` : ''}
+          </div>
+          <div class="prod-body">
+            <div class="prod-category">${p.category}</div>
+            <div class="prod-name">${p.name}</div>
+            <div class="prod-price">₹${Number(p.selling_price).toLocaleString('en-IN')}</div>
+            <div class="prod-stock">
+              ${isOut
+                ? `<span style="color:#dc2626;font-weight:600;"><i class="fa-solid fa-xmark"></i> Currently unavailable</span>`
+                : `<span style="color:#059669;"><i class="fa-solid fa-check"></i> In Stock (${p.quantity})</span>`
               }
-              ${isLow ? `<div class="prod-badge" style="background:#fef2f2;color:#dc2626;">Only ${p.quantity} left!</div>` : ''}
-              ${isOut ? `<div class="prod-badge" style="background:#fef2f2;color:#dc2626;">Out of Stock</div>` : ''}
-              ${!isLow && !isOut ? `<div class="prod-badge" style="background:#ecfdf5;color:#059669;">${p.quantity} available</div>` : ''}
-            </div>
-            <div class="prod-body">
-              <div class="prod-category">${p.category}</div>
-              <div class="prod-name">${p.name}</div>
-              <div class="prod-price">₹${Number(p.selling_price).toLocaleString('en-IN')}</div>
-              <div class="prod-stock">
-                ${isOut
-                  ? `<span style="color:#dc2626;font-weight:600;"><i class="fa-solid fa-xmark"></i> Currently unavailable</span>`
-                  : `<span style="color:#059669;"><i class="fa-solid fa-check"></i> In Stock (${p.quantity})</span>`
-                }
-              </div>
             </div>
           </div>
-        `;
-      }).join('');
+        </div>
+      `;
     }
   </script>
+
+  <!-- Floating Points Button -->
+  <a href="index.html?points=open" class="points-fab" style="text-decoration:none;">
+    <i class="fa-solid fa-star"></i>
+    <span>My Points</span>
+  </a>
+
   <script>
     if ('serviceWorker' in navigator) {
       navigator.serviceWorker.register('sw.js');

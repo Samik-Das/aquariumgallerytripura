@@ -72,13 +72,16 @@ function renderCustomers() {
     const remaining = 1000 - (c.points % 1000);
 
     // WhatsApp message based on points status
+    // TODO: Replace with your actual store URL
+    const storeUrl = 'https://aquariumgallerytripura-store.netlify.app';
+    const pointsLink = `${storeUrl}/?points=${c.phone}`;
     let waMsg = '';
     if (canClaim) {
-      waMsg = `Hi ${c.name}! 🎉 You have ${c.points.toLocaleString('en-IN')} loyalty points at AquariumGalleryTripura! You can claim your reward now. Visit us soon! 🐠`;
+      waMsg = `Hi ${c.name}! 🎉 You have *${c.points.toLocaleString('en-IN')}* loyalty points at AquariumGalleryTripura! You can claim your reward now!\n\n👉 Check your points: ${pointsLink}\n\nVisit us soon! 🐠`;
     } else if (closeToClaim) {
-      waMsg = `Hi ${c.name}! ⭐ You have ${c.points.toLocaleString('en-IN')} points at AquariumGalleryTripura! Just ${remaining} more to claim your reward. Visit us soon! 🐠`;
+      waMsg = `Hi ${c.name}! ⭐ You have *${c.points.toLocaleString('en-IN')}* points at AquariumGalleryTripura! Just *${remaining}* more to claim your reward.\n\n👉 Check your points: ${pointsLink}\n\nVisit us soon! 🐠`;
     } else {
-      waMsg = `Hi ${c.name}! 👋 You have ${c.points.toLocaleString('en-IN')} loyalty points at AquariumGalleryTripura. Keep shopping to earn more rewards! 🐠`;
+      waMsg = `Hi ${c.name}! 👋 You have *${c.points.toLocaleString('en-IN')}* loyalty points at AquariumGalleryTripura. Keep shopping to earn more rewards!\n\n👉 Check your points: ${pointsLink} 🐠`;
     }
     const waLink = `https://wa.me/91${c.phone}?text=${encodeURIComponent(waMsg)}`;
 
