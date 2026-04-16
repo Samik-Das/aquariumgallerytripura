@@ -401,7 +401,7 @@
       itemsEl.innerHTML = cart.map((item, i) => `
         <div class="cart-item-card">
           <div class="cart-item-img">
-            ${item.image ? `<img src="${item.image}" alt="${item.name}">` : `<i class="fa-solid fa-fish" style="font-size:1.5rem;color:#a5f3fc;"></i>`}
+            ${item.image ? `<img src="${item.image}" alt="${item.name}" loading="lazy">` : `<i class="fa-solid fa-fish" style="font-size:1.5rem;color:#a5f3fc;"></i>`}
           </div>
           <div class="cart-item-info">
             <div class="cart-item-name">${item.name}</div>

@@ -235,13 +235,15 @@
       'Telegram': { icon: 'fa-telegram', bg: '#0088cc' },
     };
 
-    // Load everything
+    // Load everything in PARALLEL (not sequential)
     (async () => {
-      await loadBanner();
-      await loadTicker();
-      await loadCategories();
-      await loadCarousel();
-      await loadSocials();
+      await Promise.all([
+        loadBanner(),
+        loadTicker(),
+        loadCategories(),
+        loadCarousel(),
+        loadSocials()
+      ]);
     })();
 
     async function loadTicker() {
@@ -276,7 +278,7 @@
       grid.innerHTML = data.map(c => `
         <a href="products.html${c.name ? '?category=' + encodeURIComponent(c.name) : ''}" class="category-card">
           <div class="card-img">
-            ${c.image_url ? `<img src="${c.image_url}" alt="${c.name}">` : '<i class="fa-solid fa-fish" style="font-size:3rem;color:#a5f3fc;"></i>'}
+            ${c.image_url ? `<img src="${c.image_url}" alt="${c.name}" loading="lazy" decoding="async">` : '<i class="fa-solid fa-fish" style="font-size:3rem;color:#a5f3fc;"></i>'}
           </div>
           <div class="card-body">
             <h3>${c.name || ''}</h3>
@@ -300,7 +302,7 @@
         return `
           <div class="carousel-card">
             <div class="img-wrap">
-              ${p.image_url ? `<img src="${p.image_url}" alt="${p.name}">` : '<i class="fa-solid fa-fish" style="font-size:2.5rem;color:#a5f3fc;"></i>'}
+              ${p.image_url ? `<img src="${p.image_url}" alt="${p.name}" loading="lazy" decoding="async">` : '<i class="fa-solid fa-fish" style="font-size:2.5rem;color:#a5f3fc;"></i>'}
             </div>
             <div class="info">
               <h4>${p.name}</h4>

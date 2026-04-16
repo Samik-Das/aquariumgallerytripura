@@ -8,8 +8,7 @@ let productImageFile = null;
 (async () => {
   await checkAuth();
   buildNavbar('Products');
-  await loadDropdowns();
-  await loadHistory();
+  await Promise.all([loadDropdowns(), loadHistory()]);
 })();
 
 // ===== Load Dropdowns =====

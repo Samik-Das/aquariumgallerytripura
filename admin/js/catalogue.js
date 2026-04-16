@@ -10,8 +10,7 @@ const PAGE_SIZE = 20;
 (async () => {
   await checkAuth();
   buildNavbar('Catalogue');
-  await loadProducts();
-  await loadCategoryFilter();
+  await Promise.all([loadProducts(), loadCategoryFilter()]);
   applyUrlFilter();
 })();
 
@@ -108,7 +107,7 @@ function renderProductCard(p) {
     <div class="product-card ${isLow ? 'ring-1 ring-red-300' : ''}">
       <div class="product-image">
         ${p.image_url
-          ? `<img src="${p.image_url}" alt="${p.name}">`
+          ? `<img src="${p.image_url}" alt="${p.name}" loading="lazy" decoding="async">`
           : `<div class="no-image"><i class="fa-solid fa-fish"></i></div>`
         }
         ${isLow ? '<div class="absolute top-1 left-1"><span class="badge badge-red" style="font-size:0.5rem;padding:1px 4px;"><i class="fa-solid fa-triangle-exclamation"></i> Low</span></div>' : ''}

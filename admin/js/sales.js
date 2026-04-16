@@ -10,9 +10,8 @@ let existingCustomerId = null;
 (async () => {
   await checkAuth();
   buildNavbar('Sales');
-  await loadProducts();
+  await Promise.all([loadProducts(), loadSalesHistory()]);
   addSaleItem(); // Add first item row
-  await loadSalesHistory();
 })();
 
 async function loadProducts() {

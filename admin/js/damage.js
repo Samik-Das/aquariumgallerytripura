@@ -7,8 +7,7 @@ let selectedProduct = null;
 (async () => {
   await checkAuth();
   buildNavbar('Damage');
-  await loadProducts();
-  await loadDamageHistory();
+  await Promise.all([loadProducts(), loadDamageHistory()]);
 })();
 
 async function loadProducts() {

@@ -11,13 +11,15 @@ let cardImageFile = null;
 (async () => {
   await checkAuth();
   buildNavbar('Home');
-  await loadBanner();
-  await loadTicker();
-  await loadCategoryCards();
-  await loadProductCarousel();
-  await loadSocialLinks();
-  await loadContact();
-  await loadUpi();
+  await Promise.all([
+    loadBanner(),
+    loadTicker(),
+    loadCategoryCards(),
+    loadProductCarousel(),
+    loadSocialLinks(),
+    loadContact(),
+    loadUpi()
+  ]);
 })();
 
 // ===== Ticker / Running Text =====
@@ -143,7 +145,7 @@ function renderCategoryCards() {
     <div class="relative group rounded-xl overflow-hidden shadow-md border border-gray-100 transition-all hover:shadow-xl hover:-translate-y-1 cursor-pointer" style="min-height:240px;" onclick="window.location.href='catalogue.html?category=${encodeURIComponent(card.name)}'">
       <div class="h-40 bg-gradient-to-br from-cyan-50 to-amber-50 flex items-center justify-center overflow-hidden">
         ${card.image_url
-          ? `<img src="${card.image_url}" alt="${card.name}" class="w-full h-full object-cover">`
+          ? `<img src="${card.image_url}" alt="${card.name}" class="w-full h-full object-cover" loading="lazy" decoding="async">`
           : `<i class="fa-solid fa-image text-4xl text-cyan-200"></i>`
         }
       </div>
@@ -269,7 +271,7 @@ async function loadProductCarousel() {
     <div class="flex-shrink-0 w-64 bg-white rounded-xl overflow-hidden shadow-md border border-gray-100">
       <div class="h-36 bg-gradient-to-br from-cyan-50 to-amber-50 flex items-center justify-center overflow-hidden">
         ${p.image_url
-          ? `<img src="${p.image_url}" alt="${p.name}" class="w-full h-full object-cover">`
+          ? `<img src="${p.image_url}" alt="${p.name}" class="w-full h-full object-cover" loading="lazy" decoding="async">`
           : `<i class="fa-solid fa-fish text-3xl text-cyan-200"></i>`
         }
       </div>

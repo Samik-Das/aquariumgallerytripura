@@ -7,8 +7,7 @@ let filteredCustomers = [];
 (async () => {
   await checkAuth();
   buildNavbar('Points');
-  await loadCustomers();
-  await loadPointsHistory();
+  await Promise.all([loadCustomers(), loadPointsHistory()]);
 })();
 
 async function loadCustomers() {

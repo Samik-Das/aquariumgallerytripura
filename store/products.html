@@ -104,8 +104,7 @@
     const PAGE_SIZE = 20;
 
     (async () => {
-      await loadCategories();
-      await loadProducts();
+      await Promise.all([loadCategories(), loadProducts()]);
       applyUrlFilter();
     })();
 
@@ -245,7 +244,7 @@
         <div class="store-product-card${isOut ? ' out-of-stock' : ''}">
           <div class="prod-img">
             ${p.image_url
-              ? `<img src="${p.image_url}" alt="${p.name}" loading="lazy">`
+              ? `<img src="${p.image_url}" alt="${p.name}" loading="lazy" decoding="async">`
               : `<i class="fa-solid fa-fish" style="font-size:2rem;color:#a5f3fc;"></i>`
             }
             ${badge}
