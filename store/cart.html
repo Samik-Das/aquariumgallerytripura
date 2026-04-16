@@ -4,6 +4,9 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Cart - AquariumGalleryTripura</title>
+  <link rel="preconnect" href="https://pkutovmcaumbbskoutsy.supabase.co">
+  <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+  <link rel="dns-prefetch" href="https://cdnjs.cloudflare.com">
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
   <link rel="stylesheet" href="css/style.css">
@@ -512,7 +515,7 @@
 
       const btn = document.getElementById('confirm-paid-btn');
       btn.disabled = true;
-      btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Placing Order...';
+      btn.innerHTML = '🐠 Placing Order...';
 
       const items = cart.map(c => ({ name: c.name, price: c.price, qty: c.qty, image: c.image }));
       const total = cart.reduce((s, c) => s + (c.price * c.qty), 0);
@@ -567,7 +570,7 @@
 
       const resultsEl = document.getElementById('track-results');
       const emptyEl = document.getElementById('track-empty');
-      resultsEl.innerHTML = '<div style="text-align:center;padding:2rem;color:#94a3b8;"><i class="fa-solid fa-spinner fa-spin" style="font-size:1.5rem;"></i></div>';
+      resultsEl.innerHTML = '<div class="fish-loader" style="padding:1.5rem 0;"><div class="fish-swim"><span class="fish">🐠</span><span class="fish">🐟</span><span class="fish">🐡</span><div class="bubbles"><span></span><span></span><span></span></div></div><div class="fish-loader-text">Loading your orders<span class="dot-anim"></span></div></div>';
       emptyEl.style.display = 'none';
 
       const { data, error } = await db.from('online_orders').select('*').eq('customer_phone', phone).order('created_at', { ascending: false });

@@ -4,6 +4,9 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>AquariumGalleryTripura - Premium Aquarium Shop</title>
+  <link rel="preconnect" href="https://pkutovmcaumbbskoutsy.supabase.co">
+  <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+  <link rel="dns-prefetch" href="https://cdnjs.cloudflare.com">
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
   <link rel="stylesheet" href="css/style.css">
@@ -77,7 +80,10 @@
       <div class="title-accent"></div>
     </div>
     <div class="category-grid" id="category-grid">
-      <!-- Loaded dynamically -->
+      <div class="fish-loader" id="categories-loader">
+        <div class="fish-swim"><span class="fish">🐠</span><span class="fish">🐟</span><span class="fish">🐡</span><div class="bubbles"><span></span><span></span><span></span></div></div>
+        <div class="fish-loader-text">Loading categories<span class="dot-anim"></span></div>
+      </div>
     </div>
   </section>
 
@@ -89,7 +95,10 @@
         <div class="title-accent"></div>
       </div>
       <div class="carousel-track" id="carousel-track">
-        <!-- Loaded dynamically -->
+        <div class="fish-loader" id="carousel-loader">
+          <div class="fish-swim"><span class="fish">🐠</span><span class="fish">🐟</span><span class="fish">🐡</span><div class="bubbles"><span></span><span></span><span></span></div></div>
+          <div class="fish-loader-text">Loading products<span class="dot-anim"></span></div>
+        </div>
       </div>
     </div>
   </section>
@@ -101,7 +110,9 @@
       <p style="color:rgba(255,255,255,0.6);font-size:0.9rem;">Stay connected for latest arrivals and offers</p>
     </div>
     <div class="social-grid" id="social-grid">
-      <!-- Loaded dynamically -->
+      <div class="fish-loader-inline" id="social-loader">
+        <div class="fish-swim"><span class="fish">🐠</span><span class="fish">🐟</span><span class="fish">🐡</span><div class="bubbles"><span></span><span></span><span></span></div></div>
+      </div>
     </div>
   </section>
 
@@ -373,7 +384,7 @@
       }
 
       const btn = document.getElementById('check-points-btn');
-      btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Checking...';
+      btn.innerHTML = '🐠 Checking...';
       btn.disabled = true;
       errEl.style.display = 'none';
 

@@ -3,6 +3,9 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="preconnect" href="https://pkutovmcaumbbskoutsy.supabase.co">
+  <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+  <link rel="dns-prefetch" href="https://cdnjs.cloudflare.com">
   <title>Catalogue - AquariumGalleryTripura Admin</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
@@ -63,7 +66,10 @@
 
     <!-- Product Grid -->
     <div id="product-grid" class="product-grid">
-      <!-- Products loaded dynamically -->
+      <div class="fish-loader" id="catalogue-loader" style="grid-column:1/-1;">
+        <div class="fish-swim"><span class="fish">🐠</span><span class="fish">🐟</span><span class="fish">🐡</span><div class="bubbles"><span></span><span></span><span></span></div></div>
+        <div class="fish-loader-text">Loading products<span class="dot-anim"></span></div>
+      </div>
     </div>
 
     <!-- Load More Button -->

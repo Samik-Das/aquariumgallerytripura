@@ -3,6 +3,9 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="preconnect" href="https://pkutovmcaumbbskoutsy.supabase.co">
+  <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+  <link rel="dns-prefetch" href="https://cdnjs.cloudflare.com">
   <title>Homepage - AquariumGalleryTripura Admin</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
@@ -70,7 +73,10 @@
           <button onclick="addCategoryCard()" class="btn btn-primary btn-sm"><i class="fa-solid fa-plus"></i> Add Card</button>
         </div>
         <div id="category-cards" class="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-4">
-          <!-- Cards loaded dynamically -->
+          <div class="fish-loader" id="cat-loader" style="grid-column:1/-1;">
+            <div class="fish-swim"><span class="fish">🐠</span><span class="fish">🐟</span><span class="fish">🐡</span><div class="bubbles"><span></span><span></span><span></span></div></div>
+            <div class="fish-loader-text">Loading categories<span class="dot-anim"></span></div>
+          </div>
         </div>
         <div id="category-empty" class="empty-state" style="display:none;">
           <i class="fa-solid fa-layer-group"></i>
@@ -89,7 +95,9 @@
         </div>
         <div class="carousel-container">
           <div class="carousel-track" id="product-carousel">
-            <!-- Products loaded dynamically -->
+            <div class="fish-loader-inline" id="carousel-loader">
+              <span class="fish">🐠</span><span class="fish">🐟</span><span class="fish">🐡</span>
+            </div>
           </div>
         </div>
         <div id="carousel-empty" class="empty-state" style="display:none;">
@@ -108,7 +116,9 @@
           <button onclick="addSocialLink()" class="btn btn-primary btn-sm"><i class="fa-solid fa-plus"></i> Add Link</button>
         </div>
         <div id="social-links" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3" style="overflow:hidden;">
-          <!-- Social links loaded dynamically -->
+          <div class="fish-loader-inline" id="social-loader" style="grid-column:1/-1;">
+            <span class="fish">🐠</span><span class="fish">🐟</span><span class="fish">🐡</span>
+          </div>
         </div>
       </div>
     </section>
