@@ -124,20 +124,9 @@
               <div style="font-family:'Poppins',sans-serif;font-weight:900;font-size:1.6rem;color:#059669;line-height:1.2;">₹<span id="pay-amount">0</span></div>
             </div>
 
-            <!-- UPI ID + Copy -->
-            <div id="upi-display" style="display:flex;align-items:center;justify-content:space-between;background:#f8fafc;border:1.5px solid #e2e8f0;border-radius:10px;padding:10px 14px;margin-bottom:14px;">
-              <div>
-                <div style="font-size:0.6rem;color:#94a3b8;text-transform:uppercase;font-weight:600;letter-spacing:0.5px;">UPI ID</div>
-                <div id="upi-id-label" style="font-family:'Poppins',sans-serif;font-weight:700;font-size:0.9rem;color:#155e75;word-break:break-all;">—</div>
-              </div>
-              <button onclick="copyUpiId()" style="background:linear-gradient(135deg,#06b6d4,#0891b2);color:white;border:none;border-radius:8px;padding:8px 16px;font-size:0.75rem;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:5px;font-family:'Inter',sans-serif;white-space:nowrap;">
-                <i class="fa-regular fa-copy"></i> Copy
-              </button>
-            </div>
-
-            <!-- Pay with App -->
+            <!-- Pay with App (moved to top) -->
             <p style="font-size:0.75rem;color:#64748b;font-weight:600;margin-bottom:8px;">Choose your payment app</p>
-            <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px;">
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px;">
               <button onclick="payWithApp('tez')" class="upi-app-btn">
                 <svg viewBox="0 0 24 24" width="20" height="20" style="flex-shrink:0;"><circle cx="12" cy="12" r="12" fill="#4285F4"/><text x="12" y="16" text-anchor="middle" fill="white" font-size="11" font-weight="bold" font-family="sans-serif">G</text></svg>
                 Google Pay
@@ -156,15 +145,36 @@
               </button>
             </div>
 
-            <div id="upi-note" style="display:none;padding:10px;background:#ecfdf5;border-radius:10px;border:1px solid #a7f3d0;">
-              <p style="color:#065f46;font-size:0.8rem;font-weight:600;margin:0;"><i class="fa-solid fa-circle-info"></i> After completing payment in your app, come back here and tap "I've Paid" below.</p>
+            <!-- UPI ID + Copy (moved to bottom) -->
+            <div id="upi-display" style="display:flex;align-items:center;justify-content:space-between;background:#f8fafc;border:1.5px solid #e2e8f0;border-radius:10px;padding:10px 14px;">
+              <div>
+                <div style="font-size:0.6rem;color:#94a3b8;text-transform:uppercase;font-weight:600;letter-spacing:0.5px;">Or pay manually — UPI ID</div>
+                <div id="upi-id-label" style="font-family:'Poppins',sans-serif;font-weight:700;font-size:0.9rem;color:#155e75;word-break:break-all;">—</div>
+              </div>
+              <button onclick="copyUpiId()" style="background:linear-gradient(135deg,#06b6d4,#0891b2);color:white;border:none;border-radius:8px;padding:8px 16px;font-size:0.75rem;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:5px;font-family:'Inter',sans-serif;white-space:nowrap;">
+                <i class="fa-regular fa-copy"></i> Copy
+              </button>
             </div>
           </div>
 
-          <!-- Confirm Payment Button -->
-          <button id="confirm-paid-btn" onclick="confirmPaid()" class="cart-confirm-btn" style="display:none;">
-            <i class="fa-solid fa-check-circle"></i> I've Paid — Place My Order
-          </button>
+          <!-- Payment Confirmation Popup -->
+          <div id="payment-popup" class="payment-popup-overlay" style="display:none;">
+            <div class="payment-popup-card">
+              <div style="text-align:center;margin-bottom:16px;">
+                <div style="width:56px;height:56px;margin:0 auto 10px;background:linear-gradient(135deg,#ecfdf5,#d1fae5);border-radius:50%;display:flex;align-items:center;justify-content:center;">
+                  <i class="fa-solid fa-indian-rupee-sign" style="font-size:1.5rem;color:#059669;"></i>
+                </div>
+                <h3 style="font-family:'Poppins',sans-serif;font-size:1.05rem;font-weight:800;color:#155e75;margin-bottom:4px;">Have you completed the payment?</h3>
+                <p style="font-size:0.8rem;color:#64748b;">₹<span id="popup-amount">0</span> to <strong id="popup-upi">—</strong></p>
+              </div>
+              <button onclick="confirmPaid()" class="payment-popup-btn paid">
+                <i class="fa-solid fa-check-circle"></i> Yes, I've Paid
+              </button>
+              <button onclick="closePaymentPopup()" class="payment-popup-btn notpaid">
+                <i class="fa-solid fa-arrow-left"></i> Not Paid Yet
+              </button>
+            </div>
+          </div>
 
         </div>
 
@@ -183,7 +193,7 @@
           <!-- Trust Messaging: Contact Admin -->
           <div class="cart-section-card" style="background:linear-gradient(135deg,#fffbeb,#fef3c7);border:2px solid #fcd34d;">
             <h3 style="color:#92400e;"><i class="fa-solid fa-phone-volume"></i> Next Step: Confirm Your Order</h3>
-            <p style="color:#b45309;font-size:0.82rem;margin-bottom:12px;">Please contact the shop owner to confirm your order and arrange delivery. Your order will be processed once confirmed.</p>
+            <p style="color:#b45309;font-size:0.82rem;margin-bottom:12px;">Please contact the shop owner to confirm your order. You can visit the shop to collect your items, or ask if delivery is available to your location.</p>
             <div style="display:flex;gap:8px;flex-wrap:wrap;">
               <a id="contact-call-btn" href="tel:" class="cart-contact-btn" style="background:#2563eb;">
                 <i class="fa-solid fa-phone"></i> Call Now
@@ -406,11 +416,12 @@
           <div class="cart-item-info">
             <div class="cart-item-name">${item.name}</div>
             <div class="cart-item-price">₹${Number(item.price).toLocaleString('en-IN')}</div>
+            ${item.maxQty ? `<div class="cart-item-stock">${item.maxQty} in stock</div>` : ''}
           </div>
           <div class="cart-item-controls">
             <div class="qty-controls">
               <button onclick="changeQty(${i},-1)"><i class="fa-solid fa-minus"></i></button>
-              <span>${item.qty}</span>
+              <input type="number" value="${item.qty}" min="1" max="${item.maxQty || 999}" class="qty-input" onchange="setQty(${i},this.value)" onclick="this.select()">
               <button onclick="changeQty(${i},1)"><i class="fa-solid fa-plus"></i></button>
             </div>
             <button class="cart-remove-btn" onclick="removeItem(${i})"><i class="fa-solid fa-trash"></i></button>
@@ -434,8 +445,29 @@
     function changeQty(index, delta) {
       const cart = getCart();
       if (!cart[index]) return;
-      cart[index].qty += delta;
-      if (cart[index].qty <= 0) cart.splice(index, 1);
+      const newQty = cart[index].qty + delta;
+      if (newQty <= 0) { cart.splice(index, 1); }
+      else if (cart[index].maxQty && newQty > cart[index].maxQty) {
+        showCopyToast(`Only ${cart[index].maxQty} available in stock`);
+        return;
+      } else {
+        cart[index].qty = newQty;
+      }
+      saveCart(cart);
+      renderCart();
+      updateCartBadge();
+    }
+
+    function setQty(index, val) {
+      const cart = getCart();
+      if (!cart[index]) return;
+      let qty = parseInt(val) || 1;
+      if (qty <= 0) qty = 1;
+      if (cart[index].maxQty && qty > cart[index].maxQty) {
+        qty = cart[index].maxQty;
+        showCopyToast(`Only ${cart[index].maxQty} available in stock`);
+      }
+      cart[index].qty = qty;
       saveCart(cart);
       renderCart();
       updateCartBadge();
@@ -472,16 +504,26 @@
         upi: `upi://pay?${params}`
       };
       window.location.href = schemes[app] || schemes.upi;
-      setTimeout(() => {
-        document.getElementById('upi-note').style.display = 'block';
-        document.getElementById('confirm-paid-btn').style.display = 'flex';
-      }, 1500);
+      setTimeout(() => showPaymentPopup(), 1500);
+    }
+
+    function showPaymentPopup() {
+      const cart = getCart();
+      const total = cart.reduce((s, c) => s + (c.price * c.qty), 0);
+      document.getElementById('popup-amount').textContent = total.toLocaleString('en-IN');
+      document.getElementById('popup-upi').textContent = upiData.upi_id || '—';
+      document.getElementById('payment-popup').style.display = 'flex';
+    }
+
+    function closePaymentPopup() {
+      document.getElementById('payment-popup').style.display = 'none';
     }
 
     function copyUpiId() {
       if (!upiData.upi_id) return;
       navigator.clipboard.writeText(upiData.upi_id).then(() => {
         showCopyToast('UPI ID copied! Open your UPI app to pay.');
+        setTimeout(() => showPaymentPopup(), 1500);
       }).catch(() => {
         const t = document.createElement('textarea');
         t.value = upiData.upi_id;
@@ -490,6 +532,7 @@
         document.execCommand('copy');
         document.body.removeChild(t);
         showCopyToast('UPI ID copied! Open your UPI app to pay.');
+        setTimeout(() => showPaymentPopup(), 1500);
       });
     }
 
@@ -503,6 +546,8 @@
 
     // ===== Confirm Payment & Place Order =====
     async function confirmPaid() {
+      closePaymentPopup();
+
       const name = sessionStorage.getItem('agt_cust_name') || '';
       const phone = sessionStorage.getItem('agt_cust_phone') || '';
       const cart = getCart();
@@ -513,9 +558,10 @@
         return;
       }
 
-      const btn = document.getElementById('confirm-paid-btn');
-      btn.disabled = true;
-      btn.innerHTML = '🐠 Placing Order...';
+      // Show inline loading state
+      const checkoutEl = document.getElementById('cart-checkout');
+      const origHTML = checkoutEl.innerHTML;
+      checkoutEl.innerHTML = '<div style="text-align:center;padding:2rem;"><div class="fish-loader"><div class="fish-swim"><span class="fish">🐠</span><span class="fish">🐟</span><span class="fish">🐡</span><div class="bubbles"><span></span><span></span><span></span></div></div><div class="fish-loader-text">Placing your order<span class="dot-anim"></span></div></div></div>';
 
       const items = cart.map(c => ({ name: c.name, price: c.price, qty: c.qty, image: c.image }));
       const total = cart.reduce((s, c) => s + (c.price * c.qty), 0);
@@ -530,8 +576,7 @@
 
       if (error) {
         alert('Failed to place order. Please try again or contact the shop directly.');
-        btn.disabled = false;
-        btn.innerHTML = '<i class="fa-solid fa-check-circle"></i> I\'ve Paid — Place My Order';
+        checkoutEl.innerHTML = origHTML;
         return;
       }
 
@@ -587,6 +632,7 @@
           confirmed: { label: 'Confirmed', bg: '#dcfce7', color: '#166534', icon: 'fa-check' },
           delivered: { label: 'Delivered', bg: '#ecfeff', color: '#0e7490', icon: 'fa-truck' },
           declined: { label: 'Declined', bg: '#fef2f2', color: '#991b1b', icon: 'fa-xmark' },
+          cancelled: { label: 'Cancelled & Refunded', bg: '#fef2f2', color: '#991b1b', icon: 'fa-rotate-left' },
         };
         const s = statusConfig[order.status] || statusConfig.pending;
         const items = order.items || [];

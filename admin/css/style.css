@@ -841,12 +841,45 @@ h1, h2, h3, h4, h5, h6 { font-family: 'Poppins', sans-serif; }
 
 .carousel-track {
   display: flex;
-  transition: transform 0.5s ease;
-  gap: 1.5rem;
+  gap: 1rem;
+  will-change: transform;
+  padding: 8px 0;
 }
 
-.carousel-track .product-card {
-  flex: 0 0 280px;
+/* Navigation Arrows */
+.carousel-nav {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: none;
+  background: rgba(255,255,255,0.95);
+  color: #0891b2;
+  font-size: 0.9rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.15);
+  z-index: 5;
+  transition: all 0.2s;
+  backdrop-filter: blur(4px);
+}
+.carousel-nav:hover {
+  background: #0891b2;
+  color: white;
+  transform: translateY(-50%) scale(1.1);
+}
+.carousel-nav:active { transform: translateY(-50%) scale(0.95); }
+.carousel-nav.left { left: -8px; }
+.carousel-nav.right { right: -8px; }
+.carousel-nav.hidden { opacity: 0; pointer-events: none; }
+
+.carousel-track .product-card,
+.carousel-track > div {
+  flex: 0 0 240px;
 }
 
 /* ===== Filter Bar ===== */

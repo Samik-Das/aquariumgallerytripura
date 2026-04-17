@@ -20,6 +20,7 @@ function updateStats() {
   document.getElementById('stat-confirmed').textContent = allOrders.filter(o => o.status === 'confirmed').length;
   document.getElementById('stat-delivered').textContent = allOrders.filter(o => o.status === 'delivered').length;
   document.getElementById('stat-declined').textContent = allOrders.filter(o => o.status === 'declined').length;
+  document.getElementById('stat-cancelled').textContent = allOrders.filter(o => o.status === 'cancelled').length;
 }
 
 function renderOrders() {
@@ -77,7 +78,7 @@ function renderOrders() {
 }
 
 function renderHistory() {
-  const delivered = allOrders.filter(o => o.status === 'delivered' || o.status === 'declined');
+  const delivered = allOrders.filter(o => o.status === 'delivered' || o.status === 'declined' || o.status === 'cancelled');
   document.getElementById('history-count').textContent = delivered.length;
   const tbody = document.getElementById('history-body');
 
@@ -148,8 +149,7 @@ function viewOrder(id) {
     `;
   } else if (o.status === 'confirmed') {
     actions += `
-      <button class="btn btn-primary" style="background:linear-gradient(135deg,#22c55e,#16a34a);" onclick="updateOrderStatus('${o.id}','delivered')"><i class="fa-solid fa-truck"></i> Mark Delivered</button>
-    `;
+      <button class="btn btn-primary" style="background:linear-gradient(135deg,#22c55e,#16a34a);" onclick="updateOrderStatus('${o.id}','delivered')"><i class="fa-solid fa-truck"></i> Mark Delivered</button>      <button class="btn btn-danger" onclick="updateOrderStatus('${o.id}','cancelled')"><i class="fa-solid fa-rotate-left"></i> Cancel & Refund</button>    `;
   }
 
   document.getElementById('order-modal-actions').innerHTML = actions;
@@ -157,18 +157,34 @@ function viewOrder(id) {
 }
 
 async function updateOrderStatus(id, status) {
-  const labels = { confirmed: 'Confirmed', declined: 'Declined', delivered: 'Delivered' };
-  const yes = await showConfirm('Update Order', `Mark this order as <strong>${labels[status]}</strong>?${status === 'delivered' ? '<br><small style="color:#059669;">This will create a sale entry, update inventory, and award loyalty points.</small>' : ''}`);
+  const labels = { confirmed: 'Confirmed', declined: 'Declined', delivered: 'Delivered', cancelled: 'Cancelled' };
+  let subtitle = '';
+  if (status === 'confirmed') subtitle = '<br><small style="color:#0891b2;">Product quantities will be deducted from inventory.</small>';
+  else if (status === 'delivered') subtitle = '<br><small style="color:#059669;">This will create a sale entry and award loyalty points.</small>';
+  else if (status === 'cancelled') subtitle = '<br><small style="color:#dc2626;">Product quantities will be restored to inventory.</small>';
+
+  const yes = await showConfirm('Update Order', `Mark this order as <strong>${labels[status]}</strong>?${subtitle}`);
   if (!yes) return;
 
   try {
     const { error } = await db.from('online_orders').update({ status }).eq('id', id);
     if (error) throw error;
 
-    // If delivered, create a full sale entry (same as in-shop sale)
-    if (status === 'delivered') {
-      const order = allOrders.find(o => o.id === id);
-      if (order) await createSaleFromOrder(order);
+    const order = allOrders.find(o => o.id === id);
+
+    // On confirm: deduct product quantities
+    if (status === 'confirmed' && order) {
+      await adjustInventory(order, -1);
+    }
+
+    // On delivered: create sale entry + award points (inventory already deducted on confirm)
+    if (status === 'delivered' && order) {
+      await createSaleFromOrder(order);
+    }
+
+    // On cancelled: restore product quantities
+    if (status === 'cancelled' && order) {
+      await adjustInventory(order, 1);
     }
 
     document.getElementById('order-modal').style.display = 'none';
@@ -176,6 +192,18 @@ async function updateOrderStatus(id, status) {
     await loadOrders();
   } catch (err) {
     showToast(err.message, 'error');
+  }
+}
+
+// Adjust inventory: direction = -1 to deduct, +1 to restore
+async function adjustInventory(order, direction) {
+  const items = typeof order.items === 'string' ? JSON.parse(order.items) : order.items;
+  for (const item of items) {
+    const { data: product } = await db.from('products').select('id, quantity').ilike('name', item.name).maybeSingle();
+    if (product) {
+      const newQty = Math.max(0, product.quantity + (item.qty * direction));
+      await db.from('products').update({ quantity: newQty }).eq('id', product.id);
+    }
   }
 }
 
@@ -217,12 +245,7 @@ async function createSaleFromOrder(order) {
         commission_amount: 0
       });
 
-      // Deduct inventory if product found
-      if (product) {
-        await db.from('products').update({
-          quantity: Math.max(0, product.quantity - item.qty)
-        }).eq('id', product.id);
-      }
+      // Inventory already deducted on confirm — no need to deduct again here
     }
 
     const totalAmount = items.reduce((s, i) => s + (i.price * i.qty), 0);
@@ -271,12 +294,13 @@ function getStatusBadge(status) {
     pending: '<span class="badge badge-gold"><i class="fa-solid fa-clock"></i> Pending</span>',
     confirmed: '<span class="badge badge-aqua"><i class="fa-solid fa-check-circle"></i> In Progress</span>',
     delivered: '<span class="badge badge-green"><i class="fa-solid fa-truck"></i> Delivered</span>',
-    declined: '<span class="badge badge-red"><i class="fa-solid fa-xmark"></i> Declined</span>'
+    declined: '<span class="badge badge-red"><i class="fa-solid fa-xmark"></i> Declined</span>',
+    cancelled: '<span class="badge badge-red"><i class="fa-solid fa-rotate-left"></i> Cancelled</span>'
   };
   return map[status] || status;
 }
 
 function getStatusColor(status) {
-  const map = { pending: '#f59e0b', confirmed: '#0891b2', delivered: '#22c55e', declined: '#dc2626' };
+  const map = { pending: '#f59e0b', confirmed: '#0891b2', delivered: '#22c55e', declined: '#dc2626', cancelled: '#dc2626' };
   return map[status] || '#94a3b8';
 }

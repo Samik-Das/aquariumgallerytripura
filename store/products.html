@@ -101,25 +101,28 @@
     let allProducts = [];
     let currentFiltered = [];
     let displayedCount = 0;
+    let categoryOrder = {};
     const PAGE_SIZE = 20;
 
     (async () => {
       await Promise.all([loadCategories(), loadProducts()]);
+      filterProducts();
       applyUrlFilter();
+      highlightProduct();
     })();
 
     async function loadCategories() {
-      const { data } = await db.from('categories').select('name').order('name');
+      const { data } = await db.from('categories').select('name').order('created_at');
       const select = document.getElementById('category-filter');
-      (data || []).forEach(c => {
+      (data || []).forEach((c, i) => {
+        categoryOrder[c.name] = i;
         select.innerHTML += `<option value="${c.name}">${c.name}</option>`;
       });
     }
 
     async function loadProducts() {
       const { data } = await db.from('products').select('*').order('name');
-      allProducts = (data || []).filter(p => p.quantity > 0 || p.image_url);
-      filterProducts();
+      allProducts = data || [];
     }
 
     function applyUrlFilter() {
@@ -129,6 +132,33 @@
         document.getElementById('category-filter').value = cat;
         filterProducts();
       }
+    }
+
+    function highlightProduct() {
+      const params = new URLSearchParams(window.location.search);
+      const pid = params.get('highlight');
+      if (!pid) return;
+      // Clear category filter so product is visible regardless of category
+      document.getElementById('category-filter').value = '';
+      filterProducts();
+      // Load all products so the highlighted one is visible
+      const idx = currentFiltered.findIndex(p => String(p.id) === String(pid));
+      if (idx >= 0 && idx >= displayedCount) {
+        while (displayedCount <= idx) loadMore();
+      }
+      setTimeout(() => {
+        const card = document.querySelector(`[data-product-id="${pid}"]`);
+        if (card) {
+          card.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          card.style.outline = '3px solid #0891b2';
+          card.style.outlineOffset = '3px';
+          card.style.borderRadius = '14px';
+          setTimeout(() => {
+            card.style.transition = 'outline 1.5s ease';
+            card.style.outline = '3px solid transparent';
+          }, 2500);
+        }
+      }, 300);
     }
 
     function filterProducts() {
@@ -145,6 +175,16 @@
       if (sort === 'low') currentFiltered.sort((a, b) => a.selling_price - b.selling_price);
       else if (sort === 'high') currentFiltered.sort((a, b) => b.selling_price - a.selling_price);
       else if (sort === 'name') currentFiltered.sort((a, b) => a.name.localeCompare(b.name));
+
+      // Sort: in-stock grouped by category order first, then out-of-stock grouped by category order
+      currentFiltered.sort((a, b) => {
+        const aOut = a.quantity > 0 ? 0 : 1;
+        const bOut = b.quantity > 0 ? 0 : 1;
+        if (aOut !== bOut) return aOut - bOut;
+        const aCat = categoryOrder[a.category] ?? 999;
+        const bCat = categoryOrder[b.category] ?? 999;
+        return aCat - bCat;
+      });
 
       displayedCount = 0;
       document.getElementById('product-grid').innerHTML = '';
@@ -241,7 +281,7 @@
         </button>`;
 
       return `
-        <div class="store-product-card${isOut ? ' out-of-stock' : ''}">
+        <div class="store-product-card${isOut ? ' out-of-stock' : ''}" data-product-id="${p.id}">
           <div class="prod-img">
             ${p.image_url
               ? `<img src="${p.image_url}" alt="${p.name}" loading="lazy" decoding="async">`
@@ -251,6 +291,7 @@
           </div>
           <div class="prod-body">
             <div class="prod-name">${p.name}</div>
+            ${p.description ? `<div class="prod-desc">${p.description}</div>` : ''}
             <div class="prod-bottom">
               <span class="prod-price">₹${Number(p.selling_price).toLocaleString('en-IN')}</span>
               ${stockPill}

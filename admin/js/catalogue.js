@@ -4,6 +4,7 @@ let allProducts = [];
 let filteredProducts = [];
 let editImageFile = null;
 let displayedCount = 0;
+let categoryOrder = {};
 const PAGE_SIZE = 20;
 
 // Initialize
@@ -17,25 +18,26 @@ const PAGE_SIZE = 20;
 function applyUrlFilter() {
   const params = new URLSearchParams(window.location.search);
   const cat = params.get('category');
+  const saved = sessionStorage.getItem('catalogue_filter_cat');
   if (cat) {
     document.getElementById('filter-category').value = cat;
-    filterProducts();
+  } else if (saved) {
+    document.getElementById('filter-category').value = saved;
   }
+  filterProducts();
 }
 
 async function loadProducts() {
   const { data } = await db.from('products').select('*').order('name');
   allProducts = data || [];
-  filteredProducts = [...allProducts];
-  displayedCount = 0;
-  renderProducts();
   updateStats();
 }
 
 async function loadCategoryFilter() {
-  const { data } = await db.from('categories').select('name').order('name');
+  const { data } = await db.from('categories').select('name').order('created_at');
   const select = document.getElementById('filter-category');
-  (data || []).forEach(c => {
+  (data || []).forEach((c, i) => {
+    categoryOrder[c.name] = i;
     select.innerHTML += `<option value="${c.name}">${c.name}</option>`;
   });
 }
@@ -56,10 +58,24 @@ function filterProducts() {
   const search = document.getElementById('search-input').value.toLowerCase().trim();
   const category = document.getElementById('filter-category').value;
 
+  // Persist category filter across refresh
+  if (category) sessionStorage.setItem('catalogue_filter_cat', category);
+  else sessionStorage.removeItem('catalogue_filter_cat');
+
   filteredProducts = allProducts.filter(p => {
     const matchSearch = !search || p.name.toLowerCase().includes(search) || p.category.toLowerCase().includes(search);
     const matchCat = !category || p.category === category;
     return matchSearch && matchCat;
+  });
+
+  // Sort: in-stock grouped by category order first, then out-of-stock grouped by category order
+  filteredProducts.sort((a, b) => {
+    const aOut = a.quantity > 0 ? 0 : 1;
+    const bOut = b.quantity > 0 ? 0 : 1;
+    if (aOut !== bOut) return aOut - bOut;
+    const aCat = categoryOrder[a.category] ?? 999;
+    const bCat = categoryOrder[b.category] ?? 999;
+    return aCat - bCat;
   });
 
   displayedCount = 0;
@@ -116,6 +132,7 @@ function renderProductCard(p) {
       <div class="product-info">
         <div class="product-category">${p.category}</div>
         <div class="product-name">${p.name}</div>
+        ${p.description ? `<div style="font-size:0.65rem;color:#94a3b8;line-height:1.3;margin-bottom:2px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;">${p.description}</div>` : ''}
         <div class="product-prices">
           <span class="product-sp">₹${Number(p.selling_price).toLocaleString('en-IN')}</span>
           <span class="product-bp">BP:₹${Number(p.buying_price).toLocaleString('en-IN')}</span>
@@ -144,6 +161,7 @@ function openEditModal(id) {
   document.getElementById('edit-sp').value = product.selling_price;
   document.getElementById('edit-bp').value = product.buying_price;
   document.getElementById('edit-qty').value = product.quantity;
+  document.getElementById('edit-description').value = product.description || '';
   document.getElementById('edit-product-id').value = id;
   editImageFile = null;
   document.getElementById('edit-modal').style.display = 'flex';
@@ -162,12 +180,14 @@ async function saveEditProduct() {
   const sp = parseFloat(document.getElementById('edit-sp').value);
   const bp = parseFloat(document.getElementById('edit-bp').value);
   const qty = parseInt(document.getElementById('edit-qty').value);
+  const description = document.getElementById('edit-description').value.trim();
 
   try {
     const updates = {
       selling_price: sp,
       buying_price: bp,
       quantity: qty,
+      description: description || null,
       updated_at: new Date().toISOString()
     };
 

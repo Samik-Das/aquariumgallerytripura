@@ -94,6 +94,8 @@
         <h2>Featured Products</h2>
         <div class="title-accent"></div>
       </div>
+      <button class="carousel-nav left" id="carousel-left" onclick="scrollCarousel(-1)"><i class="fa-solid fa-chevron-left"></i></button>
+      <button class="carousel-nav right" id="carousel-right" onclick="scrollCarousel(1)"><i class="fa-solid fa-chevron-right"></i></button>
       <div class="carousel-track" id="carousel-track">
         <div class="fish-loader" id="carousel-loader">
           <div class="fish-swim"><span class="fish">🐠</span><span class="fish">🐟</span><span class="fish">🐡</span><div class="bubbles"><span></span><span></span><span></span></div></div>
@@ -269,7 +271,7 @@
     }
 
     async function loadCategories() {
-      const { data } = await db.from('categories').select('*').order('name');
+      const { data } = await db.from('categories').select('*').order('created_at');
       const grid = document.getElementById('category-grid');
       if (!data || data.length === 0) {
         document.getElementById('categories-section').style.display = 'none';
@@ -288,6 +290,15 @@
       `).join('');
     }
 
+    let carouselProducts = []; // Store for addToCart
+    let rafId = null;
+    let carouselPos = 0;
+    let carouselSpeed = 0.6; // px per frame
+    let carouselPaused = false;
+    let resumeTimer = null;
+    let oneSetWidth = 0;
+    const CARD_GAP = 16; // 1rem
+
     async function loadCarousel() {
       const { data } = await db.from('products').select('*').gt('quantity', 0).order('created_at', { ascending: false }).limit(20);
       const track = document.getElementById('carousel-track');
@@ -296,33 +307,121 @@
         return;
       }
 
-      const items = data.length > 3 ? [...data, ...data] : data; // Duplicate for seamless scroll
-      track.innerHTML = items.map(p => {
+      carouselProducts = data;
+      const doubled = [...data, ...data];
+
+      track.innerHTML = doubled.map(p => {
         const isLow = p.quantity > 0 && p.quantity < 5;
         return `
-          <div class="carousel-card">
+          <div class="carousel-card" onclick="goToProduct('${p.id}')">
+            <button class="carousel-cart-btn" onclick="event.stopPropagation();addToCartHome('${p.id}')" title="Add to Cart">
+              <i class="fa-solid fa-cart-plus"></i>
+            </button>
             <div class="img-wrap">
               ${p.image_url ? `<img src="${p.image_url}" alt="${p.name}" loading="lazy" decoding="async">` : '<i class="fa-solid fa-fish" style="font-size:2.5rem;color:#a5f3fc;"></i>'}
             </div>
             <div class="info">
               <h4>${p.name}</h4>
+              ${p.description ? `<div class="carousel-desc">${p.description}</div>` : ''}
               <div class="price">₹${Number(p.selling_price).toLocaleString('en-IN')}</div>
               <div class="stock ${isLow ? 'stock-low' : 'stock-available'}">
-                ${isLow ? `Only ${p.quantity} left!` : `${p.quantity} available`}
+                ${isLow ? `Only ${p.quantity} left!` : `${p.quantity} in stock`}
               </div>
             </div>
           </div>
         `;
       }).join('');
 
-      // Auto-scroll
-      let pos = 0;
-      const cardW = 252;
-      setInterval(() => {
-        pos++;
-        if (pos >= data.length) pos = 0;
-        track.style.transform = `translateX(-${pos * cardW}px)`;
-      }, 5000);
+      // Calculate one set width from actual DOM
+      const cards = track.querySelectorAll('.carousel-card');
+      const cardW = cards[0].offsetWidth + CARD_GAP;
+      oneSetWidth = cardW * data.length;
+
+      startCarouselRAF();
+
+      // Touch support — pause while touching, resume after release
+      track.addEventListener('touchstart', () => pauseCarousel(), { passive: true });
+      track.addEventListener('touchend', () => scheduleResume(), { passive: true });
+      track.addEventListener('mouseenter', () => pauseCarousel());
+      track.addEventListener('mouseleave', () => scheduleResume());
+    }
+
+    function startCarouselRAF() {
+      if (rafId) cancelAnimationFrame(rafId);
+      function tick() {
+        if (!carouselPaused) {
+          carouselPos += carouselSpeed;
+          if (carouselPos >= oneSetWidth) carouselPos -= oneSetWidth;
+          if (carouselPos < 0) carouselPos += oneSetWidth;
+          const track = document.getElementById('carousel-track');
+          if (track) track.style.transform = `translateX(-${carouselPos}px)`;
+        }
+        rafId = requestAnimationFrame(tick);
+      }
+      rafId = requestAnimationFrame(tick);
+    }
+
+    function scrollCarousel(dir) {
+      const cardW = (oneSetWidth / carouselProducts.length) || 186;
+      carouselPos += dir * cardW * 2;
+      if (carouselPos >= oneSetWidth) carouselPos -= oneSetWidth;
+      if (carouselPos < 0) carouselPos += oneSetWidth;
+      const track = document.getElementById('carousel-track');
+      if (track) track.style.transform = `translateX(-${carouselPos}px)`;
+      pauseCarousel();
+      scheduleResume();
+    }
+
+    function pauseCarousel() {
+      carouselPaused = true;
+      clearTimeout(resumeTimer);
+    }
+
+    function scheduleResume() {
+      clearTimeout(resumeTimer);
+      resumeTimer = setTimeout(() => { carouselPaused = false; }, 4000);
+    }
+
+    // Add to cart from homepage carousel
+    function addToCartHome(productId) {
+      const p = carouselProducts.find(x => String(x.id) === String(productId));
+      if (!p || p.quantity <= 0) return;
+      const cart = getCart();
+      const existing = cart.find(c => c.id === p.id);
+      if (existing) {
+        if (existing.qty >= p.quantity) { showCartToast('Max available quantity reached'); return; }
+        existing.qty++;
+      } else {
+        cart.push({ id: p.id, name: p.name, price: p.selling_price, image: p.image_url || '', qty: 1, maxQty: p.quantity });
+      }
+      saveCart(cart);
+      updateCartBadge();
+      showCartToast(`${p.name} added to cart`);
+    }
+
+    function getCart() {
+      try { return JSON.parse(localStorage.getItem('agt_cart') || '[]'); }
+      catch { return []; }
+    }
+    function saveCart(cart) { localStorage.setItem('agt_cart', JSON.stringify(cart)); }
+    function updateCartBadge() {
+      const count = getCart().reduce((s, c) => s + c.qty, 0);
+      document.querySelectorAll('.cart-badge').forEach(b => {
+        b.textContent = count;
+        b.style.display = count > 0 ? 'flex' : 'none';
+      });
+    }
+    function showCartToast(msg) {
+      let t = document.getElementById('cart-toast');
+      if (!t) { t = document.createElement('div'); t.id = 'cart-toast'; document.body.appendChild(t); }
+      t.textContent = msg;
+      t.className = 'cart-toast show';
+      setTimeout(() => t.className = 'cart-toast', 2000);
+    }
+
+    // Click product card → go to products page and scroll to it
+    function goToProduct(productId) {
+      window.location.href = `products.html?highlight=${productId}`;
     }
 
     async function loadSocials() {

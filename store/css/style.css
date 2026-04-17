@@ -421,23 +421,58 @@ h1, h2, h3, h4, h5, h6 { font-family: 'Poppins', sans-serif; }
   max-width: 1200px;
   margin: 0 auto;
   padding: 0 1.5rem;
+  position: relative;
   overflow: hidden;
 }
 
 .carousel-track {
   display: flex;
-  gap: 1.25rem;
-  transition: transform 0.5s ease;
+  gap: 1rem;
+  will-change: transform;
+  padding: 8px 0;
 }
 
+/* Navigation Arrows */
+.carousel-nav {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: none;
+  background: rgba(255,255,255,0.95);
+  color: #0891b2;
+  font-size: 0.9rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.15);
+  z-index: 5;
+  transition: all 0.2s;
+  backdrop-filter: blur(4px);
+}
+.carousel-nav:hover {
+  background: #0891b2;
+  color: white;
+  transform: translateY(-50%) scale(1.1);
+}
+.carousel-nav:active { transform: translateY(-50%) scale(0.95); }
+.carousel-nav.left { left: 4px; }
+.carousel-nav.right { right: 4px; }
+.carousel-nav.hidden { opacity: 0; pointer-events: none; }
+
 .carousel-card {
-  flex: 0 0 180px;
+  flex: 0 0 170px;
   background: white;
-  border-radius: 10px;
+  border-radius: 12px;
   overflow: hidden;
   box-shadow: 0 2px 8px rgba(0,0,0,0.06);
   border: 1px solid rgba(0,0,0,0.04);
   transition: all 0.3s;
+  cursor: pointer;
+  position: relative;
 }
 
 .carousel-card:hover {
@@ -461,26 +496,64 @@ h1, h2, h3, h4, h5, h6 { font-family: 'Poppins', sans-serif; }
 }
 
 .carousel-card .info {
-  padding: 0.6rem 0.75rem;
+  padding: 0.5rem 0.6rem 0.4rem;
 }
 
 .carousel-card .info h4 {
-  font-size: 0.78rem;
+  font-size: 0.72rem;
   font-weight: 600;
   color: var(--aqua-800);
-  margin-bottom: 2px;
+  margin-bottom: 1px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.carousel-desc {
+  font-size: 0.6rem;
+  color: #94a3b8;
+  line-height: 1.2;
+  margin-bottom: 1px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .carousel-card .info .price {
   font-family: 'Poppins', sans-serif;
-  font-size: 0.9rem;
+  font-size: 0.85rem;
   font-weight: 700;
   color: #059669;
 }
 
 .carousel-card .info .stock {
-  font-size: 0.68rem;
-  margin-top: 2px;
+  font-size: 0.65rem;
+  margin-top: 1px;
+}
+
+.carousel-card .carousel-cart-btn {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  border: none;
+  background: rgba(255,255,255,0.95);
+  color: #0891b2;
+  font-size: 0.75rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+  transition: all 0.2s;
+  z-index: 1;
+}
+.carousel-card .carousel-cart-btn:hover {
+  background: #0891b2;
+  color: white;
+  transform: scale(1.1);
 }
 
 .stock-available { color: #059669; }
@@ -628,7 +701,18 @@ h1, h2, h3, h4, h5, h6 { font-family: 'Poppins', sans-serif; }
   font-size: 0.78rem;
   color: var(--aqua-800);
   line-height: 1.3;
-  margin-bottom: 6px;
+  margin-bottom: 2px;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.store-product-card .prod-desc {
+  font-size: 0.65rem;
+  color: #94a3b8;
+  line-height: 1.3;
+  margin-bottom: 4px;
   display: -webkit-box;
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
@@ -1234,6 +1318,7 @@ h1, h2, h3, h4, h5, h6 { font-family: 'Poppins', sans-serif; }
   margin-bottom: 8px;
   box-shadow: 0 1px 4px rgba(0,0,0,0.06);
   border: 1px solid rgba(0,0,0,0.04);
+  flex-wrap: nowrap;
 }
 .cart-item-img {
   width: 56px;
@@ -1273,6 +1358,11 @@ h1, h2, h3, h4, h5, h6 { font-family: 'Poppins', sans-serif; }
   color: #059669;
   margin-top: 2px;
 }
+.cart-item-stock {
+  font-size: 0.65rem;
+  color: #94a3b8;
+  margin-top: 1px;
+}
 .cart-item-controls {
   display: flex;
   flex-direction: column;
@@ -1302,14 +1392,21 @@ h1, h2, h3, h4, h5, h6 { font-family: 'Poppins', sans-serif; }
   transition: background 0.15s;
 }
 .qty-controls button:hover { background: #e2e8f0; }
-.qty-controls span {
-  width: 28px;
+.qty-input {
+  width: 42px;
   text-align: center;
   font-weight: 700;
   font-size: 0.8rem;
   color: #155e75;
   font-family: 'Poppins', sans-serif;
+  border: none;
+  background: none;
+  outline: none;
+  -moz-appearance: textfield;
+  padding: 0;
 }
+.qty-input::-webkit-outer-spin-button,
+.qty-input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
 
 .cart-remove-btn {
   background: none;
@@ -1441,6 +1538,60 @@ h1, h2, h3, h4, h5, h6 { font-family: 'Poppins', sans-serif; }
 }
 .cart-confirm-btn:hover { transform: scale(1.01); }
 .cart-confirm-btn:active { transform: scale(0.98); }
+
+/* Payment Confirmation Popup */
+.payment-popup-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.5);
+  backdrop-filter: blur(4px);
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1.5rem;
+}
+.payment-popup-card {
+  background: white;
+  border-radius: 20px;
+  padding: 28px 24px;
+  max-width: 360px;
+  width: 100%;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.25);
+  animation: popupIn 0.3s ease;
+}
+@keyframes popupIn {
+  from { opacity: 0; transform: scale(0.9) translateY(20px); }
+  to { opacity: 1; transform: scale(1) translateY(0); }
+}
+.payment-popup-btn {
+  width: 100%;
+  padding: 14px;
+  border: none;
+  border-radius: 12px;
+  font-size: 0.9rem;
+  font-weight: 700;
+  font-family: 'Poppins', sans-serif;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  transition: all 0.2s;
+}
+.payment-popup-btn.paid {
+  background: linear-gradient(135deg, #059669, #047857);
+  color: white;
+  box-shadow: 0 4px 16px rgba(5,150,105,0.3);
+  margin-bottom: 10px;
+}
+.payment-popup-btn.paid:hover { transform: scale(1.02); }
+.payment-popup-btn.paid:active { transform: scale(0.97); }
+.payment-popup-btn.notpaid {
+  background: #f1f5f9;
+  color: #64748b;
+}
+.payment-popup-btn.notpaid:hover { background: #e2e8f0; }
 
 /* Contact Action Buttons */
 .cart-contact-btn {

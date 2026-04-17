@@ -24,7 +24,7 @@ async function loadDropdowns() {
   });
 
   // Load categories
-  const { data: cats } = await db.from('categories').select('*').order('name');
+  const { data: cats } = await db.from('categories').select('*').order('created_at');
   allCategories = cats || [];
 
   const catSelect = document.getElementById('category-select');
@@ -45,6 +45,9 @@ function onProductSelect() {
     if (category) document.getElementById('category-select').value = category;
     if (sp && Number(sp) > 0) document.getElementById('selling-price').value = sp;
     if (bp && Number(bp) > 0) document.getElementById('buying-price').value = bp;
+    // Load description for existing product
+    const product = allProducts.find(p => p.id === option.value);
+    document.getElementById('product-description').value = product?.description || '';
   }
 }
 
@@ -132,6 +135,7 @@ async function saveProduct(e) {
   const buyingPrice = parseFloat(document.getElementById('buying-price').value);
   const sellingPrice = parseFloat(document.getElementById('selling-price').value);
   const quantity = parseInt(document.getElementById('quantity').value);
+  const description = document.getElementById('product-description').value.trim();
 
   if (!selectedValue) { showToast('Select a product name', 'error'); resetBtn(); return; }
   if (!category) { showToast('Select a category', 'error'); resetBtn(); return; }
@@ -163,7 +167,8 @@ async function saveProduct(e) {
         category,
         buying_price: buyingPrice,
         selling_price: sellingPrice,
-        quantity
+        quantity,
+        description: description || null
       };
       if (imageUrl) insertData.image_url = imageUrl;
 
@@ -182,6 +187,7 @@ async function saveProduct(e) {
         selling_price: sellingPrice,
         quantity: newQuantity,
         category,
+        description: description || null,
         updated_at: new Date().toISOString()
       };
       if (imageUrl) updates.image_url = imageUrl;

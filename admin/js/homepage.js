@@ -3,8 +3,6 @@
 let bannerData = null;
 let categoryCards = [];
 let socialLinks = [];
-let carouselInterval = null;
-let carouselPosition = 0;
 let cardImageFile = null;
 
 // Initialize
@@ -125,7 +123,7 @@ async function uploadBannerImage(event) {
 
 // ===== Category Cards (from categories table) =====
 async function loadCategoryCards() {
-  const { data } = await db.from('categories').select('*').order('name');
+  const { data } = await db.from('categories').select('*').order('created_at');
   categoryCards = data || [];
   renderCategoryCards();
 }
@@ -252,6 +250,15 @@ async function deleteCard(id) {
 }
 
 // ===== Product Carousel =====
+let adminRafId = null;
+let adminCarouselPos = 0;
+let adminCarouselSpeed = 0.6;
+let adminCarouselPaused = false;
+let adminResumeTimer = null;
+let adminOneSetWidth = 0;
+let adminItemCount = 0;
+const ADMIN_CARD_GAP = 16;
+
 async function loadProductCarousel() {
   const { data } = await db.from('products').select('*').gt('quantity', 0).order('created_at', { ascending: false }).limit(20);
   const container = document.getElementById('product-carousel');
@@ -264,11 +271,11 @@ async function loadProductCarousel() {
   }
 
   empty.style.display = 'none';
+  adminItemCount = data.length;
+  const doubled = [...data, ...data];
 
-  // Duplicate items for infinite scroll effect (only if more than 3 products)
-  const items = data.length > 3 ? [...data, ...data] : data;
-  container.innerHTML = items.map(p => `
-    <div class="flex-shrink-0 w-64 bg-white rounded-xl overflow-hidden shadow-md border border-gray-100">
+  container.innerHTML = doubled.map(p => `
+    <div class="flex-shrink-0 bg-white rounded-xl overflow-hidden shadow-md border border-gray-100" style="flex:0 0 240px;">
       <div class="h-36 bg-gradient-to-br from-cyan-50 to-amber-50 flex items-center justify-center overflow-hidden">
         ${p.image_url
           ? `<img src="${p.image_url}" alt="${p.name}" class="w-full h-full object-cover" loading="lazy" decoding="async">`
@@ -276,7 +283,8 @@ async function loadProductCarousel() {
         }
       </div>
       <div class="p-3">
-        <h4 class="font-heading font-semibold text-sm text-aqua-800">${p.name}</h4>
+        <h4 class="font-heading font-semibold text-sm text-aqua-800" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${p.name}</h4>
+        ${p.description ? `<p style="font-size:0.65rem;color:#94a3b8;line-height:1.2;margin:1px 0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${p.description}</p>` : ''}
         <p class="text-xs text-gray-400 uppercase">${p.category}</p>
         <div class="flex items-baseline gap-2 mt-1">
           <span class="font-heading font-bold text-green-600">₹${Number(p.selling_price).toLocaleString('en-IN')}</span>
@@ -286,23 +294,53 @@ async function loadProductCarousel() {
     </div>
   `).join('');
 
-  // Auto-scroll carousel
-  startCarousel(data.length);
+  // Calculate one set width from actual DOM
+  const cards = container.children;
+  const cardW = cards[0].offsetWidth + ADMIN_CARD_GAP;
+  adminOneSetWidth = cardW * data.length;
+
+  startAdminCarouselRAF();
+
+  container.addEventListener('touchstart', () => pauseAdminCarousel(), { passive: true });
+  container.addEventListener('touchend', () => scheduleAdminResume(), { passive: true });
+  container.addEventListener('mouseenter', () => pauseAdminCarousel());
+  container.addEventListener('mouseleave', () => scheduleAdminResume());
 }
 
-function startCarousel(totalItems) {
-  if (carouselInterval) clearInterval(carouselInterval);
-  const cardWidth = 272; // 256px card + 16px gap
-  let position = 0;
-
-  carouselInterval = setInterval(() => {
-    position++;
-    if (position >= totalItems) position = 0;
-    const track = document.getElementById('product-carousel');
-    if (track) {
-      track.style.transform = `translateX(-${position * cardWidth}px)`;
+function startAdminCarouselRAF() {
+  if (adminRafId) cancelAnimationFrame(adminRafId);
+  function tick() {
+    if (!adminCarouselPaused) {
+      adminCarouselPos += adminCarouselSpeed;
+      if (adminCarouselPos >= adminOneSetWidth) adminCarouselPos -= adminOneSetWidth;
+      if (adminCarouselPos < 0) adminCarouselPos += adminOneSetWidth;
+      const track = document.getElementById('product-carousel');
+      if (track) track.style.transform = `translateX(-${adminCarouselPos}px)`;
     }
-  }, 5000);
+    adminRafId = requestAnimationFrame(tick);
+  }
+  adminRafId = requestAnimationFrame(tick);
+}
+
+function scrollAdminCarousel(dir) {
+  const cardW = adminItemCount > 0 ? (adminOneSetWidth / adminItemCount) : 256;
+  adminCarouselPos += dir * cardW * 2;
+  if (adminCarouselPos >= adminOneSetWidth) adminCarouselPos -= adminOneSetWidth;
+  if (adminCarouselPos < 0) adminCarouselPos += adminOneSetWidth;
+  const track = document.getElementById('product-carousel');
+  if (track) track.style.transform = `translateX(-${adminCarouselPos}px)`;
+  pauseAdminCarousel();
+  scheduleAdminResume();
+}
+
+function pauseAdminCarousel() {
+  adminCarouselPaused = true;
+  clearTimeout(adminResumeTimer);
+}
+
+function scheduleAdminResume() {
+  clearTimeout(adminResumeTimer);
+  adminResumeTimer = setTimeout(() => { adminCarouselPaused = false; }, 4000);
 }
 
 // ===== Social Links =====
