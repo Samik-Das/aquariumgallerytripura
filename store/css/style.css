@@ -109,32 +109,53 @@
   top: 78%;
   font-size: 1rem;
   opacity: 0.4;
-  animation: splashFishSwim1 12s infinite ease-in-out reverse;
+  animation: splashFishSwim2 12s infinite ease-in-out;
   animation-delay: 0.5s;
 }
+.splash-fish5 {
+  top: 15%;
+  font-size: 1.3rem;
+  opacity: 0.6;
+  animation: splashFishSwim1 9s infinite ease-in-out;
+  animation-delay: 1.8s;
+}
+.splash-fish6 {
+  top: 35%;
+  font-size: 0.9rem;
+  opacity: 0.5;
+  animation: splashFishSwim3 6s infinite ease-in-out;
+  animation-delay: 3.2s;
+}
+.splash-fish7 {
+  top: 85%;
+  font-size: 0.8rem;
+  opacity: 0.3;
+  animation: splashFishSwim2 11s infinite ease-in-out;
+  animation-delay: 2.7s;
+}
 @keyframes splashFishSwim1 {
-  0% { right: -10%; left: auto; transform: scaleX(-1) translateY(0); }
-  25% { transform: scaleX(-1) translateY(-15px); }
-  50% { right: 110%; transform: scaleX(-1) translateY(0); }
-  51% { transform: scaleX(1) translateY(0); }
-  75% { transform: scaleX(1) translateY(10px); }
-  100% { right: -10%; transform: scaleX(1) translateY(0); }
+  0% { right: -10%; left: auto; transform: scaleX(1) translateY(0); }
+  25% { transform: scaleX(1) translateY(-15px); }
+  50% { right: 110%; transform: scaleX(1) translateY(0); }
+  51% { transform: scaleX(-1) translateY(0); }
+  75% { transform: scaleX(-1) translateY(10px); }
+  100% { right: -10%; transform: scaleX(-1) translateY(0); }
 }
 @keyframes splashFishSwim2 {
-  0% { left: -10%; right: auto; transform: scaleX(1) translateY(0); }
-  25% { transform: scaleX(1) translateY(-20px); }
-  50% { left: 110%; transform: scaleX(1) translateY(0); }
-  51% { transform: scaleX(-1) translateY(0); }
-  75% { transform: scaleX(-1) translateY(12px); }
-  100% { left: -10%; transform: scaleX(-1) translateY(0); }
+  0% { left: -10%; right: auto; transform: scaleX(-1) translateY(0); }
+  25% { transform: scaleX(-1) translateY(-20px); }
+  50% { left: 110%; transform: scaleX(-1) translateY(0); }
+  51% { transform: scaleX(1) translateY(0); }
+  75% { transform: scaleX(1) translateY(12px); }
+  100% { left: -10%; transform: scaleX(1) translateY(0); }
 }
 @keyframes splashFishSwim3 {
-  0% { right: -8%; left: auto; transform: scaleX(-1) translateY(5px); }
-  30% { transform: scaleX(-1) translateY(-10px); }
-  50% { right: 108%; transform: scaleX(-1) translateY(-5px); }
-  51% { transform: scaleX(1) translateY(-5px); }
-  80% { transform: scaleX(1) translateY(8px); }
-  100% { right: -8%; transform: scaleX(1) translateY(5px); }
+  0% { right: -8%; left: auto; transform: scaleX(1) translateY(5px); }
+  30% { transform: scaleX(1) translateY(-10px); }
+  50% { right: 108%; transform: scaleX(1) translateY(-5px); }
+  51% { transform: scaleX(-1) translateY(-5px); }
+  80% { transform: scaleX(-1) translateY(8px); }
+  100% { right: -8%; transform: scaleX(-1) translateY(5px); }
 }
 
 /* Center content */
