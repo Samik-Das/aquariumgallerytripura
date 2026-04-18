@@ -342,7 +342,7 @@
     const CARD_GAP = 16; // 1rem
 
     async function loadCarousel() {
-      const { data } = await db.from('products').select('*').gt('quantity', 0).order('created_at', { ascending: false }).limit(20);
+      const { data } = await db.from('products').select('*').eq('is_featured', true).order('created_at', { ascending: false }).limit(20);
       const track = document.getElementById('carousel-track');
       if (!data || data.length === 0) {
         document.getElementById('carousel-section').style.display = 'none';
@@ -354,11 +354,12 @@
 
       track.innerHTML = doubled.map(p => {
         const isLow = p.quantity > 0 && p.quantity < 5;
+        const isOut = p.quantity <= 0;
         return `
           <div class="carousel-card" onclick="goToProduct('${p.id}')">
-            <button class="carousel-cart-btn" onclick="event.stopPropagation();addToCartHome('${p.id}')" title="Add to Cart">
+            ${!isOut ? `<button class="carousel-cart-btn" onclick="event.stopPropagation();addToCartHome('${p.id}')" title="Add to Cart">
               <i class="fa-solid fa-cart-plus"></i>
-            </button>
+            </button>` : ''}
             <div class="img-wrap">
               ${p.image_url ? `<img src="${p.image_url}" alt="${p.name}" loading="lazy" decoding="async">` : '<i class="fa-solid fa-fish" style="font-size:2.5rem;color:#a5f3fc;"></i>'}
             </div>
@@ -366,8 +367,8 @@
               <h4>${p.name}</h4>
               ${p.description ? `<div class="carousel-desc">${p.description}</div>` : ''}
               <div class="price">₹${Number(p.selling_price).toLocaleString('en-IN')}</div>
-              <div class="stock ${isLow ? 'stock-low' : 'stock-available'}">
-                ${isLow ? `Only ${p.quantity} left!` : `${p.quantity} in stock`}
+              <div class="stock ${isOut ? 'stock-out' : isLow ? 'stock-low' : 'stock-available'}">
+                ${isOut ? 'Out of Stock' : isLow ? `Only ${p.quantity} left!` : `${p.quantity} in stock`}
               </div>
             </div>
           </div>

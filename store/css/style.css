@@ -974,6 +974,7 @@ h1, h2, h3, h4, h5, h6 { font-family: 'Poppins', sans-serif; }
 
 .stock-available { color: #059669; }
 .stock-low { color: #dc2626; font-weight: 600; }
+.stock-out { color: #9ca3af; font-weight: 600; text-decoration: line-through; }
 
 /* ===== Quick View Popup ===== */
 .qv-overlay {

@@ -283,7 +283,7 @@ let adminItemCount = 0;
 const ADMIN_CARD_GAP = 16;
 
 async function loadProductCarousel() {
-  const { data } = await db.from('products').select('*').gt('quantity', 0).order('created_at', { ascending: false }).limit(20);
+  const { data } = await db.from('products').select('*').eq('is_featured', true).order('created_at', { ascending: false }).limit(20);
   const container = document.getElementById('product-carousel');
   const empty = document.getElementById('carousel-empty');
 
@@ -297,25 +297,35 @@ async function loadProductCarousel() {
   adminItemCount = data.length;
   const doubled = [...data, ...data];
 
-  container.innerHTML = doubled.map(p => `
-    <div class="flex-shrink-0 bg-white rounded-xl overflow-hidden shadow-md border border-gray-100" style="flex:0 0 240px;">
-      <div class="h-36 bg-gradient-to-br from-cyan-50 to-amber-50 flex items-center justify-center overflow-hidden">
-        ${p.image_url
-          ? `<img src="${p.image_url}" alt="${p.name}" class="w-full h-full object-cover" loading="lazy" decoding="async">`
-          : `<i class="fa-solid fa-fish text-3xl text-cyan-200"></i>`
-        }
-      </div>
-      <div class="p-3">
-        <h4 class="font-heading font-semibold text-sm text-aqua-800" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${p.name}</h4>
-        ${p.description ? `<p style="font-size:0.65rem;color:#94a3b8;line-height:1.2;margin:1px 0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${p.description}</p>` : ''}
-        <p class="text-xs text-gray-400 uppercase">${p.category}</p>
-        <div class="flex items-baseline gap-2 mt-1">
-          <span class="font-heading font-bold text-green-600">₹${Number(p.selling_price).toLocaleString('en-IN')}</span>
-          <span class="text-xs ${p.quantity < 5 ? 'text-red-500 font-bold' : 'text-gray-400'}">${p.quantity} in stock</span>
+  container.innerHTML = doubled.map(p => {
+    const isLow = p.quantity > 0 && p.quantity < 5;
+    const isOut = p.quantity <= 0;
+    return `
+      <div class="flex-shrink-0 bg-white rounded-xl overflow-hidden shadow-md border border-gray-100" style="flex:0 0 240px;">
+        <div class="h-36 bg-gradient-to-br from-cyan-50 to-amber-50 flex items-center justify-center overflow-hidden relative">
+          ${p.image_url
+            ? `<img src="${p.image_url}" alt="${p.name}" class="w-full h-full object-cover" loading="lazy" decoding="async">`
+            : `<i class="fa-solid fa-fish text-3xl text-cyan-200"></i>`
+          }
+          ${isOut ? '<div class="absolute top-1 right-1"><span class="badge badge-red" style="font-size:0.5rem;padding:1px 4px;">Out</span></div>' : ''}
+        </div>
+        <div class="p-3">
+          <div class="flex items-center gap-1 mb-1">
+            <h4 class="font-heading font-semibold text-sm text-aqua-800" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;flex:1;">${p.name}</h4>
+            <span style="font-size:0.6rem;">⭐</span>
+          </div>
+          ${p.description ? `<p style="font-size:0.65rem;color:#94a3b8;line-height:1.2;margin:1px 0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${p.description}</p>` : ''}
+          <p class="text-xs text-gray-400 uppercase">${p.category}</p>
+          <div class="flex items-baseline gap-2 mt-1">
+            <span class="font-heading font-bold text-green-600">₹${Number(p.selling_price).toLocaleString('en-IN')}</span>
+            <span class="text-xs ${isOut ? 'text-red-500 font-bold' : isLow ? 'text-orange-500 font-bold' : 'text-gray-400'}">
+              ${isOut ? 'Out of Stock' : isLow ? `Only ${p.quantity} left` : `${p.quantity} in stock`}
+            </span>
+          </div>
         </div>
       </div>
-    </div>
-  `).join('');
+    `;
+  }).join('');
 
   // Calculate one set width from actual DOM
   const cards = container.children;

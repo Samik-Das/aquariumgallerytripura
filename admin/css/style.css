@@ -807,6 +807,47 @@ h1, h2, h3, h4, h5, h6 { font-family: 'Poppins', sans-serif; }
   border-top: 1px solid #f1f5f9;
 }
 
+/* ===== Featured Control ===== */
+.featured-control {
+  display: flex;
+  justify-content: center;
+  padding: 6px;
+  background: linear-gradient(135deg, #f8fafc, #f1f5f9);
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.featured-checkbox {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  cursor: pointer;
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: #475569;
+  transition: all 0.2s;
+}
+
+.featured-checkbox:hover {
+  color: #fbbf24;
+  transform: scale(1.02);
+}
+
+.featured-checkbox input[type="checkbox"] {
+  width: 12px;
+  height: 12px;
+  accent-color: #fbbf24;
+  cursor: pointer;
+}
+
+.featured-checkbox input[type="checkbox"]:checked + .featured-label {
+  color: #f59e0b;
+  font-weight: 700;
+}
+
+.featured-label {
+  transition: all 0.2s;
+}
+
 /* ===== Editable Fields ===== */
 .editable {
   cursor: pointer;

@@ -121,6 +121,12 @@ function renderProductCard(p) {
   const isOut = p.quantity <= 0;
   return `
     <div class="product-card ${isLow ? 'ring-1 ring-red-300' : ''}">
+      <div class="featured-control">
+        <label class="featured-checkbox">
+          <input type="checkbox" onchange="toggleFeatured('${p.id}', this)" ${p.is_featured ? 'checked' : ''}>
+          <span class="featured-label">⭐ Featured</span>
+        </label>
+      </div>
       <div class="product-image">
         ${p.image_url
           ? `<img src="${p.image_url}" alt="${p.name}" loading="lazy" decoding="async">`
@@ -238,6 +244,34 @@ async function deleteProduct(id) {
     showToast('Product deleted');
     setTimeout(() => window.location.reload(), 1000);
   } catch (err) {
+    showToast('Error: ' + err.message, 'error');
+  }
+}
+
+async function toggleFeatured(productId, checkbox) {
+  const isFeatured = checkbox.checked;
+  
+  try {
+    const { error } = await db
+      .from('products')
+      .update({ is_featured: isFeatured })
+      .eq('id', productId);
+    
+    if (error) throw error;
+    
+    // Update local data
+    const product = allProducts.find(p => p.id === productId);
+    if (product) {
+      product.is_featured = isFeatured;
+    }
+    
+    // Show success message with star animation
+    const star = isFeatured ? '⭐' : '⚪';
+    showToast(`${star} Product ${isFeatured ? 'featured' : 'unfeatured'}!`);
+    
+  } catch (err) {
+    // Revert checkbox on error
+    checkbox.checked = !isFeatured;
     showToast('Error: ' + err.message, 'error');
   }
 }
