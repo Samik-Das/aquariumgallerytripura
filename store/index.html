@@ -19,12 +19,9 @@
 </head>
 <body>
 
-  <!-- ===== Animated Splash Screen ===== -->
-  <div id="splash" class="splash">
-    <div class="splash-ocean">
-      <div class="splash-wave splash-wave1"></div>
-      <div class="splash-wave splash-wave2"></div>
-    </div>
+  <!-- ===== Custom Splash (First Launch Only) ===== -->
+  <div id="splash" class="splash" style="display:none;">
+    <div class="splash-ocean"></div>
     <div class="splash-bubbles">
       <span></span><span></span><span></span><span></span><span></span>
       <span></span><span></span><span></span><span></span><span></span>
@@ -35,18 +32,9 @@
     <div class="splash-fish splash-fish4">🐠</div>
     <div class="splash-fish splash-fish5">🐟</div>
     <div class="splash-fish splash-fish6">🐡</div>
-    <div class="splash-fish splash-fish7">🐠</div>
     <div class="splash-content">
-      <div class="splash-icon">
-        <i class="fa-solid fa-water"></i>
-      </div>
-      <h1 class="splash-title">
-        <span class="splash-letter" style="--i:0">A</span><span class="splash-letter" style="--i:1">q</span><span class="splash-letter" style="--i:2">u</span><span class="splash-letter" style="--i:3">a</span><span class="splash-letter" style="--i:4">r</span><span class="splash-letter" style="--i:5">i</span><span class="splash-letter" style="--i:6">u</span><span class="splash-letter" style="--i:7">m</span><span class="splash-letter splash-gap" style="--i:8">G</span><span class="splash-letter" style="--i:9">a</span><span class="splash-letter" style="--i:10">l</span><span class="splash-letter" style="--i:11">l</span><span class="splash-letter" style="--i:12">e</span><span class="splash-letter" style="--i:13">r</span><span class="splash-letter" style="--i:14">y</span><span class="splash-letter splash-gap" style="--i:15">T</span><span class="splash-letter" style="--i:16">r</span><span class="splash-letter" style="--i:17">i</span><span class="splash-letter" style="--i:18">p</span><span class="splash-letter" style="--i:19">u</span><span class="splash-letter" style="--i:20">r</span><span class="splash-letter" style="--i:21">a</span>
-      </h1>
+      <h1 class="splash-title">AquariumGalleryTripura</h1>
       <p class="splash-tagline">Every Tank a Canvas<br>A Framed Nature's Gallery</p>
-      <div class="splash-loader">
-        <div class="splash-loader-bar"></div>
-      </div>
     </div>
   </div>
 
@@ -690,15 +678,29 @@
     if ('serviceWorker' in navigator) {
       navigator.serviceWorker.register('sw.js');
     }
-    // Dismiss splash screen
-    window.addEventListener('load', () => {
-      setTimeout(() => {
+    
+    // Show splash only once per session
+    window.addEventListener('DOMContentLoaded', () => {
+      const hasShownSplash = sessionStorage.getItem('agt_splash_shown');
+      
+      if (!hasShownSplash) {
+        // First launch this session - show splash
         const splash = document.getElementById('splash');
         if (splash) {
-          splash.classList.add('splash-hide');
-          setTimeout(() => splash.remove(), 600);
+          splash.style.display = 'flex';
+          
+          // Hide splash after 1.5 seconds
+          setTimeout(() => {
+            splash.classList.add('splash-hide');
+            setTimeout(() => {
+              splash.style.display = 'none';
+            }, 500);
+          }, 1500);
+          
+          // Mark as shown for this session
+          sessionStorage.setItem('agt_splash_shown', 'true');
         }
-      }, 2400);
+      }
     });
   </script>
 </body>
