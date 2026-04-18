@@ -116,7 +116,7 @@ async function addNewCategory() {
 
     document.getElementById('category-modal').style.display = 'none';
     showToast('Category added!');
-    allCategories.push({ name });
+    setTimeout(() => window.location.reload(), 1000);
   } catch (err) {
     showToast(err.message, 'error');
   }
@@ -207,9 +207,7 @@ async function saveProduct(e) {
     });
 
     showToast('Product saved successfully!');
-    resetForm();
-    await loadDropdowns();
-    await loadHistory();
+    setTimeout(() => window.location.reload(), 1000);
   } catch (err) {
     showToast('Error: ' + err.message, 'error');
   }

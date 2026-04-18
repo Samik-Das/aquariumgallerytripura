@@ -127,9 +127,7 @@ async function saveDamage(e) {
     await db.from('products').update(updates).eq('id', selectedProduct.id);
 
     showToast(`Damage recorded! ${autoFix ? 'SP adjusted to ₹' + newSP.toFixed(2) : ''}`);
-    resetDamageForm();
-    await loadProducts();
-    await loadDamageHistory();
+    setTimeout(() => window.location.reload(), 1000);
   } catch (err) {
     showToast('Error: ' + err.message, 'error');
   }

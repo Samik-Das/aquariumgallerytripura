@@ -189,7 +189,7 @@ async function updateOrderStatus(id, status) {
 
     document.getElementById('order-modal').style.display = 'none';
     showToast(`Order ${labels[status]}!`);
-    await loadOrders();
+    setTimeout(() => window.location.reload(), 1000);
   } catch (err) {
     showToast(err.message, 'error');
   }
@@ -283,6 +283,7 @@ async function createSaleFromOrder(order) {
     }
 
     showToast(`Sale created! ${name} earned ${pointsEarned} points.`);
+    setTimeout(() => window.location.reload(), 1000);
   } catch (err) {
     showToast('Sale creation failed: ' + err.message, 'error');
   }

@@ -99,7 +99,7 @@
     let currentFiltered = [];
     let displayedCount = 0;
     let categoryOrder = {};
-    const PAGE_SIZE = 20;
+    const PAGE_SIZE = 21;
 
     (async () => {
       await Promise.all([loadCategories(), loadProducts()]);
@@ -210,7 +210,6 @@
       const remaining = currentFiltered.length - displayedCount;
       if (remaining > 0) {
         wrapper.style.display = 'block';
-        countLabel.textContent = `Showing ${displayedCount} of ${currentFiltered.length} products • ${remaining} more`;
       } else {
         wrapper.style.display = 'none';
       }

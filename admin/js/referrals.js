@@ -207,8 +207,7 @@ async function payReferrer(name, amount, saleIdsStr) {
     if (error) throw error;
 
     showToast(`Paid ₹${amount.toLocaleString('en-IN')} to ${name}`);
-    await loadReferralData();
-    applyFilters();
+    setTimeout(() => window.location.reload(), 1000);
   } catch (err) {
     showToast('Error: ' + err.message, 'error');
   }

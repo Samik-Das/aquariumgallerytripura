@@ -877,18 +877,6 @@ h1, h2, h3, h4, h5, h6 { font-family: 'Poppins', sans-serif; }
 .carousel-nav.right { right: -8px; }
 .carousel-nav.hidden { opacity: 0; pointer-events: none; }
 
-/* Hide carousel arrows on mobile/touch devices */
-@media (max-width: 768px) {
-  .carousel-nav {
-    display: none !important;
-  }
-}
-@media (pointer: coarse) {
-  .carousel-nav {
-    display: none !important;
-  }
-}
-
 .carousel-track .product-card,
 .carousel-track > div {
   flex: 0 0 240px;

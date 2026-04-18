@@ -132,8 +132,7 @@ async function claimPoints(customerId, customerName, currentPoints) {
     });
 
     showToast(`1000 points claimed for ${customerName}! Remaining: ${newPoints}`);
-    await loadCustomers();
-    await loadPointsHistory();
+    setTimeout(() => window.location.reload(), 1000);
   } catch (err) {
     showToast('Error: ' + err.message, 'error');
   }

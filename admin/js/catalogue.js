@@ -5,7 +5,7 @@ let filteredProducts = [];
 let editImageFile = null;
 let displayedCount = 0;
 let categoryOrder = {};
-const PAGE_SIZE = 20;
+const PAGE_SIZE = 21;
 
 // Initialize
 (async () => {
@@ -106,7 +106,7 @@ function renderProducts() {
   const remaining = filteredProducts.length - displayedCount;
   if (remaining > 0) {
     wrapper.style.display = 'block';
-    countLabel.textContent = `Showing ${displayedCount} of ${filteredProducts.length} products • ${remaining} more`;
+    countLabel.textContent = `Load ${remaining} More Products`;
   } else {
     wrapper.style.display = 'none';
   }
@@ -132,7 +132,7 @@ function renderProductCard(p) {
       <div class="product-info">
         <div class="product-category">${p.category}</div>
         <div class="product-name">${p.name}</div>
-        ${p.description ? `<div style="font-size:0.65rem;color:#94a3b8;line-height:1.3;margin-bottom:2px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;">${p.description}</div>` : ''}
+        ${p.description ? `<div style="font-size:0.65rem;color:#94a3b8;line-height:1.3;min-height:2.8em;margin-bottom:2px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;">${p.description}</div>` : `<div style="font-size:0.65rem;min-height:2.8em;margin-bottom:2px;"></div>`}
         <div class="product-prices">
           <span class="product-sp">₹${Number(p.selling_price).toLocaleString('en-IN')}</span>
           <span class="product-bp">BP:₹${Number(p.buying_price).toLocaleString('en-IN')}</span>
@@ -154,10 +154,22 @@ function renderProductCard(p) {
 }
 
 // ===== Edit Modal =====
-function openEditModal(id) {
+async function openEditModal(id) {
   const product = allProducts.find(p => p.id === id);
   if (!product) return;
 
+  // Load categories for dropdown
+  const { data: categories } = await db.from('categories').select('name').order('name');
+  const categorySelect = document.getElementById('edit-category');
+  categorySelect.innerHTML = '<option value="">Select category...</option>';
+  if (categories) {
+    categories.forEach(cat => {
+      categorySelect.innerHTML += `<option value="${cat.name}" ${cat.name === product.category ? 'selected' : ''}>${cat.name}</option>`;
+    });
+  }
+
+  document.getElementById('edit-name').value = product.name || '';
+  document.getElementById('edit-category').value = product.category || '';
   document.getElementById('edit-sp').value = product.selling_price;
   document.getElementById('edit-bp').value = product.buying_price;
   document.getElementById('edit-qty').value = product.quantity;
@@ -177,13 +189,22 @@ document.getElementById('edit-image').addEventListener('change', (e) => {
 
 async function saveEditProduct() {
   const id = document.getElementById('edit-product-id').value;
+  const name = document.getElementById('edit-name').value.trim();
+  const category = document.getElementById('edit-category').value.trim();
   const sp = parseFloat(document.getElementById('edit-sp').value);
   const bp = parseFloat(document.getElementById('edit-bp').value);
   const qty = parseInt(document.getElementById('edit-qty').value);
   const description = document.getElementById('edit-description').value.trim();
 
+  if (!name || !category || isNaN(sp) || isNaN(bp) || isNaN(qty)) {
+    showToast('Please fill all required fields', 'error');
+    return;
+  }
+
   try {
     const updates = {
+      name,
+      category,
       selling_price: sp,
       buying_price: bp,
       quantity: qty,
@@ -201,7 +222,7 @@ async function saveEditProduct() {
 
     closeEditModal();
     showToast('Product updated!');
-    await loadProducts();
+    setTimeout(() => window.location.reload(), 1000);
   } catch (err) {
     showToast('Error: ' + err.message, 'error');
   }
@@ -215,7 +236,7 @@ async function deleteProduct(id) {
     const { error } = await db.from('products').delete().eq('id', id);
     if (error) throw error;
     showToast('Product deleted');
-    await loadProducts();
+    setTimeout(() => window.location.reload(), 1000);
   } catch (err) {
     showToast('Error: ' + err.message, 'error');
   }

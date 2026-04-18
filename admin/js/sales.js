@@ -331,13 +331,7 @@ async function saveSale() {
     }
 
     showToast(`Sale saved! ${name} earned ${pointsEarned} points.${hasReferralItems ? ' Referral commission: ₹' + totalCommission.toLocaleString('en-IN') : ''}`);
-
-    // Reset form
-    document.getElementById('customer-phone').value = '';
-    document.getElementById('customer-name').value = '';
-    document.getElementById('referrer-name').value = '';
-    document.getElementById('returning-badge').style.display = 'none';
-    existingCustomerId = null;
+    setTimeout(() => window.location.reload(), 1000);
     document.getElementById('sale-items-container').innerHTML = '';
     saleItems = [];
     saleItemCounter = 0;

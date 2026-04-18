@@ -51,7 +51,7 @@ async function saveTicker() {
     }
     document.getElementById('ticker-modal').style.display = 'none';
     showToast('Announcement updated!');
-    await loadTicker();
+    setTimeout(() => window.location.reload(), 1000);
   } catch (err) {
     showToast(err.message, 'error');
   }
@@ -96,7 +96,7 @@ async function saveBanner() {
     }
     closeBannerModal();
     showToast('Banner updated successfully!');
-    await loadBanner();
+    setTimeout(() => window.location.reload(), 1000);
   } catch (err) {
     showToast(err.message, 'error');
   }
@@ -115,7 +115,7 @@ async function uploadBannerImage(event) {
       await db.from('homepage_content').insert({ type: 'banner', title: 'AquariumGalleryTripura', image_url: url, sort_order: 0 });
     }
     showToast('Banner image updated!');
-    await loadBanner();
+    setTimeout(() => window.location.reload(), 1000);
   } catch (err) {
     showToast('Failed to upload image: ' + err.message, 'error');
   }
@@ -230,7 +230,7 @@ async function saveCard() {
 
     closeCardModal();
     showToast(editId ? 'Card updated!' : 'Card added!');
-    await loadCategoryCards();
+    setTimeout(() => window.location.reload(), 1000);
   } catch (err) {
     showToast(err.message, 'error');
   }
@@ -243,7 +243,7 @@ async function deleteCard(id) {
   try {
     await db.from('categories').delete().eq('id', id);
     showToast('Category deleted');
-    await loadCategoryCards();
+    setTimeout(() => window.location.reload(), 1000);
   } catch (err) {
     showToast(err.message, 'error');
   }
@@ -455,7 +455,7 @@ async function saveSocialLink() {
     }
     closeSocialModal();
     showToast(editId ? 'Link updated!' : 'Link added!');
-    await loadSocialLinks();
+    setTimeout(() => window.location.reload(), 1000);
   } catch (err) {
     showToast(err.message, 'error');
   }
@@ -467,7 +467,7 @@ async function deleteSocialLink(id) {
   try {
     await db.from('homepage_content').delete().eq('id', id);
     showToast('Link deleted');
-    await loadSocialLinks();
+    setTimeout(() => window.location.reload(), 1000);
   } catch (err) {
     showToast(err.message, 'error');
   }
@@ -525,7 +525,7 @@ async function saveContact() {
     }
     document.getElementById('contact-modal').style.display = 'none';
     showToast('Contact info saved!');
-    await loadContact();
+    setTimeout(() => window.location.reload(), 1000);
   } catch (err) {
     showToast(err.message, 'error');
   }
@@ -573,7 +573,7 @@ async function saveUpi() {
     }
     document.getElementById('upi-modal').style.display = 'none';
     showToast('UPI settings saved!');
-    await loadUpi();
+    setTimeout(() => window.location.reload(), 1000);
   } catch (err) {
     showToast(err.message, 'error');
   }
