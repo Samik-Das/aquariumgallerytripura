@@ -29,8 +29,18 @@ async function loadTicker() {
   const el = document.getElementById('ticker-text');
   if (data && data.description) {
     el.textContent = data.description;
+    
+    // Calculate dynamic speed based on text length
+    const textWidth = el.scrollWidth;
+    const containerWidth = el.parentElement.offsetWidth;
+    const totalDistance = textWidth + containerWidth;
+    const speed = 80; // pixels per second (constant speed)
+    const duration = totalDistance / speed;
+    
+    el.style.animationDuration = `${duration}s`;
   } else {
     el.textContent = 'No announcement set yet';
+    el.style.animationDuration = '20s'; // fallback
   }
 }
 
@@ -51,6 +61,19 @@ async function saveTicker() {
     }
     document.getElementById('ticker-modal').style.display = 'none';
     showToast('Announcement updated!');
+    
+    // Update ticker immediately with dynamic speed
+    setTimeout(() => {
+      const el = document.getElementById('ticker-text');
+      el.textContent = text;
+      const textWidth = el.scrollWidth;
+      const containerWidth = el.parentElement.offsetWidth;
+      const totalDistance = textWidth + containerWidth;
+      const speed = 80; // pixels per second (constant speed)
+      const duration = totalDistance / speed;
+      el.style.animationDuration = `${duration}s`;
+    }, 100);
+    
     setTimeout(() => window.location.reload(), 1000);
   } catch (err) {
     showToast(err.message, 'error');

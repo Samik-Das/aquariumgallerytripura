@@ -71,11 +71,11 @@
   animation: dots 1.5s steps(4, end) infinite;
 }
 @keyframes fishSwim {
-  0% { left: -30px; transform: scaleX(1); }
-  45% { left: 100px; transform: scaleX(1); }
-  50% { left: 100px; transform: scaleX(-1); }
-  95% { left: -30px; transform: scaleX(-1); }
-  100% { left: -30px; transform: scaleX(1); }
+  0% { left: -30px; transform: scaleX(-1); }
+  45% { left: 100px; transform: scaleX(-1); }
+  50% { left: 100px; transform: scaleX(1); }
+  95% { left: -30px; transform: scaleX(1); }
+  100% { left: -30px; transform: scaleX(-1); }
 }
 @keyframes bubbleUp {
   0% { opacity: 0; transform: translateY(0) scale(0.5); }

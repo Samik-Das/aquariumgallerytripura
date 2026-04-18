@@ -285,6 +285,18 @@
         const track = document.getElementById('ticker-track');
         track.innerHTML = `<span>${data.description}</span>`;
         bar.style.display = 'block';
+        
+        // Calculate dynamic speed based on text length
+        setTimeout(() => {
+          const textEl = track.querySelector('span');
+          const textWidth = textEl.scrollWidth;
+          const containerWidth = bar.offsetWidth;
+          const totalDistance = textWidth + containerWidth;
+          const speed = 80; // pixels per second (constant speed)
+          const duration = totalDistance / speed;
+          
+          track.style.animationDuration = `${duration}s`;
+        }, 50); // Small delay to ensure DOM is ready
       }
     }
 
