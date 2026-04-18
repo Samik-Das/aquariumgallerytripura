@@ -301,8 +301,35 @@ async function loadProductCarousel() {
 
   startAdminCarouselRAF();
 
-  container.addEventListener('touchstart', () => pauseAdminCarousel(), { passive: true });
-  container.addEventListener('touchend', () => scheduleAdminResume(), { passive: true });
+  // Touch support + swipe detection
+  let adminStartX = 0, adminStartY = 0;
+  container.addEventListener('touchstart', (e) => {
+    adminStartX = e.touches[0].clientX;
+    adminStartY = e.touches[0].clientY;
+    pauseAdminCarousel();
+  }, { passive: true });
+  
+  container.addEventListener('touchend', (e) => {
+    if (e.changedTouches.length > 0) {
+      const endX = e.changedTouches[0].clientX;
+      const endY = e.changedTouches[0].clientY;
+      const deltaX = endX - adminStartX;
+      const deltaY = endY - adminStartY;
+      
+      // Check if horizontal swipe (more horizontal than vertical movement)
+      if (Math.abs(deltaX) > Math.abs(deltaY) && Math.abs(deltaX) > 50) {
+        if (deltaX > 0) {
+          // Swipe right → scroll left (show previous items)
+          scrollAdminCarousel(-1);
+        } else {
+          // Swipe left → scroll right (show next items)
+          scrollAdminCarousel(1);
+        }
+      }
+    }
+    scheduleAdminResume();
+  }, { passive: true });
+  
   container.addEventListener('mouseenter', () => pauseAdminCarousel());
   container.addEventListener('mouseleave', () => scheduleAdminResume());
 }
