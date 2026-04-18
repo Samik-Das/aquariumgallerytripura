@@ -113,28 +113,28 @@
   animation-delay: 0.5s;
 }
 @keyframes splashFishSwim1 {
-  0% { left: -10%; transform: scaleX(1) translateY(0); }
-  25% { transform: scaleX(1) translateY(-15px); }
-  50% { left: 110%; transform: scaleX(1) translateY(0); }
-  51% { transform: scaleX(-1) translateY(0); }
-  75% { transform: scaleX(-1) translateY(10px); }
-  100% { left: -10%; transform: scaleX(-1) translateY(0); }
-}
-@keyframes splashFishSwim2 {
   0% { right: -10%; left: auto; transform: scaleX(-1) translateY(0); }
-  25% { transform: scaleX(-1) translateY(-20px); }
+  25% { transform: scaleX(-1) translateY(-15px); }
   50% { right: 110%; transform: scaleX(-1) translateY(0); }
   51% { transform: scaleX(1) translateY(0); }
-  75% { transform: scaleX(1) translateY(12px); }
+  75% { transform: scaleX(1) translateY(10px); }
   100% { right: -10%; transform: scaleX(1) translateY(0); }
 }
+@keyframes splashFishSwim2 {
+  0% { left: -10%; right: auto; transform: scaleX(1) translateY(0); }
+  25% { transform: scaleX(1) translateY(-20px); }
+  50% { left: 110%; transform: scaleX(1) translateY(0); }
+  51% { transform: scaleX(-1) translateY(0); }
+  75% { transform: scaleX(-1) translateY(12px); }
+  100% { left: -10%; transform: scaleX(-1) translateY(0); }
+}
 @keyframes splashFishSwim3 {
-  0% { left: -8%; transform: scaleX(1) translateY(5px); }
-  30% { transform: scaleX(1) translateY(-10px); }
-  50% { left: 108%; transform: scaleX(1) translateY(-5px); }
-  51% { transform: scaleX(-1) translateY(-5px); }
-  80% { transform: scaleX(-1) translateY(8px); }
-  100% { left: -8%; transform: scaleX(-1) translateY(5px); }
+  0% { right: -8%; left: auto; transform: scaleX(-1) translateY(5px); }
+  30% { transform: scaleX(-1) translateY(-10px); }
+  50% { right: 108%; transform: scaleX(-1) translateY(-5px); }
+  51% { transform: scaleX(1) translateY(-5px); }
+  80% { transform: scaleX(1) translateY(8px); }
+  100% { right: -8%; transform: scaleX(1) translateY(5px); }
 }
 
 /* Center content */
@@ -160,7 +160,7 @@
 .splash-title {
   font-family: 'Poppins', sans-serif;
   font-weight: 900;
-  font-size: 1.8rem;
+  font-size: 1.5rem;
   line-height: 1.2;
   margin: 0;
   display: flex;
@@ -198,11 +198,12 @@
 /* Tagline */
 .splash-tagline {
   font-family: 'Inter', sans-serif;
-  font-size: 0.85rem;
-  color: rgba(165,243,252,0.7);
-  letter-spacing: 3px;
-  text-transform: uppercase;
-  margin-top: 12px;
+  font-size: 0.75rem;
+  color: rgba(165,243,252,0.8);
+  letter-spacing: 1px;
+  text-align: center;
+  line-height: 1.4;
+  margin-top: 16px;
   animation: splashFadeUp 0.6s 1.8s both;
 }
 @keyframes splashFadeUp {
