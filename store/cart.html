@@ -312,6 +312,9 @@
       document.getElementById('cart-gate').style.display = 'block';
       document.getElementById('cart-main').style.display = 'none';
       document.getElementById('gate-name').value = '';
+      document.getElementById('gate-name').readOnly = false;
+      document.getElementById('gate-name').style.background = '';
+      document.getElementById('gate-name').style.color = '';
       document.getElementById('gate-phone').value = '';
       document.getElementById('gate-hint').style.display = 'none';
     }
@@ -328,7 +331,10 @@
       const { data: customer } = await db.from('customers').select('name').eq('phone', phone).maybeSingle();
       if (customer && customer.name) {
         nameEl.value = customer.name;
-        hintEl.innerHTML = '<i class="fa-solid fa-circle-check"></i> Welcome back, ' + customer.name + '!';
+        nameEl.readOnly = true;
+        nameEl.style.background = '#f0fdfa';
+        nameEl.style.color = '#0e7490';
+        hintEl.innerHTML = '<i class="fa-solid fa-circle-check"></i> Welcome back, ' + customer.name + '! <span style="font-size:0.65rem;color:#94a3b8;">(name linked to this number)</span>';
         hintEl.style.display = 'block';
         return;
       }
@@ -337,11 +343,18 @@
       const { data: order } = await db.from('online_orders').select('customer_name').eq('customer_phone', phone).order('created_at', { ascending: false }).limit(1).maybeSingle();
       if (order && order.customer_name) {
         nameEl.value = order.customer_name;
-        hintEl.innerHTML = '<i class="fa-solid fa-circle-check"></i> Welcome back, ' + order.customer_name + '!';
+        nameEl.readOnly = true;
+        nameEl.style.background = '#f0fdfa';
+        nameEl.style.color = '#0e7490';
+        hintEl.innerHTML = '<i class="fa-solid fa-circle-check"></i> Welcome back, ' + order.customer_name + '! <span style="font-size:0.65rem;color:#94a3b8;">(name linked to this number)</span>';
         hintEl.style.display = 'block';
         return;
       }
 
+      // New customer — unlock name field
+      nameEl.readOnly = false;
+      nameEl.style.background = '';
+      nameEl.style.color = '';
       hintEl.style.display = 'none';
     }
 

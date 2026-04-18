@@ -32,6 +32,8 @@ function lookupCustomer() {
     const { data } = await db.from('customers').select('*').eq('phone', phone).single();
     if (data) {
       document.getElementById('customer-name').value = data.name;
+      document.getElementById('customer-name').readOnly = true;
+      document.getElementById('customer-name').style.background = '#f0fdfa';
       document.getElementById('returning-badge').style.display = 'inline-flex';
       existingCustomerId = data.id;
 
@@ -48,6 +50,8 @@ function lookupCustomer() {
       }
     } else {
       document.getElementById('returning-badge').style.display = 'none';
+      document.getElementById('customer-name').readOnly = false;
+      document.getElementById('customer-name').style.background = '';
       existingCustomerId = null;
     }
   }, 500);
@@ -269,8 +273,6 @@ async function saveSale() {
       const { data: existing } = await db.from('customers').select('id').eq('phone', phone).single();
       if (existing) {
         customerId = existing.id;
-        // Update name if changed
-        await db.from('customers').update({ name }).eq('id', customerId);
       } else {
         const { data: newCust, error } = await db.from('customers').insert({ name, phone, points: 0 }).select().single();
         if (error) throw error;

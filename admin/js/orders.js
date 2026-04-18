@@ -219,7 +219,6 @@ async function createSaleFromOrder(order) {
     const { data: existing } = await db.from('customers').select('id').eq('phone', phone).maybeSingle();
     if (existing) {
       customerId = existing.id;
-      await db.from('customers').update({ name }).eq('id', customerId);
     } else {
       const { data: newCust, error } = await db.from('customers').insert({ name, phone, points: 0 }).select().single();
       if (error) throw error;
