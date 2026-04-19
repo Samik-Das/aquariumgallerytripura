@@ -239,7 +239,7 @@
 
   <!-- Footer -->
   <footer class="store-footer">
-    <p>&copy; 2022 <a href="index.html">AquariumGalleryTripura</a>. All rights reserved.</p>
+    <p>&copy; Since 2022 <a href="index.html">AquariumGalleryTripura</a>. All rights reserved.</p>
   </footer>
 
   <!-- Floating Points Button -->
@@ -258,8 +258,52 @@
     </div>
   </nav>
 
+  <!-- Review Modal -->
+  <div id="review-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.55);z-index:9999;align-items:center;justify-content:center;padding:1rem;">
+    <div style="background:white;border-radius:20px;padding:1.5rem;max-width:380px;width:100%;box-shadow:0 20px 60px rgba(0,0,0,0.25);">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem;">
+        <h3 style="font-family:'Poppins',sans-serif;font-size:1rem;font-weight:800;color:#0e7490;margin:0;"><i class="fa-solid fa-star"></i> Write a Review</h3>
+        <button onclick="closeReviewModal()" style="background:none;border:none;font-size:1.2rem;color:#94a3b8;cursor:pointer;"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <div id="review-form">
+        <div id="review-product-box" style="display:none;margin-bottom:10px;padding:8px 12px;background:#f0fdfa;border-radius:8px;border-left:3px solid #22d3ee;font-size:0.78rem;color:#0e7490;">
+          <i class="fa-solid fa-fish"></i> <strong>Purchase:</strong> <span id="review-products"></span>
+        </div>
+        <p style="font-size:0.8rem;color:#64748b;margin-bottom:1rem;">How was your experience? Your review helps other customers.</p>
+        <!-- Stars -->
+        <div style="text-align:center;margin-bottom:1rem;">
+          <div style="font-size:0.8rem;color:#64748b;margin-bottom:6px;">Tap to rate</div>
+          <div style="font-size:2rem;display:flex;justify-content:center;gap:6px;">
+            <span class="review-star" onclick="setReviewStars(1)" style="cursor:pointer;color:#cbd5e1;">★</span>
+            <span class="review-star" onclick="setReviewStars(2)" style="cursor:pointer;color:#cbd5e1;">★</span>
+            <span class="review-star" onclick="setReviewStars(3)" style="cursor:pointer;color:#cbd5e1;">★</span>
+            <span class="review-star" onclick="setReviewStars(4)" style="cursor:pointer;color:#cbd5e1;">★</span>
+            <span class="review-star" onclick="setReviewStars(5)" style="cursor:pointer;color:#cbd5e1;">★</span>
+          </div>
+        </div>
+        <!-- Comment -->
+        <textarea id="review-comment" placeholder="Share your experience (optional)..." style="width:100%;min-height:90px;padding:10px 12px;border:1.5px solid #e2e8f0;border-radius:10px;font-size:0.82rem;font-family:'Inter',sans-serif;resize:vertical;box-sizing:border-box;outline:none;" onfocus="this.style.borderColor='#22d3ee'" onblur="this.style.borderColor='#e2e8f0'"></textarea>
+        <!-- Anonymous toggle -->
+        <label style="display:flex;align-items:center;gap:8px;margin-top:10px;cursor:pointer;font-size:0.78rem;color:#64748b;user-select:none;">
+          <input type="checkbox" id="review-anonymous" style="width:15px;height:15px;accent-color:#0891b2;cursor:pointer;">
+          Post anonymously <span style="color:#94a3b8;font-size:0.72rem;">(your name will be hidden from other customers)</span>
+        </label>
+        <div id="review-error" style="display:none;color:#dc2626;font-size:0.75rem;margin-top:6px;"></div>
+        <button id="review-submit-btn" onclick="submitReview()" style="margin-top:12px;width:100%;padding:12px;background:linear-gradient(135deg,#0891b2,#0e7490);color:white;border:none;border-radius:12px;font-size:0.85rem;font-weight:700;cursor:pointer;font-family:'Poppins',sans-serif;">
+          <i class="fa-solid fa-paper-plane"></i> Submit Review
+        </button>
+      </div>
+      <div id="review-success" style="display:none;text-align:center;padding:1.5rem 0;">
+        <div style="font-size:2.5rem;margin-bottom:0.5rem;">🌟</div>
+        <h4 style="font-family:'Poppins',sans-serif;color:#0e7490;margin:0 0 6px;">Thank You!</h4>
+        <p style="font-size:0.8rem;color:#64748b;">Your review has been submitted for approval.</p>
+      </div>
+    </div>
+  </div>
+
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="js/supabase-config.js"></script>
+  <script src="js/wa-floater.js"></script>
   <script>
     let contactInfo = {};
     let upiData = {};
@@ -631,48 +675,217 @@
       resultsEl.innerHTML = '<div class="fish-loader" style="padding:1.5rem 0;"><div class="fish-swim"><span class="fish">🐠</span><span class="fish">🐟</span><span class="fish">🐡</span><div class="bubbles"><span></span><span></span><span></span></div></div><div class="fish-loader-text">Loading your orders<span class="dot-anim"></span></div></div>';
       emptyEl.style.display = 'none';
 
-      const { data, error } = await db.from('online_orders').select('*').eq('customer_phone', phone).order('created_at', { ascending: false });
+      // Track reviewed orders locally (RLS only exposes approved reviews to anon users)
+      const reviewedIds = new Set(getReviewedOrders());
 
-      if (error || !data || data.length === 0) {
+      // Fetch online orders and in-store sales in parallel
+      const [onlineRes, salesRes] = await Promise.all([
+        db.from('online_orders').select('*').eq('customer_phone', phone).order('created_at', { ascending: false }),
+        db.from('sales').select('*').eq('customer_phone', phone).order('sale_date', { ascending: false })
+      ]);
+
+      const onlineOrders = onlineRes.data || [];
+      const salesRecords = salesRes.data || [];
+
+      // Fetch sale items for offline purchases if any
+      let saleItems = [];
+      if (salesRecords.length > 0) {
+        const saleIds = salesRecords.map(s => s.id);
+        const { data: items } = await db.from('sale_items').select('*').in('sale_id', saleIds);
+        saleItems = items || [];
+      }
+
+      if (onlineOrders.length === 0 && salesRecords.length === 0) {
         resultsEl.innerHTML = '';
         emptyEl.style.display = 'block';
         return;
       }
 
-      resultsEl.innerHTML = data.map(order => {
-        const statusConfig = {
-          pending: { label: 'Pending Confirmation', bg: '#fef3c7', color: '#92400e', icon: 'fa-clock' },
-          confirmed: { label: 'Confirmed', bg: '#dcfce7', color: '#166534', icon: 'fa-check' },
-          delivered: { label: 'Delivered', bg: '#ecfeff', color: '#0e7490', icon: 'fa-truck' },
-          declined: { label: 'Declined', bg: '#fef2f2', color: '#991b1b', icon: 'fa-xmark' },
-          cancelled: { label: 'Cancelled & Refunded', bg: '#fef2f2', color: '#991b1b', icon: 'fa-rotate-left' },
-        };
+      const statusConfig = {
+        pending: { label: 'Pending Confirmation', bg: '#fef3c7', color: '#92400e', icon: 'fa-clock' },
+        confirmed: { label: 'Confirmed', bg: '#dcfce7', color: '#166534', icon: 'fa-check' },
+        delivered: { label: 'Delivered', bg: '#ecfeff', color: '#0e7490', icon: 'fa-truck' },
+        declined: { label: 'Declined', bg: '#fef2f2', color: '#991b1b', icon: 'fa-xmark' },
+        cancelled: { label: 'Cancelled & Refunded', bg: '#fef2f2', color: '#991b1b', icon: 'fa-rotate-left' },
+      };
+
+      function reviewBtn(orderId, orderType, orderStatus, productNames) {
+        // Only available for delivered online orders and all store purchases
+        const eligible = orderType === 'store' || orderStatus === 'delivered';
+        if (!eligible) return '';
+        if (reviewedIds.has(orderId)) {
+          return `<div style="margin-top:10px;padding:8px 12px;background:#f0fdf4;border-radius:8px;font-size:0.75rem;color:#166534;text-align:center;"><i class="fa-solid fa-circle-check"></i> Review Submitted</div>`;
+        }
+        const safeNames = productNames.map(n => n.replace(/\|/g, '')).join('|');
+        return `<button onclick="openReviewModal('${orderId}','${orderType}','${safeNames}')" style="margin-top:10px;width:100%;padding:8px 12px;background:linear-gradient(135deg,#e0f2fe,#cffafe);border:1px solid #a5f3fc;border-radius:8px;font-size:0.75rem;font-weight:700;color:#0e7490;cursor:pointer;"><i class="fa-solid fa-star"></i> Write a Review</button>`;
+      }
+
+      // Build online order cards
+      const onlineCards = onlineOrders.map(order => {
         const s = statusConfig[order.status] || statusConfig.pending;
         const items = order.items || [];
+        const productNames = items.map(it => it.name);
         const date = new Date(order.created_at).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+        return {
+          sortDate: new Date(order.created_at).getTime(),
+          html: `
+            <div class="cart-section-card" style="margin-top:10px;">
+              <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+                <span style="font-size:0.7rem;color:#94a3b8;">${date}</span>
+                <span style="padding:4px 10px;border-radius:20px;font-size:0.7rem;font-weight:700;background:${s.bg};color:${s.color};">
+                  <i class="fa-solid ${s.icon}"></i> ${s.label}
+                </span>
+              </div>
+              <div style="font-size:0.75rem;color:#64748b;margin-bottom:6px;">
+                ${items.map(it => `<div style="display:flex;justify-content:space-between;padding:3px 0;border-bottom:1px solid #f1f5f9;">
+                  <span>${it.name} × ${it.qty}</span>
+                  <span style="font-weight:600;">₹${(it.price * it.qty).toLocaleString('en-IN')}</span>
+                </div>`).join('')}
+              </div>
+              <div style="display:flex;justify-content:space-between;align-items:center;padding-top:6px;border-top:2px solid #e2e8f0;">
+                <span style="font-weight:700;font-family:'Poppins',sans-serif;color:#0891b2;font-size:0.9rem;">₹${Number(order.total_amount).toLocaleString('en-IN')}</span>
+                <span style="font-size:0.65rem;color:#94a3b8;">ID: ${order.id.substring(0, 8)}...</span>
+              </div>
+              ${order.admin_notes ? `<div style="margin-top:8px;padding:8px;background:#f8fafc;border-radius:8px;font-size:0.75rem;color:#64748b;"><i class="fa-solid fa-note-sticky"></i> ${order.admin_notes}</div>` : ''}
+              ${reviewBtn(order.id, 'online', order.status, productNames)}
+            </div>
+          `
+        };
+      });
 
-        return `
-          <div class="cart-section-card" style="margin-top:10px;">
-            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
-              <span style="font-size:0.7rem;color:#94a3b8;">${date}</span>
-              <span style="padding:4px 10px;border-radius:20px;font-size:0.7rem;font-weight:700;background:${s.bg};color:${s.color};">
-                <i class="fa-solid ${s.icon}"></i> ${s.label}
-              </span>
+      // Build in-store sale cards
+      const offlineCards = salesRecords.map(sale => {
+        const items = saleItems.filter(i => i.sale_id === sale.id);
+        const productNames = items.map(it => it.product_name);
+        const date = new Date(sale.sale_date).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+        return {
+          sortDate: new Date(sale.sale_date).getTime(),
+          html: `
+            <div class="cart-section-card" style="margin-top:10px;">
+              <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+                <span style="font-size:0.7rem;color:#94a3b8;">${date}</span>
+                <span style="padding:4px 10px;border-radius:20px;font-size:0.7rem;font-weight:700;background:#f0fdf4;color:#166534;">
+                  <i class="fa-solid fa-store"></i> Store Purchase
+                </span>
+              </div>
+              <div style="font-size:0.75rem;color:#64748b;margin-bottom:6px;">
+                ${items.map(it => `<div style="display:flex;justify-content:space-between;padding:3px 0;border-bottom:1px solid #f1f5f9;">
+                  <span>${it.product_name} × ${it.quantity}</span>
+                  <span style="font-weight:600;">₹${(it.actual_selling_price * it.quantity).toLocaleString('en-IN')}</span>
+                </div>`).join('')}
+              </div>
+              <div style="display:flex;justify-content:space-between;align-items:center;padding-top:6px;border-top:2px solid #e2e8f0;">
+                <span style="font-weight:700;font-family:'Poppins',sans-serif;color:#0891b2;font-size:0.9rem;">₹${Number(sale.total_amount).toLocaleString('en-IN')}</span>
+                <span style="font-size:0.65rem;color:#94a3b8;">In-store</span>
+              </div>
+              ${reviewBtn(sale.id, 'store', 'store', productNames)}
             </div>
-            <div style="font-size:0.75rem;color:#64748b;margin-bottom:6px;">
-              ${items.map(it => `<div style="display:flex;justify-content:space-between;padding:3px 0;border-bottom:1px solid #f1f5f9;">
-                <span>${it.name} × ${it.qty}</span>
-                <span style="font-weight:600;">₹${(it.price * it.qty).toLocaleString('en-IN')}</span>
-              </div>`).join('')}
-            </div>
-            <div style="display:flex;justify-content:space-between;align-items:center;padding-top:6px;border-top:2px solid #e2e8f0;">
-              <span style="font-weight:700;font-family:'Poppins',sans-serif;color:#0891b2;font-size:0.9rem;">₹${Number(order.total_amount).toLocaleString('en-IN')}</span>
-              <span style="font-size:0.65rem;color:#94a3b8;">ID: ${order.id.substring(0, 8)}...</span>
-            </div>
-            ${order.admin_notes ? `<div style="margin-top:8px;padding:8px;background:#f8fafc;border-radius:8px;font-size:0.75rem;color:#64748b;"><i class="fa-solid fa-note-sticky"></i> ${order.admin_notes}</div>` : ''}
-          </div>
-        `;
-      }).join('');
+          `
+        };
+      });
+
+      // Merge both and sort by date descending
+      const allCards = [...onlineCards, ...offlineCards].sort((a, b) => b.sortDate - a.sortDate);
+      resultsEl.innerHTML = allCards.map(c => c.html).join('');
+    }
+
+    // ===== Review Modal =====
+    let _reviewOrderId = '';
+    let _reviewOrderType = '';
+    let _reviewRating = 0;
+    let _reviewProductNames = [];
+
+    function openReviewModal(orderId, orderType, productNamesStr) {
+      _reviewOrderId = orderId;
+      _reviewOrderType = orderType;
+      _reviewProductNames = productNamesStr ? productNamesStr.split('|').filter(Boolean) : [];
+      _reviewRating = 0;
+      document.getElementById('review-comment').value = '';
+      document.getElementById('review-anonymous').checked = false;
+      document.getElementById('review-error').style.display = 'none';
+      document.getElementById('review-success').style.display = 'none';
+      document.getElementById('review-form').style.display = 'block';
+      // Show what they purchased
+      const prodEl = document.getElementById('review-products');
+      if (_reviewProductNames.length > 0) {
+        prodEl.textContent = _reviewProductNames.join(', ');
+        prodEl.parentElement.style.display = 'block';
+      } else {
+        prodEl.parentElement.style.display = 'none';
+      }
+      setReviewStars(0);
+      document.getElementById('review-modal').style.display = 'flex';
+    }
+
+    function closeReviewModal() {
+      document.getElementById('review-modal').style.display = 'none';
+    }
+
+    function setReviewStars(rating) {
+      _reviewRating = rating;
+      document.querySelectorAll('.review-star').forEach((s, i) => {
+        s.style.color = i < rating ? '#f59e0b' : '#cbd5e1';
+      });
+    }
+
+    async function submitReview() {
+      const errEl = document.getElementById('review-error');
+      errEl.style.display = 'none';
+
+      if (_reviewRating === 0) {
+        errEl.textContent = 'Please select a star rating.';
+        errEl.style.display = 'block';
+        return;
+      }
+
+      const comment = document.getElementById('review-comment').value.trim();
+      const isAnonymous = document.getElementById('review-anonymous').checked;
+      const name = sessionStorage.getItem('agt_cust_name') || '';
+      const phone = sessionStorage.getItem('agt_cust_phone') || '';
+
+      const btn = document.getElementById('review-submit-btn');
+      btn.disabled = true;
+      btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Submitting...';
+
+      const { error } = await db.from('reviews').insert({
+        reviewer_name: name,
+        reviewer_phone: phone,
+        order_type: _reviewOrderType,
+        order_id: _reviewOrderId,
+        product_name: _reviewProductNames.length > 0 ? _reviewProductNames.join(', ') : null,
+        rating: _reviewRating,
+        body: comment || null,
+        is_anonymous: isAnonymous,
+        status: 'pending'
+      });
+
+      btn.disabled = false;
+      btn.innerHTML = '<i class="fa-solid fa-paper-plane"></i> Submit Review';
+
+      if (error) {
+        errEl.textContent = error.code === '23505' ? 'You already submitted a review for this order.' : 'Failed to submit. Please try again.';
+        errEl.style.display = 'block';
+        return;
+      }
+
+      // Mark locally so button updates without needing admin-level DB read
+      markOrderReviewed(_reviewOrderId);
+
+      document.getElementById('review-form').style.display = 'none';
+      document.getElementById('review-success').style.display = 'block';
+      setTimeout(() => {
+        closeReviewModal();
+        trackOrders(); // Refresh to show "Review Submitted"
+      }, 2000);
+    }
+
+    // ===== Review Local Tracking (localStorage) =====
+    function getReviewedOrders() {
+      try { return JSON.parse(localStorage.getItem('agt_reviewed_orders') || '[]'); } catch { return []; }
+    }
+    function markOrderReviewed(orderId) {
+      const ids = getReviewedOrders();
+      if (!ids.includes(orderId)) { ids.push(orderId); localStorage.setItem('agt_reviewed_orders', JSON.stringify(ids)); }
     }
   </script>
 
