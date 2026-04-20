@@ -863,8 +863,20 @@
       btn.innerHTML = '<i class="fa-solid fa-paper-plane"></i> Submit Review';
 
       if (error) {
-        errEl.textContent = error.code === '23505' ? 'You already submitted a review for this order.' : 'Failed to submit. Please try again.';
-        errEl.style.display = 'block';
+        if (error.code === '23505') {
+          // Already reviewed in another context (browser vs PWA have separate localStorage)
+          // Save to this context's localStorage and show success so it doesn't happen again
+          markOrderReviewed(_reviewOrderId);
+          document.getElementById('review-form').style.display = 'none';
+          document.getElementById('review-success').style.display = 'block';
+          setTimeout(() => {
+            closeReviewModal();
+            trackOrders();
+          }, 2000);
+        } else {
+          errEl.textContent = 'Failed to submit. Please try again.';
+          errEl.style.display = 'block';
+        }
         return;
       }
 
