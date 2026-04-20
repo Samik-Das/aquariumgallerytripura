@@ -1,5 +1,5 @@
 // Service Worker - Offline Caching PWA (Network First, Cache Fallback)
-const CACHE_NAME = 'agt-store-v1';
+const CACHE_NAME = 'agt-store-v3';
 const STATIC_ASSETS = [
   'index.html',
   'products.html',

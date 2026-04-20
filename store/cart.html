@@ -296,7 +296,7 @@
       <div id="review-success" style="display:none;text-align:center;padding:1.5rem 0;">
         <div style="font-size:2.5rem;margin-bottom:0.5rem;">🌟</div>
         <h4 style="font-family:'Poppins',sans-serif;color:#0e7490;margin:0 0 6px;">Thank You!</h4>
-        <p style="font-size:0.8rem;color:#64748b;">Your review has been submitted for approval.</p>
+        <p style="font-size:0.8rem;color:#64748b;">Thanks for sharing your review!</p>
       </div>
     </div>
   </div>
@@ -714,7 +714,7 @@
         const eligible = orderType === 'store' || orderStatus === 'delivered';
         if (!eligible) return '';
         if (reviewedIds.has(orderId)) {
-          return `<div style="margin-top:10px;padding:8px 12px;background:#f0fdf4;border-radius:8px;font-size:0.75rem;color:#166534;text-align:center;"><i class="fa-solid fa-circle-check"></i> Review Submitted</div>`;
+          return `<div style="margin-top:10px;padding:8px 12px;background:#f0fdf4;border-radius:8px;font-size:0.75rem;color:#166534;text-align:center;"><i class="fa-solid fa-circle-check"></i> Thanks for sharing your review!</div>`;
         }
         const safeNames = productNames.map(n => n.replace(/\|/g, '')).join('|');
         return `<button onclick="openReviewModal('${orderId}','${orderType}','${safeNames}')" style="margin-top:10px;width:100%;padding:8px 12px;background:linear-gradient(135deg,#e0f2fe,#cffafe);border:1px solid #a5f3fc;border-radius:8px;font-size:0.75rem;font-weight:700;color:#0e7490;cursor:pointer;"><i class="fa-solid fa-star"></i> Write a Review</button>`;
