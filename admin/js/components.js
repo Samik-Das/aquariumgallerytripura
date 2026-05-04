@@ -10,6 +10,7 @@ function buildNavbar(activePage) {
     { name: 'Orders', href: 'orders.html', icon: 'fa-truck' },
     { name: 'Damage', href: 'damage.html', icon: 'fa-triangle-exclamation' },
     { name: 'Points', href: 'points.html', icon: 'fa-star' },
+    { name: 'Reviews', href: 'reviews.html', icon: 'fa-star-half-stroke' },
     { name: 'Referrals', href: 'referrals.html', icon: 'fa-handshake' },
     { name: 'Dashboard', href: 'dashboard.html', icon: 'fa-chart-line' },
   ];
@@ -189,5 +190,113 @@ function debounce(fn, delay = 300) {
   return (...args) => {
     clearTimeout(timer);
     timer = setTimeout(() => fn(...args), delay);
+  };
+}
+
+// ===== Searchable Dropdown =====
+// Converts a <select> into a searchable dropdown with type-to-filter
+function makeSearchable(selectId) {
+  const select = document.getElementById(selectId);
+  if (!select) return;
+
+  // Avoid double initialization
+  if (select.dataset.searchable === 'true') return;
+  select.dataset.searchable = 'true';
+
+  const wrapper = document.createElement('div');
+  wrapper.className = 'searchable-dropdown';
+  select.parentNode.insertBefore(wrapper, select);
+
+  const input = document.createElement('input');
+  input.type = 'text';
+  input.className = 'form-input searchable-input';
+  input.placeholder = select.options[0]?.text || '-- Select --';
+  input.autocomplete = 'off';
+
+  const dropdown = document.createElement('div');
+  dropdown.className = 'searchable-list';
+
+  wrapper.appendChild(input);
+  wrapper.appendChild(dropdown);
+  select.style.display = 'none';
+  wrapper.appendChild(select);
+
+  function renderOptions(filter = '') {
+    const options = Array.from(select.options).slice(1); // skip placeholder
+    const filtered = options.filter(o =>
+      o.text.toLowerCase().includes(filter.toLowerCase())
+    );
+
+    if (filtered.length === 0) {
+      dropdown.innerHTML = '<div class="searchable-item no-result">No matches found</div>';
+    } else {
+      dropdown.innerHTML = filtered.map(o =>
+        `<div class="searchable-item" data-value="${o.value}">${o.text}</div>`
+      ).join('');
+    }
+  }
+
+  input.addEventListener('focus', () => {
+    renderOptions(input.value);
+    dropdown.classList.add('open');
+  });
+
+  input.addEventListener('input', () => {
+    renderOptions(input.value);
+    dropdown.classList.add('open');
+  });
+
+  dropdown.addEventListener('click', (e) => {
+    const item = e.target.closest('.searchable-item');
+    if (!item || item.classList.contains('no-result')) return;
+
+    const value = item.dataset.value;
+    select.value = value;
+    input.value = item.textContent;
+    dropdown.classList.remove('open');
+
+    // Trigger change event on the original select
+    select.dispatchEvent(new Event('change'));
+  });
+
+  // Close dropdown on outside click
+  document.addEventListener('click', (e) => {
+    if (!wrapper.contains(e.target)) {
+      dropdown.classList.remove('open');
+    }
+  });
+
+  // Allow clearing by emptying input
+  input.addEventListener('blur', () => {
+    setTimeout(() => {
+      if (!input.value.trim()) {
+        select.value = '';
+        select.dispatchEvent(new Event('change'));
+      }
+      dropdown.classList.remove('open');
+    }, 200);
+  });
+
+  // Public method to reset
+  select.resetSearchable = () => {
+    input.value = '';
+    select.value = '';
+    renderOptions('');
+  };
+
+  // Public method to refresh options (after DOM update)
+  select.refreshSearchable = () => {
+    input.value = '';
+    renderOptions('');
+  };
+
+  // Public method to sync input display with current select value
+  select.syncSearchable = () => {
+    const opt = select.options[select.selectedIndex];
+    if (opt && opt.value) {
+      input.value = opt.text;
+    } else {
+      input.value = '';
+    }
   };
 }

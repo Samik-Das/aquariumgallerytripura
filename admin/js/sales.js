@@ -129,6 +129,7 @@ function addSaleItem() {
 
   document.getElementById('sale-items-container').insertAdjacentHTML('beforeend', html);
   saleItems.push(id);
+  makeSearchable(`item-product-${id}`);
 }
 
 function removeSaleItem(id) {

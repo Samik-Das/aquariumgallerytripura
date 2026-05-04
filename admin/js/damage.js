@@ -19,6 +19,7 @@ async function loadProducts() {
   allProducts.forEach(p => {
     select.innerHTML += `<option value="${p.id}">${p.name} (Stock: ${p.quantity})</option>`;
   });
+  makeSearchable('damage-product');
 }
 
 function onDamageProductChange() {

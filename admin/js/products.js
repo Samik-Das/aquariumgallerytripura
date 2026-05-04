@@ -32,6 +32,9 @@ async function loadDropdowns() {
   allCategories.forEach(c => {
     catSelect.innerHTML += `<option value="${c.name}">${c.name}</option>`;
   });
+
+  makeSearchable('product-name-select');
+  makeSearchable('category-select');
 }
 
 // When a product is selected from dropdown
@@ -42,7 +45,10 @@ function onProductSelect() {
     const category = option.getAttribute('data-category');
     const sp = option.getAttribute('data-sp');
     const bp = option.getAttribute('data-bp');
-    if (category) document.getElementById('category-select').value = category;
+    if (category) {
+      document.getElementById('category-select').value = category;
+      document.getElementById('category-select').syncSearchable();
+    }
     if (sp && Number(sp) > 0) document.getElementById('selling-price').value = sp;
     if (bp && Number(bp) > 0) document.getElementById('buying-price').value = bp;
     // Load description for existing product
@@ -80,6 +86,7 @@ async function addNewName() {
   newOption.textContent = name + ' (New)';
   newOption.selected = true;
   nameSelect.appendChild(newOption);
+  nameSelect.syncSearchable();
 
   document.getElementById('name-modal').style.display = 'none';
   showToast('Product name added! Fill in details and save.');
@@ -113,6 +120,7 @@ async function addNewCategory() {
       catSelect.appendChild(opt);
     }
     catSelect.value = name;
+    catSelect.syncSearchable();
 
     document.getElementById('category-modal').style.display = 'none';
     showToast('Category added!');
