@@ -70,6 +70,7 @@ async function loadDashboard() {
   let totalProfit = 0;
   let totalDamageLoss = 0;
   let totalCommission = 0;
+  let totalDiscount = 0;
 
   const detailRows = [];
 
@@ -78,11 +79,13 @@ async function loadDashboard() {
     const revenue = item.actual_selling_price * item.quantity;
     const cost = item.buying_price * item.quantity;
     const commission = item.commission_amount || 0;
-    const profit = revenue - cost - commission;
+    const discount = item.discount_amount || 0;
+    const profit = revenue - cost - commission - discount;
 
     totalRevenue += revenue;
     totalProfit += profit;
     totalCommission += commission;
+    totalDiscount += discount;
 
     detailRows.push({
       date: sale?.sale_date || item.created_at,
@@ -95,6 +98,7 @@ async function loadDashboard() {
       revenue,
       profit,
       commission,
+      discount,
       referrer: (item.is_referral && sale?.referrer_name) ? sale.referrer_name : null
     });
   });
@@ -109,6 +113,7 @@ async function loadDashboard() {
   document.getElementById('stat-profit').parentElement.className = `stat-card ${totalProfit >= 0 ? 'green' : 'red'}`;
   document.getElementById('stat-sales-count').textContent = salesData.length;
   document.getElementById('stat-commission').textContent = '₹' + totalCommission.toLocaleString('en-IN', { minimumFractionDigits: 0 });
+  document.getElementById('stat-discount').textContent = '₹' + totalDiscount.toLocaleString('en-IN', { minimumFractionDigits: 0 });
   document.getElementById('stat-damage-loss').textContent = '₹' + totalDamageLoss.toLocaleString('en-IN', { minimumFractionDigits: 0 });
 
   // Render sales table
@@ -145,6 +150,7 @@ function renderSalesTable(rows) {
       <td>${formatCurrency(r.actual_sp)}</td>
       <td class="text-gray-400">${formatCurrency(r.bp)}</td>
       <td><strong class="text-aqua-600">${formatCurrency(r.revenue)}</strong></td>
+      <td>${r.discount > 0 ? `<strong class="text-orange-600">${formatCurrency(r.discount)}</strong>` : '<span class="text-gray-300">—</span>'}</td>
       <td>${r.referrer ? `<span class="badge badge-purple text-xs">${r.referrer}</span>` : '<span class="text-gray-300">—</span>'}</td>
       <td>${r.commission > 0 ? `<strong class="text-purple-600">${formatCurrency(r.commission)}</strong>` : '<span class="text-gray-300">—</span>'}</td>
       <td><strong class="${r.profit >= 0 ? 'text-green-600' : 'text-red-600'}">${formatCurrency(r.profit)}</strong></td>

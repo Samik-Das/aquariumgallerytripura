@@ -53,6 +53,7 @@ CREATE TABLE sales (
   customer_phone TEXT,
   sale_date TIMESTAMPTZ DEFAULT NOW(),
   total_amount DECIMAL(10,2) DEFAULT 0,
+  total_discount DECIMAL(10,2) DEFAULT 0,
   created_at TIMESTAMPTZ DEFAULT NOW()
 );
 
@@ -67,6 +68,7 @@ CREATE TABLE sale_items (
   selling_price DECIMAL(10,2) NOT NULL,
   actual_selling_price DECIMAL(10,2) NOT NULL,
   buying_price DECIMAL(10,2) NOT NULL,
+  discount_amount DECIMAL(10,2) DEFAULT 0,
   created_at TIMESTAMPTZ DEFAULT NOW()
 );
 

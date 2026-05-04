@@ -115,3 +115,46 @@ Then revert the code changes to restore the old carousel logic (featured product
 - Featured products maintain their order by creation date (newest first)
 - The system gracefully handles empty featured product lists
 - Out-of-stock products can still be featured for promotional purposes
+
+---
+
+# Per-Item Discount Feature - Database Migration
+
+## Overview
+This migration adds a per-item discount system in the sales flow. Discounts are tracked per item and reflected in profit/loss calculations.
+
+## Required Database Changes
+
+Execute these SQL commands in your Supabase SQL Editor:
+
+### 1. Add `discount_amount` Column to `sale_items` Table
+
+```sql
+ALTER TABLE sale_items 
+ADD COLUMN discount_amount DECIMAL(10,2) DEFAULT 0;
+```
+
+### 2. Add `total_discount` Column to `sales` Table
+
+```sql
+ALTER TABLE sales 
+ADD COLUMN total_discount DECIMAL(10,2) DEFAULT 0;
+```
+
+## How It Works
+
+- Each sale item row now has a **"Discount (₹)"** input field
+- The discount is subtracted from the sale total
+- Dashboard profit formula: `Profit = Revenue - Cost - Commission - Discount`
+- Discount is visible in:
+  - Sales page history table
+  - Dashboard stat card ("Total Discount")
+  - Dashboard sales detail table (per-item)
+  - CSV export
+
+## Rollback
+
+```sql
+ALTER TABLE sale_items DROP COLUMN discount_amount;
+ALTER TABLE sales DROP COLUMN total_discount;
+```

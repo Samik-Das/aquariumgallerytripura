@@ -45,7 +45,7 @@
     </div>
 
     <!-- Summary Stats -->
-    <div class="grid grid-cols-2 md:grid-cols-5 gap-4 mb-6 stat-grid">
+    <div class="grid grid-cols-2 md:grid-cols-6 gap-4 mb-6 stat-grid">
       <div class="stat-card aqua">
         <div class="stat-icon"><i class="fa-solid fa-indian-rupee-sign"></i></div>
         <div class="stat-value" id="stat-revenue">₹0</div>
@@ -60,6 +60,11 @@
         <div class="stat-icon"><i class="fa-solid fa-receipt"></i></div>
         <div class="stat-value" id="stat-sales-count">0</div>
         <div class="stat-label">Total Sales</div>
+      </div>
+      <div class="stat-card orange">
+        <div class="stat-icon"><i class="fa-solid fa-tag"></i></div>
+        <div class="stat-value" id="stat-discount">₹0</div>
+        <div class="stat-label">Total Discount</div>
       </div>
       <div class="stat-card purple">
         <div class="stat-icon"><i class="fa-solid fa-handshake"></i></div>
@@ -91,12 +96,13 @@
               <th>Actual SP</th>
               <th>BP</th>
               <th>Revenue</th>
+              <th>Discount</th>
               <th>Referrer</th>
               <th>Comm.</th>
               <th>Profit</th>
             </tr>
           </thead>
-          <tbody id="sales-detail-body"><tr class="fish-loader-row"><td colspan="11"><div class="fish-loader"><div class="fish-swim"><span class="fish">🐠</span><span class="fish">🐟</span><span class="fish">🐡</span><div class="bubbles"><span></span><span></span><span></span></div></div><div class="fish-loader-text">Loading sales<span class="dot-anim"></span></div></div></td></tr></tbody>
+          <tbody id="sales-detail-body"><tr class="fish-loader-row"><td colspan="12"><div class="fish-loader"><div class="fish-swim"><span class="fish">🐠</span><span class="fish">🐟</span><span class="fish">🐡</span><div class="bubbles"><span></span><span></span><span></span></div></div><div class="fish-loader-text">Loading sales<span class="dot-anim"></span></div></div></td></tr></tbody>
         </table>
       </div>
       <div id="sales-empty" class="empty-state" style="display:none;">

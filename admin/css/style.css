@@ -605,6 +605,7 @@ h1, h2, h3, h4, h5, h6 { font-family: 'Poppins', sans-serif; }
 .stat-card.green::before { background: linear-gradient(90deg, #34d399, #10b981); }
 .stat-card.red::before { background: linear-gradient(90deg, #f87171, #ef4444); }
 .stat-card.purple::before { background: linear-gradient(90deg, #c084fc, #a855f7); }
+.stat-card.orange::before { background: linear-gradient(90deg, #fb923c, #f97316); }
 
 .stat-card .stat-icon {
   width: 48px;
@@ -622,6 +623,7 @@ h1, h2, h3, h4, h5, h6 { font-family: 'Poppins', sans-serif; }
 .stat-card.green .stat-icon { background: #ecfdf5; color: #059669; }
 .stat-card.red .stat-icon { background: #fef2f2; color: #dc2626; }
 .stat-card.purple .stat-icon { background: #faf5ff; color: #7c3aed; }
+.stat-card.orange .stat-icon { background: #fff7ed; color: #ea580c; }
 
 .stat-card .stat-value {
   font-family: 'Poppins', sans-serif;

@@ -92,8 +92,8 @@ function addSaleItem() {
           <input type="text" class="form-input" id="item-category-${id}" readonly style="background:#f8fafc;">
         </div>
       </div>
-      <!-- SP + Actual SP + Qty row -->
-      <div class="grid grid-cols-3 gap-2">
+      <!-- SP + Actual SP + Qty + Discount row -->
+      <div class="grid grid-cols-4 gap-2">
         <div class="form-group mb-0">
           <label class="form-label text-xs">Default SP</label>
           <input type="text" class="form-input" id="item-sp-${id}" readonly style="background:#f8fafc;">
@@ -105,6 +105,10 @@ function addSaleItem() {
         <div class="form-group mb-0">
           <label class="form-label text-xs">Qty</label>
           <input type="number" class="form-input" id="item-qty-${id}" placeholder="0" min="1" oninput="calculateTotal()">
+        </div>
+        <div class="form-group mb-0">
+          <label class="form-label text-xs">Discount (₹)</label>
+          <input type="number" class="form-input" id="item-discount-${id}" placeholder="0" step="0.01" min="0" oninput="calculateTotal()">
         </div>
       </div>
       <!-- Referral Commission Row (hidden by default) -->
@@ -150,11 +154,14 @@ function onItemProductChange(id) {
 function calculateTotal() {
   let total = 0;
   let totalCommission = 0;
+  let totalDiscount = 0;
   saleItems.forEach(id => {
     const qty = parseInt(document.getElementById(`item-qty-${id}`)?.value) || 0;
     const asp = parseFloat(document.getElementById(`item-actual-sp-${id}`)?.value) || 0;
+    const discount = parseFloat(document.getElementById(`item-discount-${id}`)?.value) || 0;
     const itemTotal = qty * asp;
     total += itemTotal;
+    totalDiscount += discount;
 
     // Calculate commission if referral checked
     const isRef = document.getElementById(`item-referral-${id}`)?.checked;
@@ -166,7 +173,28 @@ function calculateTotal() {
       if (amtEl) amtEl.value = '₹' + commAmt.toLocaleString('en-IN', { minimumFractionDigits: 2 });
     }
   });
-  document.getElementById('sale-total').textContent = '₹' + total.toLocaleString('en-IN', { minimumFractionDigits: 2 });
+
+  const finalTotal = total - totalDiscount;
+  document.getElementById('sale-total').textContent = '₹' + finalTotal.toLocaleString('en-IN', { minimumFractionDigits: 2 });
+
+  // Show total discount if any
+  let discEl = document.getElementById('total-discount-display');
+  if (totalDiscount > 0) {
+    if (!discEl) {
+      const container = document.getElementById('sale-total').parentElement;
+      container.insertAdjacentHTML('afterend', `
+        <div id="total-discount-display" class="mt-2 text-right">
+          <span class="text-sm font-heading font-bold text-orange-700"><i class="fa-solid fa-tag"></i> Total Discount:</span>
+          <span class="text-lg font-heading font-extrabold text-orange-600 ml-2" id="discount-total">₹0.00</span>
+        </div>
+      `);
+      discEl = document.getElementById('total-discount-display');
+    }
+    document.getElementById('discount-total').textContent = '₹' + totalDiscount.toLocaleString('en-IN', { minimumFractionDigits: 2 });
+    discEl.style.display = 'block';
+  } else if (discEl) {
+    discEl.style.display = 'none';
+  }
 
   // Show total commission if any referral items
   let commEl = document.getElementById('total-commission-display');
@@ -237,6 +265,7 @@ async function saveSale() {
     const isRef = document.getElementById(`item-referral-${id}`)?.checked || false;
     const commPct = isRef ? (parseFloat(document.getElementById(`item-commission-pct-${id}`)?.value) || 0) : 0;
     const commAmt = isRef ? ((actualSp * qty * commPct) / 100) : 0;
+    const discount = parseFloat(document.getElementById(`item-discount-${id}`)?.value) || 0;
     if (isRef) hasReferralItems = true;
 
     items.push({
@@ -247,6 +276,7 @@ async function saveSale() {
       selling_price: product.selling_price,
       actual_selling_price: actualSp,
       buying_price: product.buying_price,
+      discount_amount: discount,
       is_referral: isRef,
       commission_percent: commPct,
       commission_amount: commAmt
@@ -283,13 +313,15 @@ async function saveSale() {
     // Calculate total
     const totalAmount = items.reduce((s, i) => s + i.actual_selling_price * i.quantity, 0);
     const totalCommission = items.reduce((s, i) => s + i.commission_amount, 0);
+    const totalDiscount = items.reduce((s, i) => s + i.discount_amount, 0);
 
     // Create sale
     const { data: sale, error: saleErr } = await db.from('sales').insert({
       customer_id: customerId,
       customer_name: name,
       customer_phone: phone,
-      total_amount: totalAmount,
+      total_amount: totalAmount - totalDiscount,
+      total_discount: totalDiscount,
       is_referral: hasReferralItems,
       referrer_name: hasReferralItems ? referrerName : null,
       total_commission: totalCommission
@@ -313,7 +345,7 @@ async function saveSale() {
     }
 
     // Award loyalty points (1 point per ₹1 spent, capped per 1000)
-    const pointsEarned = Math.floor(totalAmount);
+    const pointsEarned = Math.floor(totalAmount - totalDiscount);
     if (pointsEarned > 0) {
       // Get current points
       const { data: cust } = await db.from('customers').select('points').eq('id', customerId).single();
@@ -330,7 +362,7 @@ async function saveSale() {
       });
     }
 
-    showToast(`Sale saved! ${name} earned ${pointsEarned} points.${hasReferralItems ? ' Referral commission: ₹' + totalCommission.toLocaleString('en-IN') : ''}`);
+    showToast(`Sale saved! ${name} earned ${pointsEarned} points.${hasReferralItems ? ' Referral commission: ₹' + totalCommission.toLocaleString('en-IN') : ''}${totalDiscount > 0 ? ' Discount: ₹' + totalDiscount.toLocaleString('en-IN') : ''}`);
     setTimeout(() => window.location.reload(), 1000);
     document.getElementById('sale-items-container').innerHTML = '';
     saleItems = [];
@@ -339,6 +371,8 @@ async function saveSale() {
     calculateTotal();
     const commDisplay = document.getElementById('total-commission-display');
     if (commDisplay) commDisplay.remove();
+    const discDisplay = document.getElementById('total-discount-display');
+    if (discDisplay) discDisplay.remove();
 
     await loadProducts();
     await loadSalesHistory();
@@ -385,6 +419,7 @@ async function loadSalesHistory() {
         <td>${s.customer_phone || '-'}</td>
         <td class="text-xs max-w-xs truncate">${itemNames || '-'}</td>
         <td><strong class="text-green-600">${formatCurrency(s.total_amount)}</strong></td>
+        <td>${s.total_discount > 0 ? `<strong class="text-orange-600">${formatCurrency(s.total_discount)}</strong>` : '<span class="text-gray-300">—</span>'}</td>
         <td>${s.is_referral ? `<span class="badge badge-purple text-xs">${s.referrer_name || '-'}</span>` : '<span class="text-gray-300">—</span>'}</td>
         <td>${s.total_commission > 0 ? `<strong class="text-purple-600">${formatCurrency(s.total_commission)}</strong>` : '<span class="text-gray-300">—</span>'}</td>
       </tr>
