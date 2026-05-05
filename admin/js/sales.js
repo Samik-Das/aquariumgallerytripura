@@ -65,7 +65,8 @@ function addSaleItem() {
   const productOptions = allProducts.map(p =>
     `<option value="${p.id}" data-category="${p.category}" data-sp="${p.selling_price}" data-bp="${p.buying_price}" data-qty="${p.quantity}">${p.name} (Stock: ${p.quantity})</option>`
   ).join('');
-
+  const categories = [...new Set(allProducts.map(p => p.category).filter(Boolean))].sort();
+  const categoryOptions = categories.map(c => `<option value="${c}">${c}</option>`).join('');
   const html = `
     <div class="sale-item p-4 mb-3 rounded-xl bg-gray-50 border border-gray-100" id="sale-item-${id}">
       <div class="flex items-center justify-between mb-2">
@@ -78,8 +79,15 @@ function addSaleItem() {
           ${saleItemCounter > 1 ? `<button onclick="removeSaleItem(${id})" class="btn btn-danger btn-sm btn-icon"><i class="fa-solid fa-xmark"></i></button>` : ''}
         </div>
       </div>
-      <!-- Product + Category row -->
+      <!-- Category + Product row -->
       <div class="grid grid-cols-2 gap-2 mb-2">
+        <div class="form-group mb-0">
+          <label class="form-label text-xs">Category (Filter)</label>
+          <select class="form-select" id="item-category-${id}" onchange="onItemCategoryChange(${id})">
+            <option value="">-- All Categories --</option>
+            ${categoryOptions}
+          </select>
+        </div>
         <div class="form-group mb-0">
           <label class="form-label text-xs">Product</label>
           <select class="form-select" id="item-product-${id}" onchange="onItemProductChange(${id})">
@@ -87,13 +95,13 @@ function addSaleItem() {
             ${productOptions}
           </select>
         </div>
-        <div class="form-group mb-0">
-          <label class="form-label text-xs">Category</label>
-          <input type="text" class="form-input" id="item-category-${id}" readonly style="background:#f8fafc;">
-        </div>
       </div>
-      <!-- SP + Actual SP + Qty + Discount row -->
-      <div class="grid grid-cols-4 gap-2">
+      <!-- BP + Default SP + Actual SP + Qty + Discount row -->
+      <div class="grid grid-cols-5 gap-2">
+        <div class="form-group mb-0">
+          <label class="form-label text-xs">BP (Cost)</label>
+          <input type="number" class="form-input" id="item-bp-${id}" placeholder="₹" step="0.01" min="0" oninput="calculateTotal()">
+        </div>
         <div class="form-group mb-0">
           <label class="form-label text-xs">Default SP</label>
           <input type="text" class="form-input" id="item-sp-${id}" readonly style="background:#f8fafc;">
@@ -129,6 +137,7 @@ function addSaleItem() {
 
   document.getElementById('sale-items-container').insertAdjacentHTML('beforeend', html);
   saleItems.push(id);
+  makeSearchable(`item-category-${id}`);
   makeSearchable(`item-product-${id}`);
 }
 
@@ -139,15 +148,39 @@ function removeSaleItem(id) {
   calculateTotal();
 }
 
+function onItemCategoryChange(id) {
+  const category = document.getElementById(`item-category-${id}`).value;
+  const productSelect = document.getElementById(`item-product-${id}`);
+  const filtered = category ? allProducts.filter(p => p.category === category) : allProducts;
+  productSelect.innerHTML = `<option value="">-- Select --</option>` + filtered.map(p =>
+    `<option value="${p.id}" data-category="${p.category}" data-sp="${p.selling_price}" data-bp="${p.buying_price}" data-qty="${p.quantity}">${p.name} (Stock: ${p.quantity})</option>`
+  ).join('');
+  // Reset fields
+  document.getElementById(`item-sp-${id}`).value = '';
+  document.getElementById(`item-actual-sp-${id}`).value = '';
+  document.getElementById(`item-bp-${id}`).value = '';
+  document.getElementById(`item-qty-${id}`).value = '';
+  document.getElementById(`item-discount-${id}`).value = '';
+  const prodEl = document.getElementById(`item-product-${id}`);
+  if (prodEl.refreshSearchable) prodEl.refreshSearchable();
+  calculateTotal();
+}
+
 function onItemProductChange(id) {
   const select = document.getElementById(`item-product-${id}`);
   const option = select.options[select.selectedIndex];
   if (option && option.value) {
-    document.getElementById(`item-category-${id}`).value = option.getAttribute('data-category') || '';
+    const cat = option.getAttribute('data-category') || '';
+    document.getElementById(`item-category-${id}`).value = cat;
+    const catEl = document.getElementById(`item-category-${id}`);
+    if (catEl.syncSearchable) catEl.syncSearchable();
     const sp = option.getAttribute('data-sp') || '0';
+    const bp = option.getAttribute('data-bp') || '0';
     document.getElementById(`item-sp-${id}`).value = '₹' + Number(sp).toLocaleString('en-IN');
     document.getElementById(`item-actual-sp-${id}`).value = sp;
     document.getElementById(`item-actual-sp-${id}`).placeholder = sp;
+    document.getElementById(`item-bp-${id}`).value = bp;
+    document.getElementById(`item-bp-${id}`).placeholder = bp;
   }
   calculateTotal();
 }
@@ -276,7 +309,7 @@ async function saveSale() {
       quantity: qty,
       selling_price: product.selling_price,
       actual_selling_price: actualSp,
-      buying_price: product.buying_price,
+      buying_price: parseFloat(document.getElementById(`item-bp-${id}`)?.value) || product.buying_price,
       discount_amount: discount,
       is_referral: isRef,
       commission_percent: commPct,

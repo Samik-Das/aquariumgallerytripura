@@ -38,17 +38,19 @@
       </div>
 
       <form id="damage-form" onsubmit="saveDamage(event)">
-        <!-- Product + Category in one row -->
+        <!-- Category + Product in one row -->
         <div class="grid grid-cols-2 gap-3 mb-2">
+          <div class="form-group mb-0">
+            <label class="form-label">Category (Filter)</label>
+            <select id="damage-category" class="form-select" onchange="onDamageCategoryChange()">
+              <option value="">-- All Categories --</option>
+            </select>
+          </div>
           <div class="form-group mb-0">
             <label class="form-label">Product</label>
             <select id="damage-product" class="form-select" onchange="onDamageProductChange()">
               <option value="">-- Select --</option>
             </select>
-          </div>
-          <div class="form-group mb-0">
-            <label class="form-label">Category</label>
-            <input type="text" id="damage-category" class="form-input" readonly style="background:#f8fafc;">
           </div>
         </div>
         <!-- Stock + Qty + BP in one row -->

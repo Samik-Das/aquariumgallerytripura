@@ -14,12 +14,38 @@ async function loadProducts() {
   const { data } = await db.from('products').select('*').gt('quantity', 0).order('name');
   allProducts = data || [];
 
+  // Populate category dropdown
+  const categories = [...new Set(allProducts.map(p => p.category).filter(Boolean))].sort();
+  const catSelect = document.getElementById('damage-category');
+  catSelect.innerHTML = '<option value="">-- All Categories --</option>' +
+    categories.map(c => `<option value="${c}">${c}</option>`).join('');
+
+  // Populate product dropdown
   const select = document.getElementById('damage-product');
   select.innerHTML = '<option value="">-- Select Product --</option>';
   allProducts.forEach(p => {
     select.innerHTML += `<option value="${p.id}">${p.name} (Stock: ${p.quantity})</option>`;
   });
+  makeSearchable('damage-category');
   makeSearchable('damage-product');
+}
+
+function onDamageCategoryChange() {
+  const category = document.getElementById('damage-category').value;
+  const filtered = category ? allProducts.filter(p => p.category === category) : allProducts;
+  const select = document.getElementById('damage-product');
+  select.innerHTML = '<option value="">-- Select Product --</option>';
+  filtered.forEach(p => {
+    select.innerHTML += `<option value="${p.id}">${p.name} (Stock: ${p.quantity})</option>`;
+  });
+  if (select.refreshSearchable) select.refreshSearchable();
+  // Reset fields
+  selectedProduct = null;
+  document.getElementById('damage-stock').value = '';
+  document.getElementById('damage-bp').value = '';
+  document.getElementById('damage-total-bp').value = '';
+  document.getElementById('damage-qty').value = '';
+  calculateDamageCost();
 }
 
 function onDamageProductChange() {
@@ -28,10 +54,11 @@ function onDamageProductChange() {
 
   if (selectedProduct) {
     document.getElementById('damage-category').value = selectedProduct.category;
+    const catEl = document.getElementById('damage-category');
+    if (catEl.syncSearchable) catEl.syncSearchable();
     document.getElementById('damage-stock').value = selectedProduct.quantity;
     document.getElementById('damage-bp').value = '₹' + Number(selectedProduct.buying_price).toLocaleString('en-IN');
   } else {
-    document.getElementById('damage-category').value = '';
     document.getElementById('damage-stock').value = '';
     document.getElementById('damage-bp').value = '';
   }
