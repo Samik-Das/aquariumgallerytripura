@@ -793,7 +793,7 @@ h1, h2, h3, h4, h5, h6 { font-family: 'Poppins', sans-serif; }
 }
 
 .category-card .card-img {
-  height: 120px;
+  height: 160px;
   background: linear-gradient(135deg, var(--aqua-50), var(--gold-50));
   overflow: hidden;
   display: flex;
@@ -897,7 +897,7 @@ h1, h2, h3, h4, h5, h6 { font-family: 'Poppins', sans-serif; }
 }
 
 .carousel-card .img-wrap {
-  height: 110px;
+  height: 160px;
   background: linear-gradient(135deg, var(--aqua-50), var(--gold-50));
   overflow: hidden;
   display: flex;
@@ -1289,7 +1289,7 @@ h1, h2, h3, h4, h5, h6 { font-family: 'Poppins', sans-serif; }
 }
 
 .store-product-card .prod-img {
-  height: 130px;
+  height: 160px;
   background: linear-gradient(135deg, var(--aqua-50), var(--gold-50));
   overflow: hidden;
   display: flex;
@@ -1785,12 +1785,12 @@ h1, h2, h3, h4, h5, h6 { font-family: 'Poppins', sans-serif; }
   .section-title h2 { font-size: 1.2rem; }
   .section-title { margin-bottom: 1rem; }
   .category-grid { grid-template-columns: repeat(2, 1fr); gap: 0.6rem; }
-  .category-card .card-img { height: 90px; }
+  .category-card .card-img { height: 80px; }
   .category-card .card-body { padding: 0.5rem; }
   .category-card .card-body h3 { font-size: 0.8rem; }
   .category-card .card-body p { font-size: 0.65rem; }
   .product-grid-store { grid-template-columns: repeat(3, 1fr); gap: 8px; }
-  .store-product-card .prod-img { height: 110px; }
+  .store-product-card .prod-img { height: 80px; }
   .store-product-card .prod-name { font-size: 0.72rem; }
   .store-product-card .prod-price { font-size: 0.78rem; }
   .store-product-card .prod-body { padding: 6px 8px 8px; }
@@ -1799,7 +1799,7 @@ h1, h2, h3, h4, h5, h6 { font-family: 'Poppins', sans-serif; }
   .toolbar-filters select { padding: 8px 24px 8px 8px; font-size: 0.75rem; }
   .carousel-section { padding: 1.2rem 0; }
   .carousel-card { flex: 0 0 140px; }
-  .carousel-card .img-wrap { height: 90px; }
+  .carousel-card .img-wrap { height: 80px; }
   .carousel-card .info { padding: 0.5rem 0.6rem; }
   .carousel-card .info h4 { font-size: 0.7rem; }
   .carousel-card .info .price { font-size: 0.8rem; }
@@ -1837,9 +1837,14 @@ h1, h2, h3, h4, h5, h6 { font-family: 'Poppins', sans-serif; }
   .hero-content { padding: 1.5rem 1rem; }
   .hero-content a { padding: 10px 18px; font-size: 0.85rem; }
   .category-grid { grid-template-columns: repeat(2, 1fr); gap: 0.5rem; }
+  .category-card .card-img { height: 65px; }
   .store-logo-text { font-size: 0.8rem; }
   .product-grid-store { grid-template-columns: repeat(2, 1fr); gap: 6px; }
-  .store-product-card .prod-img { height: 100px; }
+  .store-product-card .prod-img { height: 65px; }
+  .carousel-card { flex: 0 0 120px; }
+  .carousel-card .img-wrap { height: 65px; }
+  .carousel-card .info h4 { font-size: 0.65rem; }
+  .carousel-card .info .price { font-size: 0.75rem; }
   .header-points-btn {
     font-size: 0.7rem;
     padding: 5px 10px;

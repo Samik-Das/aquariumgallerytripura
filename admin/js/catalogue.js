@@ -5,7 +5,7 @@ let filteredProducts = [];
 let editImageFile = null;
 let displayedCount = 0;
 let categoryOrder = {};
-const PAGE_SIZE = 21;
+const PAGE_SIZE = window.innerWidth >= 768 ? 24 : 21;
 
 // Initialize
 (async () => {
